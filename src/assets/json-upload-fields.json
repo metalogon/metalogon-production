@@ -1,0 +1,45 @@
+{
+    "_id": "59ca29961941a8372c56905q",
+    "title": "Module D Mechanical Properties Of Crystals And Glasses - Group 6",
+    "link": "https://cdn.jwplayer.com/previews/S19jDsfd",
+    "thumb": "https://cdn.jwplayer.com/thumbs/S19jDsfd-720.jpg",
+    "duration": 1615,
+    "class": "Materials Science and Engineering",
+    "jwVideoId": "S19jDsfd",
+    "genre": "Lab presentation",
+    "presentedAt": "2017-10-16T00:00:00.000Z",
+    "annotations": [],
+    "sources": [
+                {
+                    "type": "application/vnd.apple.mpegurl",
+                    "file": "https://cdn.jwplayer.com/manifests/S19jDsfd.m3u8"
+                },
+                {
+                    "width": 320,
+                    "height": 90,
+                    "type": "video/mp4",
+                    "file": "https://cdn.jwplayer.com/videos/S19jDsfd-PjhKnmJY.mp4",
+                    "label": "180p"
+                },
+                {
+                    "width": 480,
+                    "height": 136,
+                    "type": "video/mp4",
+                    "file": "https://cdn.jwplayer.com/videos/S19jDsfd-3opehBFw.mp4",
+                    "label": "270p"
+                },
+                {
+                    "width": 720,
+                    "height": 204,
+                    "type": "video/mp4",
+                    "file": "https://cdn.jwplayer.com/videos/S19jDsfd-8fwzFALj.mp4",
+                    "label": "406p"
+                },
+                {
+                    "type": "audio/mp4",
+                    "file": "https://cdn.jwplayer.com/videos/S19jDsfd-Z0DerjSH.m4a",
+                    "label": "AAC Audio"
+                }
+            ],
+    "createdAt": "2017-09-26T10:50:45.673Z"
+}

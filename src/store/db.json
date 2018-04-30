@@ -1,0 +1,215 @@
+{
+  "videos": [
+    {
+      "title": "How To Sound Smart In Your Tedx Talk",
+      "id": 0,
+      "videoID": 0,
+      "link": "http://content.jwplatform.com/videos/BYmoWNeA-DgOi1siB.mp4",
+      "thumb": "http://content.jwplatform.com/thumbs/BYmoWNeA-720.jpg",
+      "sources": [
+        {
+          "width": 720,
+          "type": "application/vnd.apple.mpegurl",
+          "file": "https://cdn.jwplayer.com/manifests/BYmoWNeA.m3u8",
+          "height": 406
+        },
+        {
+          "width": 320,
+          "height": 180,
+          "type": "video/mp4",
+          "file": "https://cdn.jwplayer.com/videos/BYmoWNeA-S2DagQP7.mp4",
+          "label": "180p"
+        },
+        {
+          "width": 480,
+          "height": 270,
+          "type": "video/mp4",
+          "file": "https://cdn.jwplayer.com/videos/BYmoWNeA-9B9NyP5t.mp4",
+          "label": "270p"
+        },
+        {
+          "width": 720,
+          "height": 406,
+          "type": "video/mp4",
+          "file": "https://cdn.jwplayer.com/videos/BYmoWNeA-DgOi1siB.mp4",
+          "label": "406p"
+        },
+        {
+          "type": "audio/mp4",
+          "file": "https://cdn.jwplayer.com/videos/BYmoWNeA-BX5mUTQc.m4a",
+          "label": "AAC Audio"
+        }
+      ],
+      "duration": "355",
+      "jwVideoID": "BYmoWNeA",
+      "jwPlaylistID": "2INkSmd7",
+      "class": "Material Science Engineering",
+      "genre": "Thesis talk",
+      "categories": [
+        {
+          "name": "Posture & Stance",
+          "description": "Posture and stance project confidence, and allow speaker to interact with audience and screen",
+          "canon": "Delivery"
+        }
+      ],
+      "annotations": [
+        {
+          "author": "Ben Domino",
+          "canon": "Moves",
+          "category": "Introduction",
+          "comment": "Presents basic equations",
+          "from": "00:39",
+          "to": "01:34",
+          "rating": 5,
+          "id": 0
+        },
+        {
+          "author": "Ben Domino",
+          "canon": "Moves",
+          "category": "Introduction",
+          "comment": "Summarizes and previews the methods used",
+          "from": "01:27",
+          "to": "00:37",
+          "rating": 3,
+          "id": 2
+        },
+        {
+          "author": "Ben Domino",
+          "canon": "Moves",
+          "category": "Question and Answer",
+          "comment": "Responds to questions directly",
+          "from": "01:42",
+          "to": "01:54",
+          "rating": 4,
+          "id": 1
+        }
+      ]
+    },
+    {
+      "title": "Programming Your Mind For Success",
+      "id": 1,
+      "videoID": 1,
+      "link": "https://cdn.jwplayer.com/previews/OTEe0Dn3",
+      "thumb": "https://cdn.jwplayer.com/thumbs/OTEe0Dn3-720.jpg",
+      "sources": [
+        {
+          "width": 1280,
+          "type": "application/vnd.apple.mpegurl",
+          "file": "https://cdn.jwplayer.com/manifests/OTEe0Dn3.m3u8",
+          "height": 720
+        },
+        {
+          "width": 320,
+          "height": 180,
+          "type": "video/mp4",
+          "file": "https://cdn.jwplayer.com/videos/OTEe0Dn3-S2DagQP7.mp4",
+          "label": "180p"
+        },
+        {
+          "width": 480,
+          "height": 270,
+          "type": "video/mp4",
+          "file": "https://cdn.jwplayer.com/videos/OTEe0Dn3-9B9NyP5t.mp4",
+          "label": "270p"
+        },
+        {
+          "width": 720,
+          "height": 406,
+          "type": "video/mp4",
+          "file": "https://cdn.jwplayer.com/videos/OTEe0Dn3-DgOi1siB.mp4",
+          "label": "406p"
+        },
+        {
+          "width": 1280,
+          "height": 720,
+          "type": "video/mp4",
+          "file": "https://cdn.jwplayer.com/videos/OTEe0Dn3-34JmzxrC.mp4",
+          "label": "720p"
+        },
+        {
+          "type": "audio/mp4",
+          "file": "https://cdn.jwplayer.com/videos/OTEe0Dn3-BX5mUTQc.m4a",
+          "label": "AAC Audio"
+        }
+      ],
+      "duration": "931",
+      "jwVideoID": "OTEe0Dn3",
+      "jwPlaylistID": "2INkSmd7",
+      "class": "Material Science Engineering",
+      "genre": "Elevator pitch",
+      "categories": [
+        {
+          "name": "Posture & Stance",
+          "description": "Posture and stance project confidence, and allow speaker to interact with audience and screen",
+          "canon": "Delivery"
+        }
+      ],
+      "annotations": [
+        {
+          "author": "Ben Domino",
+          "canon": "Delivery",
+          "category": "Language",
+          "comment": "",
+          "from": "01:22",
+          "to": "01:35",
+          "rating": 2,
+          "id": 0
+        },
+        {
+          "author": "Ben Domino",
+          "canon": "Moves",
+          "category": "Results and Discussion",
+          "comment": "qwet",
+          "from": "01:23",
+          "to": "01:37",
+          "rating": 4,
+          "id": 2
+        },
+        {
+          "author": "Ben Domino",
+          "canon": "Moves",
+          "category": "Introduction",
+          "comment": "Shows that the research area is important/central/interesting/problematic/relevant and narrows down to the topic of the research",
+          "from": "01:32",
+          "to": "01:42",
+          "rating": 4,
+          "id": 1
+        }
+      ]
+    }
+  ],
+  "classes": [
+    {
+      "archived": false,
+      "id": "0bc87287-1271-4f0c-94a0",
+      "department": "Aeronautics and Astronautics",
+      "name": "Doctoral Research and Communication Seminar",
+      "number": "16.S982",
+      "semester": "Spring 2018"
+    },
+    {
+      "archived": true,
+      "id": "1bc87287-1271-4f0c-94a1",
+      "department": "Materials Science and Engineering",
+      "name": "Materials Science Lab",
+      "number": "3.014",
+      "semester": "Spring 2018"
+    },
+    {
+      "archived": false,
+      "id": "2bc87287-1271-4f0c-94a2",
+      "department": "Comparative Media Studies / Writing",
+      "name": "Rhetoric",
+      "number": "21W.747",
+      "semester": "Spring 2018"
+    },
+    {
+      "archived": false,
+      "id": "3bc87287-1271-4f0c-94a3",
+      "department": "Chemical Engineering",
+      "name": "Chemical Engineering Projects Lab",
+      "number": "10.26/27/28",
+      "semester": "Spring 2018"
+    }
+  ]
+}
