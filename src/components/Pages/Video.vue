@@ -57,50 +57,50 @@
                     </div>
                 </div>
 
-                <div class="annotate" v-show="isAnnotating">
-                    <div class="annotate-menu" v-show="isAnnotateMenu">
-                        <nav class="annotate-menu__canons">
-                            <a :class="canon.name" @click="chooseCanonAnnotate(canon.name, $event)" v-for="canon in canons" :key="canon.name" >{{ canon.name }}</a>
-                            <div class="annotate-menu__canons-close"><span @click="isAnnotating = false; isAnnotateMenu = false">X</span></div>
+                <div class="annotate" v-show="annotatingMode">
+
+                    <div class="annotate-menu"> 
+                        <nav class="annotate-menu__canons" v-if="isAnnotateCanons">
+                            <a :class="canon.name" @click="chooseCanonAnnotate(canon.name)" v-for="canon in canons" :key="canon.name" >{{ canon.name }}</a>
+                            <div class="annotate-menu__canons-close">
+                                <span @click="closeAnnotationMenu()">X</span>
+                            </div>
                         </nav>
-                        <nav class="annotate-menu__categories" v-for="canon in canons" :key="canon.name" v-if="canon.name === annotateCanon">
+                        <nav class="annotate-menu__categories" v-for="canon in canons" :key="canon.name" v-if="isAnnotateCategories && canon.name === annotateCanon">
                             <a :class="canon.name" v-for="cat in canon.categories" :key="cat.name" @click="chooseCategoryAnnotate(cat.id)" :title="cat.desc">{{ cat.name }}</a>  
                         </nav>
-                        
+                        <nav class="annotate-menu__subcategories" v-if="isAnnotateSubcategories">
+                            <button class="button" @click="isAnnotateSubcategories = false;isAnnotateCategories = true; isAnnotateCanons = true;"><i class="fa fa-chevron-left"></i>Back</button>
+                            <a v-for="subcategory in annotateCurrentCategoryObject.subcategories" :key="subcategory.id" @click="chooseSubcategoryAnnotate(subcategory.id)">{{ subcategory.name }}</a>  
+                        </nav>
                     </div>
+
                     <div class="annotate-fields annotate-annotating" v-show="isAnnotateFields"> 
                         <!-- :class="annotateCanon" -->
                         <div class="annotate-fields-left">
-                            <button class="button annotate-fields-left-back" @click="isAnnotateFields = false; isVideoline = false; isAnnotateMenu = true; selectedMove = 'Other'">
+                            <button class="button annotate-fields-left-back" @click="isAnnotateFields = false; isVideoline = false; isAnnotateCategories = true; isAnnotateCanons = true; selectedMove = 'Other'">
                                 <i aria-hidden="true" class="fa fa-chevron-left"></i>Back
                             </button>
                         </div>
                         
                         <div class="annotate-fields-right">
-                            <div class="annotate-desc field" v-for="canon in canons" :key="canon.name" v-if="canon.name === annotateCanon">
-                                <div class="annotate-desc-text" v-for="cat in canon.categories" :key="cat.id" v-if="cat.id === annotateCategory">
-                                    <h1>{{ cat.name }}</h1>
-                                    <p>{{ cat.description }}</p>
+                            <div class="annotate-desc field">
+                                <!-- If has no subcategories -->
+                                <div class="annotate-desc-text" v-if="annotateCurrentCategoryObject.subcategories.length === 0">
+                                    <h1>{{ annotateCurrentCategoryObject.name }}</h1>
+                                    <p>{{ annotateCurrentCategoryObject.description }}</p>
                                 </div>
-                                <div class="annotate-menu__canons-close"><span @click="isAnnotating = false; isAnnotateFields = false; isVideoline = false; selectedMove = 'Other'">X</span></div>
+                                <!-- If has subcategories -->
+                                <div class="annotate-desc-text" v-else>
+                                    <h1>{{ annotateCurrentSubcategoryObject.name }}</h1>
+                                    <p>{{ annotateCurrentSubcategoryObject.description }}</p>
+                                </div>
+                                <div class="annotate-menu__canons-close"><span @click="annotatingMode = false; isAnnotateFields = false; isVideoline = false; selectedMove = 'Other';">X</span></div>
                             </div>  
-                            <div class="annotate-subcategories" v-if="annotateCanon === 'Invention'">
-                                <label class="label">Choose move</label>
-                                <el-select v-model="selectedMove" v-for="cat in canons['Invention'].categories" v-if="cat.id === annotateCategory" :key="cat.name" placeholder="Choose move:">
-                                    <!-- The ternary operator x ? y : z 
-                                        We use it in :label and :value because there are subcategories without a description. -->
-                                    <el-option v-for="subcategory in cat.subcategories" :key="subcategory.id" :label="!!subcategory.description ? subcategory.name + ': ' + subcategory.description : subcategory.name" :value="!!subcategory.description ? subcategory.name + ': ' + subcategory.description : subcategory.name">
-                                    </el-option>
-                                    <el-option label="Other" value="Other"></el-option>
-                                </el-select>
-                            </div>
                             <div class="annotate-comment field" v-show="selectedMove === 'Other'">
                                 <label class="label">Comment</label>
                                 <p class="control">
-                                    <textarea class="textarea" 
-                                    placeholder="[Name] You might also want to include a concrete strategy recommendation." 
-                                            v-model="annotateComment">
-                                    </textarea>
+                                    <textarea class="textarea" placeholder="You might also want to include a concrete strategy recommendation." v-model="annotateComment"></textarea>
                                 </p>
                             </div>
                             <div class="annotate-effectiveness field">
@@ -140,7 +140,7 @@
                         -->
                         <div class="annotate-fields-right">
                             <div class="annotate-desc field" v-for="canon in canons" :key="canon.name" v-if="canon.name === annotateCanon">
-                                <p class="control" v-for="cat in canon.categories" :key="cat.id" v-if="cat.id === annotateCategory">"{{ cat.description }}"</p>
+                                <p class="control" v-for="cat in canon.categories" :key="cat.id" v-if="cat.id === annotateCategoryId">"{{ cat.description }}"</p>
                                 <div class="annotate-menu__canons-close"><span @click="isEditing = false; isVideoline = false; isEditFields = false">X</span></div>
                             </div>
                             <div class="annotate-effectiveness field">
@@ -171,7 +171,7 @@
                     </div>
                 </div>
 
-                <div class="add-annotation-area" @click="annotating()" v-show="!isAnnotating">
+                <div class="add-annotation-area" @click="annotating()" v-show="!annotatingMode">
                     <i class="fa fa-plus fa_1_5x" aria-hidden="true"></i><span>Add annotation</span>
                 </div>
 
@@ -218,55 +218,13 @@
                         </el-tab-pane>
                     </el-tabs>
                 </el-dialog>
-                <!-- <el-dialog title="Video collaborators" :visible.sync="modalCollaboratorsIsOpen" class="modal-collaborators">
-                    <el-tabs >
-                        <el-tab-pane label="Collaborators">
-                            <el-table :data="collaborators" style="width: 100%" :show-header="false" empty-text="No collaborators">
-                                <el-table-column prop="name" width="180">
-                                    <template scope="s1">
-                                        <i class="fa fa-user"></i> {{ s1.row.firstName }} {{ s1.row.lastName }}
-                                    </template>
-                                </el-table-column>
-                                <el-table-column prop="class">
-                                    <template scope="s1b">
-                                        <i class="fa fa-book"></i> {{ s1b.row.email }}
-                                    </template>
-                                </el-table-column>
-                                <el-table-column>
-                                    <template scope="scope">
-                                        <el-button size="small"  @click="deleteCollaborator(scope.$index, scope.row)">Delete collaborator</el-button>
-                                    </template>
-                                </el-table-column>
-                            </el-table>
-                        </el-tab-pane>
-                        <el-tab-pane label="Other students">
-                            <el-table ref="multipleTable" :data="classEnrolledStudentsAccepted" :border="false" style="width: 100%" :show-header="false" empty-text="No other students in this class">
-                                <el-table-column prop="name">
-                                    <template scope="s2">
-                                        <i class="fa fa-user"></i> {{ s2.row.firstName }} {{ s2.row.lastName }}
-                                    </template>
-                                </el-table-column>
-                                <el-table-column prop="class">
-                                    <template scope="s2b">
-                                        <i class="fa fa-book"></i> {{ s2b.row.email }}
-                                    </template>
-                                </el-table-column>
-                                <el-table-column>
-                                    <template scope="scope">
-                                        <el-button size="small" type="success" @click="addCollaborator(scope.$index, scope.row)">Add collaborator</el-button>
-                                    </template>
-                                </el-table-column>
-                            </el-table>
-                        </el-tab-pane>
-                    </el-tabs>
-                </el-dialog> -->
 
             </div>
 
             <div class="cards column is-4">
                 <div class="cards-content" v-if="canonLoadingDone">
                     <nav class="card-menu">
-                        <!-- title="Hide/show" -->
+                        <a style="display:flex;flex-direction:column;justify-content:center;margin:5px;color:#4a4a4a;"><i class="fa fa-graduation-cap" style="text-align:center;"></i><span style="font-size:10px;margin-top:-3px;">Professor only</span></a>
                         <a class="card-menu__item" :class="canon.name" v-for="canon in canons" :key="canon.name"  @click="chooseCanonFilter($event, canon.name)" >
                             <i class="card-menu__icon fa fa_1x" style="margin-top:20px;" :class="{ 'fa-pencil-square-o': (canon.name === 'Invention'), 'fa-book': (canon.name === 'Structure'), 'fa-commenting': (canon.name === 'Delivery'), 'fa-eye': (canon.name === 'Visuals'), 'fa-diamond': (canon.name === 'Style') }"></i>
                             <span class="card-menu__title">{{ canon.name }}</span>
@@ -355,10 +313,15 @@
                 videoCurrentTime: 0,
                 videoCurrentTimeMMSS: 0,
                 videoIndex: 0,
+                // ANNOTATE SECTION
+                annotatingMode: false,
                 annotateCanon: 'Delivery',
-                annotateCategory: '', // the categoryId from the category that is chosen
-                annotateSubCategory: '',
+                annotateCategoryId: '', // The category id from the category that is chosen.
+                annotateSubcategoryId: '', // The subcategory id from the category that is chosen.
+                annotateCurrentCategoryObject: { canon: '', description: '', id: '', name: '', subcategories: [] },
+                annotateCurrentSubcategoryObject: {},
                 annotateRating: 1,
+                annotationType: 'category', // or 'subcategory': Helps the POST /annotation to send the correct categoryId. 
                 annotateComment: '',
                 annotateStart: null,
                 annotateEnd: null,
@@ -367,16 +330,18 @@
                 editStart: null,
                 editEnd: null,
                 editingCard: null,
-                isAnnotating: false,
-                isAnnotateMenu: false,
+                isAnnotateCanons: false, // Canons menu.
+                isAnnotateCategories: false, // Categories menu.
+                isAnnotateSubcategories: false, // Subcategories menu.
                 isAnnotateFields: false,
                 isVideoline: false,
                 isEditing: false,
-                isEditMenu: false,
+                // isEditMenu: false,
                 isEditFields: false,
                 isDragging: false,
                 startDragTime: 0,
                 endDragTime: 0,
+                // END OF ANNOTATE SECTION
                 filterCanon: 'All',
                 isInvention: 'Invention',
                 isStructure: 'Structure',
@@ -411,14 +376,82 @@
             }
         },
         methods: {
+            /**
+             * The event that is fired, 
+             * when a user clicks on annotate menu canons.
+             *
+             * @param {string} canon. The canon name "Structure", "Style", etc.
+             */
+            chooseCanonAnnotate(canon) {
+                this.annotateCanon = canon
+                console.log("chooseCanonAnnotate", canon)
+            },
+            /**
+             * The event that is fired, 
+             * when a user clicks on annotate menu categories.
+             *
+             * @param {string} currentCategoryId. The category id that has been clicked.
+             */
+            chooseCategoryAnnotate(currentCategoryId) {
+                this.annotateCategoryId = currentCategoryId
+                this.isAnnotateCanons = false
+
+                // Fills the current category object.
+                var categories = this.canons[this.annotateCanon].categories
+                for (var i = 0; i < categories.length; i++) {
+                    if (categories[i].id === currentCategoryId) {
+                        this.annotateCurrentCategoryObject = categories[i]
+                    }
+                }
+
+                // If there no subcategories -> show annotation fields
+                // Else there are subcategories -> show subcategory menu
+                if (this.annotateCurrentCategoryObject.subcategories.length === 0) {
+                    console.log('No subcategories')
+                    this.annotationType = 'category'
+                    this.isAnnotateCanons = false
+                    this.isAnnotateCategories = false
+                    this.isAnnotateFields = true
+                    this.isVideoline = true
+                } else {
+                    console.log('Subcategories!')
+                    this.annotationType = 'subcategory'
+                    this.isAnnotateCategories = false
+                    this.isAnnotateSubcategories = true
+                }
+
+            },
+            /**
+             * The event that is fired, 
+             * when a user clicks on annotate menu subcategories.
+             * This applies on some of the canons, such as "Invention".
+             *
+             * @param {string} currectSubcategoryId. The subcategory id that has been clicked.
+             */
+            chooseSubcategoryAnnotate(currectSubcategoryId) {
+                this.annotateSubcategoryId = currectSubcategoryId
+
+                // Fills the current subcategory object.
+                for (var i = 0; i < this.annotateCurrentCategoryObject.subcategories.length; i++) {
+                    if (this.annotateCurrentCategoryObject.subcategories[i].id === this.annotateSubcategoryId) {
+                        this.annotateCurrentSubcategoryObject = this.annotateCurrentCategoryObject.subcategories[i]
+                    }
+                }
+                
+                this.isAnnotateSubcategories = false
+                this.isAnnotateCanons = false
+                this.isAnnotateFields = true 
+                this.isVideoline = true
+            },
             annotating() {
                 var self = this
                 
                 // Checking for new annotations in current video (for real time annotating)
                 this.$store.dispatch('getVideoAnnotations', this.id)
 
-                this.isAnnotating = true
-                this.isAnnotateMenu = true
+                this.annotatingMode = true
+                this.isAnnotateCanons = true // Opens canons menu.
+                this.isAnnotateCategories = true
                 this.annotateRating = null
                 this.annotateComment = ''
                 this.selectedMove = 'Other'
@@ -645,12 +678,11 @@
                     theComment = this.selectedMove
 
                 // Find the description of the chosen annotate category.
+                // This is for category annotation only.
                 var annotateDesc
-               
                 var annotateCategories = this.canons[this.annotateCanon].categories
-
                 for (var i = 0, l = annotateCategories.length; i < l; i++) {
-                    if (this.annotateCategory === annotateCategories[i].id)
+                    if (this.annotateCategoryId === annotateCategories[i].id)
                         annotateDesc = annotateCategories[i].description
                 }
 
@@ -658,8 +690,8 @@
                     author: this.authService.getAuthData().firstName + ' ' + this.authService.getAuthData().lastName.slice()[0] + '.', // Alexander T.
                     videoId: this.id,
                     canon: this.annotateCanon,
-                    categoryId: this.annotateCategory,
-                    label: annotateDesc, // category description
+                    categoryId: (this.annotationType === 'category') ? this.annotateCategoryId : this.annotateSubcategoryId,
+                    label: (this.annotationType === 'category') ? annotateDesc : this.annotateCurrentSubcategoryObject.description,
                     comment: theComment,
                     from: this.annotateStart,
                     to: this.annotateEnd, 
@@ -682,12 +714,21 @@
                     this.annotateStart = null
                     this.annotateEnd = null
                     this.annotateRating = 1
-                    this.isAnnotating = false
-                    this.isAnnotateMenu = false
+                    this.annotatingMode = false
+                    this.isAnnotateCanons = false
                     this.isAnnotateFields = false
                     this.isVideoline = false
                     this.selectedMove = 'Other'
                 }
+            },
+            closeAnnotationMenu() {
+                console.log("closeAnnotationMenu")
+                this.annotatingMode = false
+                this.isAnnotateCanons = false
+                this.isAnnotateSubcategories = false
+
+                this.annotateCategoryId = ''
+                this.annotateSubcategoryId = ''
             },
             editing(event) {
                 // CHECKING for new annotations in current video (for real time annotating)
@@ -704,7 +745,15 @@
                 // Setting flags
                 this.isEditing = true
                 this.isEditFields = true
-                this.player.pause()
+                if (this.player.getState() === 'playing')
+                    this.player.pause()
+
+                if (this.annotatingMode) {
+                    this.isAnnotateFields = false
+                    this.isAnnotateCanons = false
+                    this.annotatingMode = false
+                    this.isVideoline = false
+                }
 
                 // Setting from + to annotate times
                 var time = $(editingCard).find('.timeline-card__time').text() // 03:05 - 03:17
@@ -877,17 +926,6 @@
                         // event.currentTarget.style.color = "#FFFFFF"
                     }
                 }
-            },
-            chooseCanonAnnotate(canon, event) {
-                this.annotateCanon = canon
-                // this.annotateModeActiveItemProblem(event)
-            },
-            chooseCategoryAnnotate(category) {
-                this.annotateCategory = category
-                // this.annotateModeActiveItemProblem(event)
-                this.isAnnotateMenu = false
-                this.isAnnotateFields = true
-                this.isVideoline = true
             },
             seekCard(event) {
                 var time = event.currentTarget.getElementsByClassName('timeline-card__time')[0].innerHTML
@@ -1773,6 +1811,32 @@
         .annotate-menu__categories a:hover {
             opacity: 0.75;
         }
+
+    .annotate-menu__subcategories {
+        width: 100%;
+        background-color: #39425C;
+        display: flex;
+    }
+        .annotate-menu__subcategories a {
+            width: 25%;
+            height: 100px;
+            color: #FFF;
+            border: 1px solid #27314D;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .annotate-menu__subcategories a:hover {
+            opacity: 0.75;
+        }
+
+        .annotate-menu__subcategories button {
+            background-color: #39425C;
+            color: #FFF !important;
+            border: none;
+        }
+
+
             .el-slider { width: 80%}
             .el-slider__bar, .el-slider__button-wrapper, .el-slider__stop { height: 40px !important; }
             .el-slider__button { width: 25px; height: 25px; }
