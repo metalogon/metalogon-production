@@ -786,15 +786,31 @@
                 this.editRating = cardRating
 
                 // Render edit comment
-                var cardComment = $(editingCard).find('.timeline-card__comment').text()
+                var cardComment = $(editingCard).find('.timeline-card__comment p').text()
                 this.editComment = cardComment
+
+                var cardId = $(editingCard).find('.timeline-card__id').text()
+                var self = this
+
+                this.secureHTTPService.get("annotation/" + cardId)
+                    .then(function (response)
+                    {
+                        self.editComment = response.data.data.comment
+                    })
+                    .catch(function (err) {
+                        alert('Sorry, but annotation editing is not working right now. Try again later. ')
+                        console.log('GET /annotation error: ', err)
+                        // Closing editing mode section.
+                        self.isEditing = false
+                        self.isEditFields = false
+                    })
             },
             edit() {
                 var editingCard = this.editingCard
-                var cardID = $(editingCard).find('.timeline-card__id').text()
+                var cardId = $(editingCard).find('.timeline-card__id').text()
 
                 var videoBody = { comment: this.editComment, from: this.editStart, to: this.editEnd, rating: this.editRating }
-                this.$store.dispatch('editAnnotation', { annotationId: cardID, body: videoBody })
+                this.$store.dispatch('editAnnotation', { annotationId: cardId, body: videoBody })
 
                 this.isEditFields = false
                 this.isEditing = false
