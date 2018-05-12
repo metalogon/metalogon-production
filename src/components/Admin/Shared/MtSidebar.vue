@@ -11,6 +11,7 @@
 				<!-- <a class="sidebar__actionsLink" v-show="role === 'administrator' || role === 'professor'" @click="createCategoriesTreeDataForm(); modalGenreCustomization = true"><i class="fa fa-commenting-o"></i>Categories</a> -->
 				<a class="sidebar__actionsLink" v-show="role === 'administrator' && (currentClass.name !== 'Home')" @click="modalDeleteClassIsOpen = true"><i class="fa fa-trash"></i>Delete this class</a>
 				<a class="sidebar__actionsLink" v-show="role === 'student'" @click="toggleModalClassesToEnroll()"><i class="fa fa-plus"></i>Find a class to enroll</a>
+				<a class="sidebar__actionsLink" v-show="role === 'student'"><i class="fa fa-file-text-o"></i>Assignments</a>
 			</div>
 
 			<!-- Sidebar Classes menu for student -->
