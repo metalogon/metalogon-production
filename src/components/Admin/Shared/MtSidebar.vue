@@ -11,7 +11,7 @@
 				<!-- <a class="sidebar__actionsLink" v-show="role === 'administrator' || role === 'professor'" @click="createCategoriesTreeDataForm(); modalGenreCustomization = true"><i class="fa fa-commenting-o"></i>Categories</a> -->
 				<a class="sidebar__actionsLink" v-show="role === 'administrator' && (currentClass.name !== 'Home')" @click="modalDeleteClassIsOpen = true"><i class="fa fa-trash"></i>Delete this class</a>
 				<a class="sidebar__actionsLink" v-show="role === 'student'" @click="toggleModalClassesToEnroll()"><i class="fa fa-plus"></i>Find a class to enroll</a>
-				<a class="sidebar__actionsLink" v-show="role === 'student'"><i class="fa fa-file-text-o"></i>Assignments</a>
+				<a class="sidebar__actionsLink" v-show="role === 'student' && (currentClass.name !== 'Home')" @click="openAssignmentsModal()"><i class="fa fa-file-text-o"></i>Class Assignments</a>
 			</div>
 
 			<!-- Sidebar Classes menu for student -->
@@ -161,7 +161,7 @@
 				<el-button class="add-class-btn" @click="deleteClass()"><strong>Delete Class</strong></el-button>
 			</el-dialog>
 
-			<!-- administrator, professor -->
+			<!-- Administrator/Professor/Student - Assignments -->
 			<el-dialog v-bind:title="this.currentClass.name + ' Class assignments'" :visible.sync="modalClassAssignmentsIsOpen" class="modal-class-assignments">
 				<!-- Loading Screen -->
 				<div class="uploadvid__sync-load" 
@@ -175,49 +175,50 @@
 							<span class="assignments__title">
 								<strong>Title:</strong>
 								<span class="assignments__titleId">{{ a.id }}</span>
-								<p class="assignments__titleText" @click="toggleTitleEdit($event)">{{ a.title }}</p>
-								<input v-model="a.title" @blur="saveTitleEdit($event, a.id)" type="text" class="input assignments__titleInput"></textarea>
+								<!-- Editing functionality for admin/professor -->
+								<p class="assignments__titleText" v-if="role === 'administrator' || role === 'professor'" @click="toggleTitleEdit($event)">{{ a.title }}</p>
+								<textarea class="input assignments__titleInput" v-if="role === 'administrator' || role === 'professor'" v-model="a.title" @blur="saveTitleEdit($event, a.id)" type="text"></textarea>
+								<!-- Simple viewing for student -->
+								<p class="assignments__titleText_noEdit" v-if="role === 'student'">{{ a.title }}</p>
 							</span>
 							<hr>
 							<span class="assignments__desc">
 								<strong class="assignments__descTitle">Description:</strong>
 								<span class="assignments__descId">{{ a.id }}</span>
-								<p class="assignments__descText" @click="toggleDescriptionEdit($event)">{{ a.description }}</p>
-								<textarea v-model="a.description" @blur="saveDescriptionEdit($event, a.id)" type="text" class="textarea assignments__descTextarea"></textarea>
+								<!-- Editing functionality for admin/professor -->
+								<p class="assignments__descText" v-if="role === 'administrator' || role === 'professor'" @click="toggleDescriptionEdit($event)">{{ a.description }}</p>
+								<textarea class="textarea assignments__descTextarea" v-if="role === 'administrator' || role === 'professor'" v-model="a.description" @blur="saveDescriptionEdit($event, a.id)" type="text"></textarea>
+								<!-- Simple viewing for student -->
+								<p class="assignments__titleText_noEdit" v-if="role === 'student'">{{ a.description }}</p>
 							</span>
 							<hr>
 							<span class="assignments__genre" v-for="g in genres" v-if="g.id === a.genre" :key="g.id">
 								<strong class="assignments__genreTitle">Genre:</strong> 
 								<span class="assignments__genreId">{{ a.id }}</span>
-								<p class="assignments__genreName" @click="toggleGenreEdit($event)">{{ g.name }}</p>
-								<select v-model="a.genre" @change="saveGenreEdit($event, a.id)" class="assignments__genreSelect select">
+								<!-- Editing functionality for admin/professor -->
+								<p class="assignments__genreName" v-if="role === 'administrator' || role === 'professor'" @click="toggleGenreEdit($event)">{{ g.name }}</p>
+								<select class="assignments__genreSelect select" v-if="role === 'administrator' || role === 'professor'" v-model="a.genre" @change="saveGenreEdit($event, a.id)">
 									<option v-for="g in genres" :label="g.name" :value="g.id" :key="g.id" class="option"></option>
 								</select>
+								<!-- Simple viewing for student -->
+								<p class="assignments__genreName__noEdit" v-if="role === 'student'">{{ g.name }}</p>
 							</span>
 							<hr>
 							<span class="assignments__dueDate">
 								<strong class="assignments__dueDateTitle">Due date:</strong>
 								<span class="assignments__dueDateId">{{ a.id }}</span>
 								<p>
-									<el-date-picker type="date" placeholder="Pick a date" v-model="a.dueDate" @change="saveDueDateEdit($event, a.id)"></el-date-picker>
+									<!-- Editing functionality for admin/professor -->
+									<el-date-picker type="date" placeholder="Pick a date" v-if="role === 'administrator' || role === 'professor'" v-model="a.dueDate" @change="saveDueDateEdit($event, a.id)"></el-date-picker>
+									<!-- Simple viewing for student -->
+									<el-date-picker type="date" placeholder="Pick a date" v-if="role === 'student'" v-model="a.dueDate" :readonly="true"></el-date-picker>
 								</p>
 							</span>
 							<hr>
-							<router-link :to="'/video/' + v.id" tag="div" class="classvideo" v-for="v in videos" :key="v.id" v-if="v.assignmentId === a.id" style="cursor:pointer">
-								<div class="classvideo__metadata">
-									<img class="classvideo__image" :src="v.thumb">
-									<div class="classvideo__titles">
-										<p class="classvideo__title">{{ v.title }}</p>
-										<p class="classvideo__genre">{{ secondsToMMSS(v.duration) }} / {{ v.genre }} </p>
-									</div>
-									<div class="classvideo__metameta">
-										
-									</div>
-								</div>
-							</router-link>
+							<mt-video-itemlist v-for="v in videos" v-bind:key="v.id" :currentVideo="v" v-if="v.assignmentId === a.id"></mt-video-itemlist>
 						</div>
                     </el-tab-pane>
-					<el-tab-pane label="+ Add assignment">
+					<el-tab-pane v-if="role === 'administrator' || role === 'professor'" label="+ Add assignment">
 						<el-input v-model="assignmentTitle" placeholder="Set a title" style="width:70%;margin-bottom:15px;"></el-input>
 						<el-input v-model="assignmentDescription" placeholder="Set a description" type="textarea" style="width:70%;margin-bottom:15px;"></el-input>
 						<p>Choose genre:</p>
@@ -230,6 +231,7 @@
 						<el-button @click="createAssignment()">Create</el-button>
                     </el-tab-pane>
                 </el-tabs>
+				<p v-if="assignments.length === 0 && role === 'student'" ><i>No assignments</i></p>
             </el-dialog>
 
 			<!-- Administrator/Professor - Student requests -->
@@ -290,7 +292,7 @@
 					element-loading-background="rgba(0, 0, 0, 0.8)"><br><br><br><br><br></div>
 				<el-tabs v-model="modalClassesRequestsTab" v-show="!loadingModalClasses">
                     <el-tab-pane label="Classes to enroll" name="classesToEnroll">
-						<p v-show="notEnrolledClasses.length === 0" ><b>No classes to enroll</b></p>
+						<p v-show="notEnrolledClasses.length === 0" ><i>No classes to enroll</i></p>
 						<el-input icon="search" v-show="notEnrolledClasses.length !== 0" v-model="searchInputClassModal" @change="filterClassArray('notEnrolledClasses', 'filteredNotEnrolledClasses', searchInputClassModal)" placeholder="Search for a class..." style="width:220px;margin-bottom:7px;" class="mt-search-input"></el-input>
                         <div class="mt-table">
 							<li class="mt-table__row" v-for="c in filteredNotEnrolledClasses" :key="c.id">
@@ -353,6 +355,7 @@
 	import { mapGetters } from 'vuex'
 	import { mapMutations } from 'vuex'
 	import _ from 'lodash'
+	import MtVideoItemList from './MtVideoItemList.vue'
     
     export default {
 		props: [],
@@ -1344,6 +1347,9 @@
 				]
             )
 		},
+		components: {
+			'mt-video-itemlist': MtVideoItemList
+		}
     }
 </script>
 
@@ -1454,7 +1460,9 @@
 				.assignments__titleText:hover {
 					background-color: #EFE00B;
 				}
+				.assignments__titleText__noEdit:hover {
 
+				}
 				.assignments__titleInput {
 					display: none;
 				}
@@ -1477,7 +1485,9 @@
 				.assignments__descText:hover {
 					background-color: #EFE00B;
 				}
+				.assignments__descText__noEdit:hover {
 
+				}
 				.assignments__descTextarea {
 					display: none;
 				}
@@ -1501,6 +1511,9 @@
 				}
 				.assignments__genreName:hover {
 					background-color: #EFE00B;
+				}
+				.assignments__genreName__noEdit:hover {
+
 				}
 
 				.assignments__genreSelect {
