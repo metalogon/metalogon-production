@@ -231,6 +231,7 @@
 						<el-button @click="createAssignment()">Create</el-button>
                     </el-tab-pane>
                 </el-tabs>
+				<p v-if="assignments.length === 0 && role === 'student'" ><i>No assignments</i></p>
             </el-dialog>
 
 			<!-- Administrator/Professor - Student requests -->
@@ -291,7 +292,7 @@
 					element-loading-background="rgba(0, 0, 0, 0.8)"><br><br><br><br><br></div>
 				<el-tabs v-model="modalClassesRequestsTab" v-show="!loadingModalClasses">
                     <el-tab-pane label="Classes to enroll" name="classesToEnroll">
-						<p v-show="notEnrolledClasses.length === 0" ><b>No classes to enroll</b></p>
+						<p v-show="notEnrolledClasses.length === 0" ><i>No classes to enroll</i></p>
 						<el-input icon="search" v-show="notEnrolledClasses.length !== 0" v-model="searchInputClassModal" @change="filterClassArray('notEnrolledClasses', 'filteredNotEnrolledClasses', searchInputClassModal)" placeholder="Search for a class..." style="width:220px;margin-bottom:7px;" class="mt-search-input"></el-input>
                         <div class="mt-table">
 							<li class="mt-table__row" v-for="c in filteredNotEnrolledClasses" :key="c.id">
