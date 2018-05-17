@@ -103,11 +103,15 @@ export default {
               "role" : ""
             }
             this.secureHTTPService.post("user", body)
-            // TODO add a .then here and continue to this.email = .. and this.showLogin
-            // only if then is ran, else got to catch (or something) and show post error
-            // TODO front show some "successful" screen
-            this.email = this.newEmail
-            this.showLoginForm()
+            .then(function(){
+              this.email = this.newEmail
+              this.showLoginForm()
+              alert("Account created successfully.")
+            })
+            .catch(function(err){
+              console.log("Error while posting new user: ", err)
+              alert("Something went wrong.")
+            })
           }
         },
         invitationUser() {
@@ -126,13 +130,13 @@ export default {
             }
             this.secureHTTPService.post("user?invitation=" + this.invitationCode, body)
             .then(function(){
-              alert("Post invitation successful.")
+              this.showLoginForm()
+              alert("Account created successfully.")
             })
             .catch(function(err){
-              console.log(err)
+              console.log("Error while posting new user via invitation code: ", err)
+              alert("Something went wrong.")
             })
-            //TODO create appropriate feedback with .then and .catch
-            this.showLoginForm()
           }
         },
         showRegisterForm() {
