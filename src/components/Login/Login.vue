@@ -30,7 +30,7 @@
             <input class="login-form__password" type="password" placeholder="Password" v-model="newPassword"/>
             <input class="login-form__password" type="password" placeholder="Repeat Password" v-model="repeatedPassword"/>
             <input class="login-form__username" type="text" placeholder="Invitation code" v-model="invitationCode"/>
-            <button type="submit">GET INVITE</button>
+            <button type="submit">CREATE ACCOUNT</button>
             <p class="login-form__switchform">Already registered? <a class="login-form__switchform-link" @click="showLoginForm()">Sign In</a></p>
           </form>
 
