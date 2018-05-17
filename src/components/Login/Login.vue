@@ -17,6 +17,7 @@
             <input class="login-form__username" type="text" placeholder="First name" v-model="firstName"/>
             <input class="login-form__username" type="text" placeholder="Last name" v-model="lastName"/>
             <input class="login-form__username" type="text" placeholder="E-mail address" v-model="newEmail"/>
+            <input class="login-form__username" type="text" placeholder="Repeat e-mail address" v-model="repeatedNewEmail"/>
             <input class="login-form__password" type="password" placeholder="Password" v-model="newPassword"/>
             <input class="login-form__password" type="password" placeholder="Repeat Password" v-model="repeatedPassword"/>
             <button type="submit">CREATE ACCOUNT</button>
@@ -51,6 +52,7 @@ export default {
           firstName: '',
           lastName: '',
           newEmail: '',
+          repeatedNewEmail: '',
           newPassword: '',
           repeatedPassword: '',
           // Login
@@ -85,6 +87,9 @@ export default {
           }
           else if (this.newPassword != this.repeatedPassword) {
             alert("Please repeat password correctly.")
+          }
+          else if (this.newEmail != this.repeatedNewEmail) {
+            alert("Please repeat e-mail address correctly.")
           }
           else {
             var capitalizedFirstName = this.firstName[0].toUpperCase() + this.firstName.slice(1).toLowerCase()
