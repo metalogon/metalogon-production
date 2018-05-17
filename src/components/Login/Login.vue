@@ -102,10 +102,11 @@ export default {
               "password" : this.newPassword,
               "role" : ""
             }
+            var self = this
             this.secureHTTPService.post("user", body)
             .then(function(){
-              this.email = this.newEmail
-              this.showLoginForm()
+              self.email = self.newEmail
+              self.showLoginForm()
               alert("Account created successfully.")
             })
             .catch(function(err){
@@ -128,9 +129,10 @@ export default {
               "lastName" : this.lastName,
               "password" : this.newPassword
             }
+            var self = this
             this.secureHTTPService.post("user?invitation=" + this.invitationCode, body)
             .then(function(){
-              this.showLoginForm()
+              self.showLoginForm()
               alert("Account created successfully.")
             })
             .catch(function(err){
