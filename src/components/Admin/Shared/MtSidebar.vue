@@ -5,6 +5,7 @@
 			<!-- Sidebar buttons/actions  -->
 			<div class="sidebar__actions" v-show="!loadingClasses">
 				<a class="sidebar__actionsLink" v-show="role === 'administrator' || role === 'professor'" @click="modalCreateClassIsOpen = true"><i class="fa fa-plus"></i>Create new class</a>
+				<a class="sidebar__actionsLink" v-show="role === 'administrator'" @click="modalInviteUserIsOpen = true"><i class="fa fa-plus"></i>Invite a new user</a>
 				<a class="sidebar__actionsLink" v-show="(role === 'administrator' || role === 'professor') && !(currentClass.name === 'Home')" @click="openAssignmentsModal()"><i class="fa fa-file-text-o"></i>Assignments</a>
 				<a class="sidebar__actionsLink" v-show="(role === 'administrator' || role === 'professor') && !(currentClass.name === 'Home')" @click="modalArchiveClassIsOpen = true"><i class="fa fa-archive"></i>Archive this class</a>
 				<a class="sidebar__actionsLink" v-show="(role === 'administrator' || role === 'professor') && !(currentClass.name === 'Home')" @click="toggleModalStudentRequests()"><i class="fa fa-file-text-o"></i>Student requests ({{ requestedStudents.length }})</a>
@@ -159,6 +160,28 @@
 			<el-dialog :title="'Do you want to delete `' + currentClass.name + '` class?'" :visible.sync="modalDeleteClassIsOpen">
 				<el-button @click="modalDeleteClassIsOpen = false">Go back</el-button>
 				<el-button class="add-class-btn" @click="deleteClass()"><strong>Delete Class</strong></el-button>
+			</el-dialog>
+
+			<!-- administrator - invite new user -->
+			<el-dialog title="Invite a new user" :visible.sync="modalInviteUserIsOpen">
+					<el-form :model="invitation">
+							<el-form-item label="Email">
+								<el-input v-model="invitation.email" placeholder="E-mail address"></el-input>
+							</el-form-item>
+							<el-form-item>
+								<el-input v-model="repeatEmail" placeholder="Repeat e-mail address"></el-input>
+							</el-form-item>
+							<el-form-item label="Role">
+								<br>
+								<el-select v-model="invitation.role" placeholder="Choose a role" >
+									<el-option v-for="r in roles" :key="r.value" :label="r.label" :value="r.value" ></el-option>
+								</el-select>
+							</el-form-item>
+					</el-form>
+					<span slot="footer" class="dialog-footer">
+							<el-button @click="modalInviteUserIsOpen = false">Cancel</el-button>
+							<el-button class="add-class-btn" @click="createInvitation()">Create Invitation</el-button>
+					</span>
 			</el-dialog>
 
 			<!-- Administrator/Professor/Student - Assignments -->
@@ -406,6 +429,7 @@
 				modalStudentRequestsIsOpen: false,
 				// Administrator
 				modalDeleteClassIsOpen: false,
+				modalInviteUserIsOpen: false,
 
 				// ENROLLMENTS
 				// Professor/Administrator side
@@ -535,6 +559,16 @@
 					number: '',
 					semester: ''
 				},
+				invitation: {
+					"email": '',
+					"role": ''
+				},
+				repeatEmail: '',
+				roles: [
+					{value: 'student', label: 'Student'},
+					{value: 'professor', label: 'Professor'},
+					{value: 'administrator', label: 'Administrator'}
+				]
 			}
 		},
 		mounted () {
@@ -704,6 +738,29 @@
 				})
 			},
 			// Administrator
+			createInvitation() {
+				if (this.invitation.email === '' || this.invitation.role === '') {
+					alert("Please complete all the fields.")
+				}
+				else if (this.invitation.email != this.repeatEmail) {
+					alert("Please repeat e-mail address correctly.")
+				}
+				else {
+					this.secureHTTPService.post("invitation", this.invitation)
+					.then(function (response) {
+						// console.log(response)
+						alert("Invitation code: " + response.data.data.id)
+					})
+					.catch(function (err) {
+						console.log("Error while posting invitation: ", err)
+						alert("Something went wrong.")
+					})
+					this.modalInviteUserIsOpen = false
+					this.invitation = {"email": '', "role": ''} // Reset invitation
+					this.repeatEmail = ''
+				}
+			},
+
 			deleteClass() {
 				var classId = this.currentClass.id
 
