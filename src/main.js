@@ -15,6 +15,9 @@ Vue.use(ElementUI, { locale })
 import ReadMore from 'vue-read-more';
 Vue.use(ReadMore);
 
+import VCharts from 'v-charts'
+Vue.use(VCharts)
+
 // Load the full build.
 global._ = require('lodash');
 

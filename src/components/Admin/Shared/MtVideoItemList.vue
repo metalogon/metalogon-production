@@ -18,7 +18,8 @@
 					<p class="classvideo__genre">{{ secondsToMMSS(currentVideo.duration) }} / {{ genreName }} </p>
 				</div>
 				<div class="classvideo__metameta">
-					<span class="classvideo__score">
+					<span class="classvideo__score" @click.stop.prevent @click="modalCanonChartIsOpen = true">
+						<!--  -->
 						<p class="classvideo__scoreNum">{{ ratingAverage.toFixed(1) }}</p>
 						<p class="classvideo__scoreLabel">Effectiveness</p>
 					</span>
@@ -28,6 +29,10 @@
 					</span>
 				</div>
 		</router-link>
+
+		<el-dialog :title="'Canon statistics'" :visible.sync="modalCanonChartIsOpen">
+			  <ve-histogram :data="chartData"></ve-histogram>
+		</el-dialog>
 
 		<!-- Delete video confirmation -->
 		<el-dialog :title="'!Not complete - leaves garbage in backend (annotations, collaborations, jwvideo). Use sparingly! Do you want to delete `' + currentVideo.title + '` video?'" :visible.sync="deleteModalIsOpen">
@@ -50,10 +55,25 @@
 				numberOfAnnotations: 0,
 				ratingAverage: 0,
 				genreName: '',
-				deleteModalIsOpen: false
+				deleteModalIsOpen: false,
+				modalCanonChartIsOpen: false,
+				chartData: {
+					columns: ['canon', 'grade'],
+					rows: [
+						{ 'canon': 'Invention', 'grade': 4.3 },
+						{ 'canon': 'Structure', 'grade': 5.0 },
+						{ 'canon': 'Delivery', 'grade': 4.9 },
+						{ 'canon': 'Visuals', 'grade': 4.5 },
+						{ 'canon': 'Style', 'grade': 4.5 }
+					]
+				},
+				charchartSettings: {}
 			}
 		},
 		methods: {
+			showCanonChart() {
+				console.log('show chart!')
+			},
 			toggleDeleteConfirmationModal() {
 				if (this.deleteModalIsOpen) {
 					this.deleteModalIsOpen = false
