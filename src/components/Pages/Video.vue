@@ -179,6 +179,17 @@
                 <button class="collaborators button" @click="toggleModalCollaborators()">
                     <i class="fa fa-users"></i><span>Collaborators</span>
                 </button>
+                <button class="collaborators button" @click="modalCanonChartIsOpen = true; canonAverageRating()"><i class="fa fa-line-chart"></i>Canon statistics</button>
+
+                <el-dialog :title="'Canon statistics'" :visible.sync="modalCanonChartIsOpen">
+                    <ve-histogram :data="chartData" :settings="chartSettings"></ve-histogram>
+                    <el-table :data="canonInfo" style="width: 100%">
+                        <el-table-column prop="canon" label="Canon" >
+                        </el-table-column>
+                        <el-table-column prop="annotationCount" label="Total # of annotations">
+                        </el-table-column>
+                    </el-table>
+                </el-dialog>
                 
                 <el-dialog :visible.sync="modalCollaboratorsIsOpen">
                     <span class="modal-collaborators" slot="title"><b>{{videos.title}} - Collaborators</b></span>
@@ -372,10 +383,41 @@
                 role: '',
                 currentRoute: '',
                 loadingInstance: null,
-                canonLoadingDone: false
+                canonLoadingDone: false,
+                // Chart
+                modalCanonChartIsOpen: false,
+				chartData: {
+					columns: ['canon', 'averageRating'],
+					rows: []
+                },
+                chartSettings: { min: [1, 5]}, 
+                canonInfo: [] // Helper array for v-chart array: chartData.rows[]
             }
         },
         methods: {
+            canonAverageRating() {
+                    this.canonInfo = [{ canon: '', sumRating: 0, annotationCount: 0 }]
+                    this.chartData.rows = []
+                    var found = false
+                    for (var i = 0; i < this.videoAnnotations.length; i++) {
+                        for (var j = 0; j < this.canonInfo.length; j++) {
+                            if (this.videoAnnotations[i].canon === this.canonInfo[j].canon) {
+                                found = true
+                                this.canonInfo[j].sumRating = this.canonInfo[j].sumRating + this.videoAnnotations[i].rating
+                                this.canonInfo[j].annotationCount++
+                            } 
+                        }
+                        if (found === false) {
+                            this.canonInfo.push({ canon: this.videoAnnotations[i].canon, sumRating: this.videoAnnotations[i].rating, annotationCount: 1 })
+                        }
+                        found = false
+                    }
+                    // Deletes first element because it is a helper element.
+                    this.canonInfo.splice(0,1)
+                    for (var i = 0; i < this.canonInfo.length; i++) {
+                        this.chartData.rows.push({ canon: this.canonInfo[i].canon, averageRating: this.canonInfo[i].sumRating / this.canonInfo[i].annotationCount, })
+                    }
+            },
             /**
              * The event that is fired, 
              * when a user clicks on annotate menu canons.
