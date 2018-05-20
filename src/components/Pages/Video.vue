@@ -395,46 +395,19 @@
             }
         },
         methods: {
-            canonAverageRating() {
-                    this.canonInfo = [{ canon: '', sumRating: 0, annotationCount: 0 }]
-                    this.chartData.rows = []
-                    var found = false
-                    for (var i = 0; i < this.videoAnnotations.length; i++) {
-                        for (var j = 0; j < this.canonInfo.length; j++) {
-                            if (this.videoAnnotations[i].canon === this.canonInfo[j].canon) {
-                                found = true
-                                this.canonInfo[j].sumRating = this.canonInfo[j].sumRating + this.videoAnnotations[i].rating
-                                this.canonInfo[j].annotationCount++
-                            } 
-                        }
-                        if (found === false) {
-                            this.canonInfo.push({ canon: this.videoAnnotations[i].canon, sumRating: this.videoAnnotations[i].rating, annotationCount: 1 })
-                        }
-                        found = false
-                    }
-                    // Deletes first element because it is a helper element.
-                    this.canonInfo.splice(0,1)
-                    for (var i = 0; i < this.canonInfo.length; i++) {
-                        this.chartData.rows.push({ canon: this.canonInfo[i].canon, averageRating: this.canonInfo[i].sumRating / this.canonInfo[i].annotationCount, })
-                    }
-            },
-            /**
-             * The event that is fired, 
-             * when a user clicks on annotate menu canons.
-             *
-             * @param {string} canon. The canon name "Structure", "Style", etc.
-             */
             chooseCanonAnnotate(canon) {
+                // The event that is fired, 
+                // when a user clicks on annotate menu canons.
+                // @param {string} canon. The canon name "Structure", "Style", etc.
+
                 this.annotateCanon = canon
                 console.log("chooseCanonAnnotate", canon)
             },
-            /**
-             * The event that is fired, 
-             * when a user clicks on annotate menu categories.
-             *
-             * @param {string} currentCategoryId. The category id that has been clicked.
-             */
             chooseCategoryAnnotate(currentCategoryId) {
+                // The event that is fired, 
+                // when a user clicks on annotate menu categories.
+                // @param {string} currentCategoryId. The category id that has been clicked.
+
                 this.annotateCategoryId = currentCategoryId
                 this.isAnnotateCanons = false
 
@@ -463,14 +436,12 @@
                 }
 
             },
-            /**
-             * The event that is fired, 
-             * when a user clicks on annotate menu subcategories.
-             * This applies on some of the canons, such as "Invention".
-             *
-             * @param {string} currectSubcategoryId. The subcategory id that has been clicked.
-             */
             chooseSubcategoryAnnotate(currectSubcategoryId) {
+                // The event that is fired, 
+                // when a user clicks on annotate menu subcategories.
+                // This applies on some of the canons, such as "Invention".
+                // @param {string} currectSubcategoryId. The subcategory id that has been clicked.
+
                 this.annotateSubcategoryId = currectSubcategoryId
 
                 // Fills the current subcategory object.
@@ -1255,6 +1226,30 @@
                 .then(function() {
                     self.loadingCollaborators = false
                 })
+            },
+            canonAverageRating() {
+                // This function calculates the average rating of annotations of this video.
+                this.canonInfo = [{ canon: '', sumRating: 0, annotationCount: 0 }]
+                this.chartData.rows = []
+                var found = false
+                for (var i = 0; i < this.videoAnnotations.length; i++) {
+                    for (var j = 0; j < this.canonInfo.length; j++) {
+                        if (this.videoAnnotations[i].canon === this.canonInfo[j].canon) {
+                            found = true
+                            this.canonInfo[j].sumRating = this.canonInfo[j].sumRating + this.videoAnnotations[i].rating
+                            this.canonInfo[j].annotationCount++
+                        } 
+                    }
+                    if (found === false) {
+                        this.canonInfo.push({ canon: this.videoAnnotations[i].canon, sumRating: this.videoAnnotations[i].rating, annotationCount: 1 })
+                    }
+                    found = false
+                }
+                // Deletes first element because it is a helper element.
+                this.canonInfo.splice(0,1)
+                for (var i = 0; i < this.canonInfo.length; i++) {
+                    this.chartData.rows.push({ canon: this.canonInfo[i].canon, averageRating: this.canonInfo[i].sumRating / this.canonInfo[i].annotationCount, })
+                }
             },
             goHome() {
                 this.$router.push('/' + this.role)

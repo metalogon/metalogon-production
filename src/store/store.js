@@ -160,7 +160,6 @@ export const store = new Vuex.Store({
             return secureHTTPService.get("viewannotation?videoId=" + payload)
             .then(function (response)
             {
-                // console.log(response.data.data)
                 commit( 'GET_VIDEO_ANNOTATIONS', response.data.data )
                 state.videoAnnotations.sort(function(a,b) {return (a.from > b.from) ? 1 : ((b.from > a.from) ? -1 : 0);} );
             })

@@ -18,7 +18,7 @@
 					<p class="classvideo__genre">{{ secondsToMMSS(currentVideo.duration) }} / {{ genreName }} </p>
 				</div>
 				<div class="classvideo__metameta">
-					<span class="classvideo__score" @click.stop.prevent @click="modalCanonChartIsOpen = true">
+					<span class="classvideo__score" @click.stop.prevent @click="openModalCanonChart()">
 						<!--  -->
 						<p class="classvideo__scoreNum">{{ ratingAverage.toFixed(1) }}</p>
 						<p class="classvideo__scoreLabel">Effectiveness</p>
@@ -30,8 +30,16 @@
 				</div>
 		</router-link>
 
-		<el-dialog :title="'Canon statistics'" :visible.sync="modalCanonChartIsOpen">
-			  <ve-histogram :data="chartData"></ve-histogram>
+		<!-- Canon statistics modal -->
+		<el-dialog :title="currentVideo.title" :visible.sync="modalCanonChartIsOpen">
+			<img :src="currentVideo.thumb" width="80%">
+			<ve-histogram :data="chartData" :settings="chartSettings"></ve-histogram>
+			<el-table :data="canonInfo" style="width: 100%">
+				<el-table-column prop="canon" label="Canon" >
+				</el-table-column>
+				<el-table-column prop="annotationCount" label="Total # of annotations">
+				</el-table-column>
+			</el-table>
 		</el-dialog>
 
 		<!-- Delete video confirmation -->
@@ -58,22 +66,51 @@
 				deleteModalIsOpen: false,
 				modalCanonChartIsOpen: false,
 				chartData: {
-					columns: ['canon', 'grade'],
-					rows: [
-						{ 'canon': 'Invention', 'grade': 4.3 },
-						{ 'canon': 'Structure', 'grade': 5.0 },
-						{ 'canon': 'Delivery', 'grade': 4.9 },
-						{ 'canon': 'Visuals', 'grade': 4.5 },
-						{ 'canon': 'Style', 'grade': 4.5 }
-					]
-				},
-				charchartSettings: {}
+					columns: ['canon', 'averageRating'],
+					rows: []
+                },
+                chartSettings: { min: [1, 5] }, 
+                canonInfo: [] // Helper array for v-chart array: chartData.rows[]
 			}
 		},
 		methods: {
-			showCanonChart() {
-				console.log('show chart!')
+			openModalCanonChart() {
+				var self = this
+				this.modalCanonChartIsOpen = true
+
+				this.secureHTTPService.get("viewannotation?videoId=" + this.currentVideo.id)
+					.then(function (response)
+					{
+						var annotations = response.data.data
+						self.canonAverageRating(annotations)
+					})
+					.catch(function (err) {
+						console.log('GET /annotation error: ', err)
+					})
 			},
+			canonAverageRating(annotations) {
+				this.canonInfo = [{ canon: '', sumRating: 0, annotationCount: 0 }]
+				this.chartData.rows = []
+				var found = false
+				for (var i = 0; i < annotations.length; i++) {
+					for (var j = 0; j < this.canonInfo.length; j++) {
+						if (annotations[i].canon === this.canonInfo[j].canon) {
+							found = true
+							this.canonInfo[j].sumRating = this.canonInfo[j].sumRating + annotations[i].rating
+							this.canonInfo[j].annotationCount++
+						} 
+					}
+					if (found === false) {
+						this.canonInfo.push({ canon: annotations[i].canon, sumRating: annotations[i].rating, annotationCount: 1 })
+					}
+					found = false
+				}
+				// Deletes first element because it is a helper element.
+				this.canonInfo.splice(0,1)
+				for (var i = 0; i < this.canonInfo.length; i++) {
+					this.chartData.rows.push({ canon: this.canonInfo[i].canon, averageRating: this.canonInfo[i].sumRating / this.canonInfo[i].annotationCount, })
+				}
+            },
 			toggleDeleteConfirmationModal() {
 				if (this.deleteModalIsOpen) {
 					this.deleteModalIsOpen = false
