@@ -235,7 +235,7 @@
             <div class="cards column is-4">
                 <div class="cards-content" v-if="canonLoadingDone">
                     <nav class="card-menu">
-                        <a style="display:flex;flex-direction:column;justify-content:center;margin:5px;color:#4a4a4a;"><i class="fa fa-graduation-cap" style="text-align:center;"></i><span style="font-size:10px;margin-top:-3px;">Professor only</span></a>
+                        <!-- <a style="display:flex;flex-direction:column;justify-content:center;margin:5px;color:#4a4a4a;"><i class="fa fa-graduation-cap" style="text-align:center;"></i><span style="font-size:10px;margin-top:-3px;">Professor only</span></a> -->
                         <a class="card-menu__item" :class="canon.name" v-for="canon in canons" :key="canon.name"  @click="chooseCanonFilter($event, canon.name)" >
                             <i class="card-menu__icon fa fa_1x" style="margin-top:20px;" :class="{ 'fa-pencil-square-o': (canon.name === 'Invention'), 'fa-book': (canon.name === 'Structure'), 'fa-commenting': (canon.name === 'Delivery'), 'fa-eye': (canon.name === 'Visuals'), 'fa-diamond': (canon.name === 'Style') }"></i>
                             <span class="card-menu__title">{{ canon.name }}</span>
