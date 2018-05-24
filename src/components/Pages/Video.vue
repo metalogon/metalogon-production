@@ -179,6 +179,17 @@
                 <button class="collaborators button" @click="toggleModalCollaborators()">
                     <i class="fa fa-users"></i><span>Collaborators</span>
                 </button>
+                <button class="collaborators button" @click="modalCanonChartIsOpen = true; canonAverageRating()"><i class="fa fa-line-chart"></i>Canon statistics</button>
+
+                <el-dialog :title="'Canon statistics'" :visible.sync="modalCanonChartIsOpen">
+                    <ve-histogram :data="chartData" :settings="chartSettings"></ve-histogram>
+                    <el-table :data="canonInfo" style="width: 100%">
+                        <el-table-column prop="canon" label="Canon" >
+                        </el-table-column>
+                        <el-table-column prop="annotationCount" label="Total # of annotations">
+                        </el-table-column>
+                    </el-table>
+                </el-dialog>
                 
                 <el-dialog :visible.sync="modalCollaboratorsIsOpen">
                     <span class="modal-collaborators" slot="title"><b>{{videos.title}} - Collaborators</b></span>
@@ -224,7 +235,7 @@
             <div class="cards column is-4">
                 <div class="cards-content" v-if="canonLoadingDone">
                     <nav class="card-menu">
-                        <a style="display:flex;flex-direction:column;justify-content:center;margin:5px;color:#4a4a4a;"><i class="fa fa-graduation-cap" style="text-align:center;"></i><span style="font-size:10px;margin-top:-3px;">Professor only</span></a>
+                        <!-- <a style="display:flex;flex-direction:column;justify-content:center;margin:5px;color:#4a4a4a;"><i class="fa fa-graduation-cap" style="text-align:center;"></i><span style="font-size:10px;margin-top:-3px;">Professor only</span></a> -->
                         <a class="card-menu__item" :class="canon.name" v-for="canon in canons" :key="canon.name"  @click="chooseCanonFilter($event, canon.name)" >
                             <i class="card-menu__icon fa fa_1x" style="margin-top:20px;" :class="{ 'fa-pencil-square-o': (canon.name === 'Invention'), 'fa-book': (canon.name === 'Structure'), 'fa-commenting': (canon.name === 'Delivery'), 'fa-eye': (canon.name === 'Visuals'), 'fa-diamond': (canon.name === 'Style') }"></i>
                             <span class="card-menu__title">{{ canon.name }}</span>
@@ -372,27 +383,31 @@
                 role: '',
                 currentRoute: '',
                 loadingInstance: null,
-                canonLoadingDone: false
+                canonLoadingDone: false,
+                // Chart
+                modalCanonChartIsOpen: false,
+				chartData: {
+					columns: ['canon', 'averageRating'],
+					rows: []
+                },
+                chartSettings: { min: [1, 5]}, 
+                canonInfo: [] // Helper array for v-chart array: chartData.rows[]
             }
         },
         methods: {
-            /**
-             * The event that is fired, 
-             * when a user clicks on annotate menu canons.
-             *
-             * @param {string} canon. The canon name "Structure", "Style", etc.
-             */
             chooseCanonAnnotate(canon) {
+                // The event that is fired, 
+                // when a user clicks on annotate menu canons.
+                // @param {string} canon. The canon name "Structure", "Style", etc.
+
                 this.annotateCanon = canon
                 console.log("chooseCanonAnnotate", canon)
             },
-            /**
-             * The event that is fired, 
-             * when a user clicks on annotate menu categories.
-             *
-             * @param {string} currentCategoryId. The category id that has been clicked.
-             */
             chooseCategoryAnnotate(currentCategoryId) {
+                // The event that is fired, 
+                // when a user clicks on annotate menu categories.
+                // @param {string} currentCategoryId. The category id that has been clicked.
+
                 this.annotateCategoryId = currentCategoryId
                 this.isAnnotateCanons = false
 
@@ -421,14 +436,12 @@
                 }
 
             },
-            /**
-             * The event that is fired, 
-             * when a user clicks on annotate menu subcategories.
-             * This applies on some of the canons, such as "Invention".
-             *
-             * @param {string} currectSubcategoryId. The subcategory id that has been clicked.
-             */
             chooseSubcategoryAnnotate(currectSubcategoryId) {
+                // The event that is fired, 
+                // when a user clicks on annotate menu subcategories.
+                // This applies on some of the canons, such as "Invention".
+                // @param {string} currectSubcategoryId. The subcategory id that has been clicked.
+
                 this.annotateSubcategoryId = currectSubcategoryId
 
                 // Fills the current subcategory object.
@@ -1213,6 +1226,30 @@
                 .then(function() {
                     self.loadingCollaborators = false
                 })
+            },
+            canonAverageRating() {
+                // This function calculates the average rating of annotations of this video.
+                this.canonInfo = [{ canon: '', sumRating: 0, annotationCount: 0 }]
+                this.chartData.rows = []
+                var found = false
+                for (var i = 0; i < this.videoAnnotations.length; i++) {
+                    for (var j = 0; j < this.canonInfo.length; j++) {
+                        if (this.videoAnnotations[i].canon === this.canonInfo[j].canon) {
+                            found = true
+                            this.canonInfo[j].sumRating = this.canonInfo[j].sumRating + this.videoAnnotations[i].rating
+                            this.canonInfo[j].annotationCount++
+                        } 
+                    }
+                    if (found === false) {
+                        this.canonInfo.push({ canon: this.videoAnnotations[i].canon, sumRating: this.videoAnnotations[i].rating, annotationCount: 1 })
+                    }
+                    found = false
+                }
+                // Deletes first element because it is a helper element.
+                this.canonInfo.splice(0,1)
+                for (var i = 0; i < this.canonInfo.length; i++) {
+                    this.chartData.rows.push({ canon: this.canonInfo[i].canon, averageRating: this.canonInfo[i].sumRating / this.canonInfo[i].annotationCount, })
+                }
             },
             goHome() {
                 this.$router.push('/' + this.role)
