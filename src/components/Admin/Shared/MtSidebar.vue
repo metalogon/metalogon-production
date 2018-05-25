@@ -194,52 +194,58 @@
 					element-loading-background="rgba(0, 0, 0, 0.8)"></div>
                 <el-tabs v-show="!!currentClass.id && !loadingAssignments">
                     <el-tab-pane v-for="a in assignments" :key="a.id" :label="a.title">
-						<div class="assignments-content">
-							<span class="assignments__title">
-								<strong>Title:</strong>
-								<span class="assignments__titleId">{{ a.id }}</span>
-								<!-- Editing functionality for admin/professor -->
-								<p class="assignments__titleText" v-if="role === 'administrator' || role === 'professor'" @click="toggleTitleEdit($event)">{{ a.title }}</p>
-								<textarea class="input assignments__titleInput" v-if="role === 'administrator' || role === 'professor'" v-model="a.title" @blur="saveTitleEdit($event, a.id)" type="text"></textarea>
-								<!-- Simple viewing for student -->
-								<p class="assignments__titleText_noEdit" v-if="role === 'student'">{{ a.title }}</p>
-							</span>
-							<hr>
-							<span class="assignments__desc">
-								<strong class="assignments__descTitle">Description:</strong>
-								<span class="assignments__descId">{{ a.id }}</span>
-								<!-- Editing functionality for admin/professor -->
-								<p class="assignments__descText" v-if="role === 'administrator' || role === 'professor'" @click="toggleDescriptionEdit($event)">{{ a.description }}</p>
-								<textarea class="textarea assignments__descTextarea" v-if="role === 'administrator' || role === 'professor'" v-model="a.description" @blur="saveDescriptionEdit($event, a.id)" type="text"></textarea>
-								<!-- Simple viewing for student -->
-								<p class="assignments__titleText_noEdit" v-if="role === 'student'">{{ a.description }}</p>
-							</span>
-							<hr>
-							<span class="assignments__genre" v-for="g in genres" v-if="g.id === a.genre" :key="g.id">
-								<strong class="assignments__genreTitle">Genre:</strong> 
-								<span class="assignments__genreId">{{ a.id }}</span>
-								<!-- Editing functionality for admin/professor -->
-								<p class="assignments__genreName" v-if="role === 'administrator' || role === 'professor'" @click="toggleGenreEdit($event)">{{ g.name }}</p>
-								<select class="assignments__genreSelect select" v-if="role === 'administrator' || role === 'professor'" v-model="a.genre" @change="saveGenreEdit($event, a.id)">
-									<option v-for="g in genres" :label="g.name" :value="g.id" :key="g.id" class="option"></option>
-								</select>
-								<!-- Simple viewing for student -->
-								<p class="assignments__genreName__noEdit" v-if="role === 'student'">{{ g.name }}</p>
-							</span>
-							<hr>
-							<span class="assignments__dueDate">
-								<strong class="assignments__dueDateTitle">Due date:</strong>
-								<span class="assignments__dueDateId">{{ a.id }}</span>
-								<p>
-									<!-- Editing functionality for admin/professor -->
-									<el-date-picker type="date" placeholder="Pick a date" v-if="role === 'administrator' || role === 'professor'" v-model="a.dueDate" @change="saveDueDateEdit($event, a.id)"></el-date-picker>
-									<!-- Simple viewing for student -->
-									<el-date-picker type="date" placeholder="Pick a date" v-if="role === 'student'" v-model="a.dueDate" :readonly="true"></el-date-picker>
-								</p>
-							</span>
-							<hr>
-							<mt-video-itemlist v-for="v in videos" v-bind:key="v.id" :currentVideo="v" v-if="v.assignmentId === a.id"></mt-video-itemlist>
-						</div>
+                		<el-tabs v-show="!!currentClass.id && !loadingAssignments">
+							<el-tab-pane label="General">
+								<div class="assignments-content">
+									<span class="assignments__title">
+										<strong>Title:</strong>
+										<span class="assignments__titleId">{{ a.id }}</span>
+										<!-- Editing functionality for admin/professor -->
+										<p class="assignments__titleText" v-if="role === 'administrator' || role === 'professor'" @click="toggleTitleEdit($event)">{{ a.title }}</p>
+										<textarea class="input assignments__titleInput" v-if="role === 'administrator' || role === 'professor'" v-model="a.title" @blur="saveTitleEdit($event, a.id)" type="text"></textarea>
+										<!-- Simple viewing for student -->
+										<p class="assignments__titleText_noEdit" v-if="role === 'student'">{{ a.title }}</p>
+									</span>
+									<hr>
+									<span class="assignments__desc">
+										<strong class="assignments__descTitle">Description:</strong>
+										<span class="assignments__descId">{{ a.id }}</span>
+										<!-- Editing functionality for admin/professor -->
+										<p class="assignments__descText" v-if="role === 'administrator' || role === 'professor'" @click="toggleDescriptionEdit($event)">{{ a.description }}</p>
+										<textarea class="textarea assignments__descTextarea" v-if="role === 'administrator' || role === 'professor'" v-model="a.description" @blur="saveDescriptionEdit($event, a.id)" type="text"></textarea>
+										<!-- Simple viewing for student -->
+										<p class="assignments__titleText_noEdit" v-if="role === 'student'">{{ a.description }}</p>
+									</span>
+									<hr>
+									<span class="assignments__genre" v-for="g in genres" v-if="g.id === a.genre" :key="g.id">
+										<strong class="assignments__genreTitle">Genre:</strong> 
+										<span class="assignments__genreId">{{ a.id }}</span>
+										<!-- Editing functionality for admin/professor -->
+										<p class="assignments__genreName" v-if="role === 'administrator' || role === 'professor'" @click="toggleGenreEdit($event)">{{ g.name }}</p>
+										<select class="assignments__genreSelect select" v-if="role === 'administrator' || role === 'professor'" v-model="a.genre" @change="saveGenreEdit($event, a.id)">
+											<option v-for="g in genres" :label="g.name" :value="g.id" :key="g.id" class="option"></option>
+										</select>
+										<!-- Simple viewing for student -->
+										<p class="assignments__genreName__noEdit" v-if="role === 'student'">{{ g.name }}</p>
+									</span>
+									<hr>
+									<span class="assignments__dueDate">
+										<strong class="assignments__dueDateTitle">Due date:</strong>
+										<span class="assignments__dueDateId">{{ a.id }}</span>
+										<p>
+											<!-- Editing functionality for admin/professor -->
+											<el-date-picker type="date" placeholder="Pick a date" v-if="role === 'administrator' || role === 'professor'" v-model="a.dueDate" @change="saveDueDateEdit($event, a.id)"></el-date-picker>
+											<!-- Simple viewing for student -->
+											<el-date-picker type="date" placeholder="Pick a date" v-if="role === 'student'" v-model="a.dueDate" :readonly="true"></el-date-picker>
+										</p>
+									</span>
+								</div>
+							</el-tab-pane>
+							<el-tab-pane label="Submissions">
+								<mt-video-itemlist v-for="v in videos" v-bind:key="v.id" :currentVideo="v" v-if="v.assignmentId === a.id" :enableStatistics="false"></mt-video-itemlist>
+							</el-tab-pane>
+                		</el-tabs>
+						
                     </el-tab-pane>
 					<el-tab-pane v-if="role === 'administrator' || role === 'professor'" label="+ Add assignment">
 						<el-input v-model="assignmentTitle" placeholder="Set a title" style="width:70%;margin-bottom:15px;"></el-input>
