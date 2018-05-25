@@ -17,24 +17,41 @@ export default {
             return {} 
         }
     },
-    get(uri, qs, params) {
-        return this.request("get", uri, qs, params)
+    // get(uri, qs, params) {
+    //     return this.request("get", uri, qs, params)
+    // },
+    // put(uri, qs, params) {
+    //     return this.request("put", uri, qs, params)
+    // },
+    // post(uri, qs, params) {
+    //     return this.request("post", uri, qs, params)
+    // },
+    // delete(uri, qs, params) {
+    //     return this.request("delete", uri, qs, params)
+    // },
+    get(uri, data) {
+        return this.request("get", uri, data)
     },
-    put(uri, qs, params) {
-        return this.request("put", uri, qs, params)
+    put(uri, data) {
+        return this.request("put", uri, data)
     },
-    post(uri, qs, params) {
-        return this.request("post", uri, qs, params)
+    post(uri, data) {
+        return this.request("post", uri, data)
     },
-    delete(uri, qs, params) {
-        return this.request("delete", uri, qs, params)
+    delete(uri, data) {
+        return this.request("delete", uri, data)
     },
-    request(Method, uri, qs, Params) {
+    request(method, uri, data) {
+        // const options = {
+        //     Method: Method || "GET",
+        //     uri: uri || "",
+        //     qs: qs,
+        //     Params: Params
+        // }
         const options = {
-            Method: Method || "GET",
+            method: method || "GET",
             uri: uri || "",
-            qs: qs,
-            Params: Params
+            data: data || {}
         }
         // options.uri = uri | "";
         // console.log("Options:", options)
@@ -46,7 +63,8 @@ export default {
         var self = this
         return new Promise(function (resolve, reject) {
             // axios[method](URL + "/" + uri, qs, params,self.getHeaders())
-            axios({ method: options.Method, url: URL + "/" + options.uri, headers: self.getHeaders(), data: options.qs, params: options.Params })
+            // axios({ method: options.Method, url: URL + "/" + options.uri, headers: self.getHeaders(), data: options.qs, params: options.Params })
+            axios({ method: options.method, url: URL + "/" + options.uri, headers: self.getHeaders(), data: options.data})
                 .then(function (response) {
                     // See https://en.wikipedia.org/wiki/List_of_HTTP_status_codes for more status codes
                     // console.log("Resolved.")
