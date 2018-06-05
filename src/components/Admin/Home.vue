@@ -28,7 +28,7 @@
 				<div class="home__classvideos" v-show="!(currentClass.name === 'Home')">
 					<h3 class="class__heading"> {{ currentClass.number }} - {{ currentClass.name }}
 					</h3>
-					<mt-video-itemlist v-for="v in videos" v-bind:key="v.id" :currentVideo="v" v-if="v.class === currentClass.name"></mt-video-itemlist>
+					<mt-video-itemlist v-for="v in videos" v-bind:key="v.id" :currentVideo="v" v-if="v.class === currentClass.name" :enableStatistics="true"></mt-video-itemlist>
 				</div>
 
 				<upload-video :currentClassProp="currentClass.name" v-show="currentClass.name !== 'Home'"></upload-video>

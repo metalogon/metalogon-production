@@ -18,7 +18,11 @@
 					<p class="classvideo__genre">{{ secondsToMMSS(currentVideo.duration) }} / {{ genreName }} </p>
 				</div>
 				<div class="classvideo__metameta">
-					<span class="classvideo__score" @click.stop.prevent @click="openModalCanonChart()">
+					<span v-if="enableStatistics" class="classvideo__score" @click.stop.prevent @click="openModalCanonChart()">
+						<p class="classvideo__scoreNum">{{ ratingAverage.toFixed(1) }}</p>
+						<p class="classvideo__scoreLabel">Effectiveness</p>
+					</span>
+					<span v-if="!enableStatistics" class="classvideo__scoreNoHover">
 						<p class="classvideo__scoreNum">{{ ratingAverage.toFixed(1) }}</p>
 						<p class="classvideo__scoreLabel">Effectiveness</p>
 					</span>
@@ -61,7 +65,7 @@
     import { mapMutations } from 'vuex'
     
     export default {
-		props: ['currentVideo'],
+		props: ['currentVideo', 'enableStatistics'],
 		data() {
 			return {
 				role: this.$root.$options.authService.getAuthData().role,
@@ -368,7 +372,30 @@
 									text-align: center;
 									height: 50%;
 								}
-
+						.classvideo__scoreNoHover {
+							background-color:#89a9c0; 
+							color: #fff;
+							padding: 0px 8px;
+							display: flex;
+							flex-direction: column;
+							justify-content: center;
+							border-radius: 4px;
+							margin-top: 10px;
+							cursor: help;
+						}
+								.classvideo__scoreNoHoverNum {
+									font-weight: 600;
+									font-size: 1.8em;
+									height: 50%;
+									margin-top: 10px;
+									text-align: center;
+								}
+								.classvideo__scoreNoHoverLabel {
+									font-size: 0.8em;
+									text-align: center;
+									height: 50%;
+								}
+							
 						.classvideo__annotations {
 							margin-top: 10px;
 							margin-left: 10px;
