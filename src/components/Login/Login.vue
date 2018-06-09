@@ -17,6 +17,7 @@
             <input class="login-form__username" type="text" placeholder="First name" v-model="firstName"/>
             <input class="login-form__username" type="text" placeholder="Last name" v-model="lastName"/>
             <input class="login-form__username" type="text" placeholder="E-mail address" v-model="newEmail"/>
+            <input class="login-form__username" type="text" placeholder="Repeat e-mail address" v-model="repeatedNewEmail"/>
             <input class="login-form__password" type="password" placeholder="Password" v-model="newPassword"/>
             <input class="login-form__password" type="password" placeholder="Repeat Password" v-model="repeatedPassword"/>
             <button type="submit">CREATE ACCOUNT</button>
@@ -30,7 +31,7 @@
             <input class="login-form__password" type="password" placeholder="Password" v-model="newPassword"/>
             <input class="login-form__password" type="password" placeholder="Repeat Password" v-model="repeatedPassword"/>
             <input class="login-form__username" type="text" placeholder="Invitation code" v-model="invitationCode"/>
-            <button type="submit">GET INVITE</button>
+            <button type="submit">CREATE ACCOUNT</button>
             <p class="login-form__switchform">Already registered? <a class="login-form__switchform-link" @click="showLoginForm()">Sign In</a></p>
           </form>
 
@@ -51,6 +52,7 @@ export default {
           firstName: '',
           lastName: '',
           newEmail: '',
+          repeatedNewEmail: '',
           newPassword: '',
           repeatedPassword: '',
           // Login
@@ -86,6 +88,9 @@ export default {
           else if (this.newPassword != this.repeatedPassword) {
             alert("Please repeat password correctly.")
           }
+          else if (this.newEmail != this.repeatedNewEmail) {
+            alert("Please repeat e-mail address correctly.")
+          }
           else {
             var capitalizedFirstName = this.firstName[0].toUpperCase() + this.firstName.slice(1).toLowerCase()
             var capitalizedLastName = this.lastName[0].toUpperCase() + this.lastName.slice(1).toLowerCase()
@@ -97,12 +102,17 @@ export default {
               "password" : this.newPassword,
               "role" : ""
             }
+            var self = this
             this.secureHTTPService.post("user", body)
-            // TODO add a .then here and continue to this.email = .. and this.showLogin
-            // only if then is ran, else got to catch (or something) and show post error
-            // TODO front show some "successful" screen
-            this.email = this.newEmail
-            this.showLoginForm()
+            .then(function(){
+              self.email = self.newEmail
+              self.showLoginForm()
+              alert("Account created successfully.")
+            })
+            .catch(function(err){
+              console.log("Error while posting new user: ", err)
+              alert("Something went wrong.")
+            })
           }
         },
         invitationUser() {
@@ -119,15 +129,16 @@ export default {
               "lastName" : this.lastName,
               "password" : this.newPassword
             }
+            var self = this
             this.secureHTTPService.post("user?invitation=" + this.invitationCode, body)
             .then(function(){
-              alert("Post invitation successful.")
+              self.showLoginForm()
+              alert("Account created successfully.")
             })
             .catch(function(err){
-              console.log(err)
+              console.log("Error while posting new user via invitation code: ", err)
+              alert("Something went wrong.")
             })
-            //TODO create appropriate feedback with .then and .catch
-            this.showLoginForm()
           }
         },
         showRegisterForm() {

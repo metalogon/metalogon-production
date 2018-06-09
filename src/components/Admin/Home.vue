@@ -28,7 +28,7 @@
 				<div class="home__classvideos" v-show="!(currentClass.name === 'Home')">
 					<h3 class="class__heading"> {{ currentClass.number }} - {{ currentClass.name }}
 					</h3>
-					<mt-video-itemlist v-for="v in videos" v-bind:key="v.id" :currentVideo="v" v-if="v.class === currentClass.name"></mt-video-itemlist>
+					<mt-video-itemlist v-for="v in videos" v-bind:key="v.id" :currentVideo="v" v-if="v.class === currentClass.name" :enableStatistics="true"></mt-video-itemlist>
 				</div>
 
 				<upload-video :currentClassProp="currentClass.name" v-show="currentClass.name !== 'Home'"></upload-video>
@@ -276,114 +276,9 @@
 				border-radius: 7px;
 			}
 
-			.classvideo {
-				display: flex;
-				padding: 17px 10px;
-				border-bottom: 1px solid #efefef;
-			} 
-			.classvideo:hover	{
-				background-color: #F5F5F5;
-			}
 
-				.classvideo__favorite {
-					width: 30px;
-					height: 60px;
-				}
 
-				.classvideo__delete {
-					/* KOSTAS */
-					margin-top: 0;
-					padding-top: 0;
-					margin-bottom: 3px;
-					font-size:12px;
-					height: 60px;
-					margin-left: 10px;
-				}
-				.classvideo__metadata {
-					display: flex;
-					justify-content: space-between;
-					margin-left: 20px;
-					width: 100%;
-					/* KOSTAS */
-					text-decoration: none; 
-					color: black; 
-				}
 
-					.classvideo__image {
-						display: flex;
-						width: 200px;
-						height: 60px;
-					}
-
-					.classvideo__titles {
-						width: 100%;
-						margin-left: 15px;
-					}
-							.classvideo__title {
-								color: #4a4a4a;
-								font-weight: 600;
-								font-size: 18px;
-							}
-							.classvideo__class {
-								margin-top: 6px;
-								font-size: 14px;
-							}
-							.classvideo__genre {
-								margin-top: -4px;
-								font-size: 14px;
-							}
-
-					.classvideo__metameta {
-						display: flex;
-						margin-left: 15px;
-					}
-
-						.classvideo__score {
-							background-color:#89a9c0; 
-							color: #fff;
-							padding: 0px 8px;
-							display: flex;
-							flex-direction: column;
-							justify-content: center;
-							border-radius: 4px;
-							margin-top: 10px;
-						}
-								.classvideo__scoreNum {
-									font-weight: 600;
-									font-size: 1.8em;
-									height: 50%;
-									margin-top: 10px;
-									text-align: center;
-								}
-								.classvideo__scoreLabel {
-									font-size: 0.8em;
-									text-align: center;
-									height: 50%;
-								}
-
-						.classvideo__annotations {
-							margin-top: 10px;
-							margin-left: 10px;
-							background-color:#89a9c0; 
-							color: #fff;
-							padding: 0px 8px;
-							display: flex;
-							flex-direction: column;
-							justify-content: center;
-							border-radius: 4px;
-						}
-								.classvideo__annotationsNum {
-									font-weight: 600;
-									font-size: 1.8em;
-									text-align: center;
-									height: 50%;
-									margin-top: 10px;
-								}
-								.classvideo__annotationsLabel {
-									font-size: 0.8em;
-									text-align: center;
-									height: 50%;
-								}
 
 	/* ==============================================
 									#ANNOTATION-BADGE
