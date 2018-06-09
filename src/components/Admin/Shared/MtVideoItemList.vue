@@ -43,7 +43,7 @@
 					element-loading-text="Loading..." 
 					element-loading-spinner="el-icon-loading"
 					element-loading-background="rgba(0, 0, 0, 0.8)"><br><br><br><br><br></div>
-			<ve-histogram v-if="!loadingModalCanonChart" :data="chartData" :extend="chartExtend" :settings="chartSettings"></ve-histogram>
+			<ve-histogram v-if="!loadingModalCanonChart && canonInfo.length !== 0" :data="chartData" :extend="chartExtend" :settings="chartSettings"></ve-histogram>
 			<el-table v-if="!loadingModalCanonChart" :data="canonInfo" style="width: 100%">
 				<el-table-column prop="canon" label="Canon" >
 				</el-table-column>
@@ -103,15 +103,15 @@
 					})
 
 			},
-			// TODO
 			canonAverageRating(annotations) {
 				this.canonInfo = []
 				this.chartData.rows = []
 				var found = false
+
+				// Fills the canonInfo helper array with objects.
 				for (var i = 0; i < annotations.length; i++) {
 					for (var j = 0; j < this.canonInfo.length; j++) {
 						if (annotations[i].canon === this.canonInfo[j].canon) {
-							console.log(annotations[i].canon)
 							found = true
 							this.canonInfo[j].sumRating = this.canonInfo[j].sumRating + annotations[i].rating
 							this.canonInfo[j].annotationCount++
@@ -122,25 +122,21 @@
 					}
 					found = false
 				}
-				for (var i = 0; i < this.canonInfo.length; i++) {
-					this.chartData.rows.push({ canon: this.canonInfo[i].canon, averageRating: this.canonInfo[i].sumRating / this.canonInfo[i].annotationCount })
-				}
 				
-				// Order the chartData.rows array by canon name.
+				// Orders the chartData.rows array by canon name.
 				const CANON_ORDER = ['Invention', 'Structure', 'Delivery', 'Visuals', 'Style']
-				const newChartDataOrder = []
 				for (var i = 0; i < CANON_ORDER.length; i++) {
-					for (var j = 0; j < this.chartData.rows.length; j++) {
-						if (this.chartData.rows[j].canon === CANON_ORDER[i]) {
-							newChartDataOrder.push(this.chartData.rows[j])
+					for (var j = 0; j < this.canonInfo.length; j++) {
+						if (this.canonInfo[j].canon === CANON_ORDER[i]) {
+							 // We move an object by its canon name. The arrangement is determined by the CANON_ORDER array.
+							this.moveArrayItemByIndex(this.canonInfo, j, i)
 						}
 					}
 				}
 
-				// this.chartData.rows = []
-				// for (var i = 0; i < newChartDataOrder.length; i++) {
-				// 	this.chartData.rows.push(newChartDataOrder[i])
-				// }
+				for (var i = 0; i < this.canonInfo.length; i++) {
+					this.chartData.rows.push({ canon: this.canonInfo[i].canon, averageRating: this.canonInfo[i].sumRating / this.canonInfo[i].annotationCount })
+				}
 
 				// Fills the bars with the desired colors.
 				const CANONS_COLOR_LIST = []
@@ -162,6 +158,11 @@
 				}
 
             },
+			moveArrayItemByIndex(array, from, to) {
+				// Helper function for canonAverageRating() function.
+				// Moves an array item by index.
+				array.splice(to, 0, array.splice(from, 1)[0])
+			},
 			toggleDeleteConfirmationModal() {
 				if (this.deleteModalIsOpen) {
 					this.deleteModalIsOpen = false
