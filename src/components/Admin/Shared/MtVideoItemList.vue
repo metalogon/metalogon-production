@@ -36,8 +36,15 @@
 		<!-- Canon statistics modal -->
 		<el-dialog :title="currentVideo.title" :visible.sync="modalCanonChartIsOpen">
 			<!-- <img :src="currentVideo.thumb" width="60%"> -->
-			<ve-histogram :data="chartData" :extend="chartExtend" :settings="chartSettings"></ve-histogram>
-			<el-table :data="canonInfo" style="width: 100%">
+			<!-- Loading -->
+				<div class="uploadvid__sync-load" 
+					v-loading="loadingModalCanonChart" 
+					v-show="loadingModalCanonChart"
+					element-loading-text="Loading..." 
+					element-loading-spinner="el-icon-loading"
+					element-loading-background="rgba(0, 0, 0, 0.8)"><br><br><br><br><br></div>
+			<ve-histogram v-if="!loadingModalCanonChart && canonInfo.length !== 0" :data="chartData" :extend="chartExtend" :settings="chartSettings"></ve-histogram>
+			<el-table v-if="!loadingModalCanonChart" :data="canonInfo" style="width: 100%">
 				<el-table-column prop="canon" label="Canon" >
 				</el-table-column>
 				<el-table-column prop="annotationCount" label="Total # of annotations">
@@ -77,19 +84,22 @@
 					min: [0],
 					max: [5]
 				},
-				chartExtend: {},
-                canonInfo: [] // Helper array for v-chart array: chartData.rows[]
+				chartExtend: { series: {} },
+				canonInfo: [], // Helper array for v-chart array: chartData.rows[]
+				loadingModalCanonChart: false
 			}
 		},
 		methods: {
 			openModalCanonChart() {
 				var self = this
 				this.modalCanonChartIsOpen = true
+				this.loadingModalCanonChart = true
 
 				this.$store.dispatch('getVideoAnnotations', this.currentVideo.id)
 					.then(function ()
 					{
-						self.canonAverageRating(self.videoAnnotations)
+						self.loadingModalCanonChart = false
+						self.canonAverageRating(self.videoAnnotations)						
 					})
 
 			},
@@ -97,6 +107,8 @@
 				this.canonInfo = []
 				this.chartData.rows = []
 				var found = false
+
+				// Fills the canonInfo helper array with objects.
 				for (var i = 0; i < annotations.length; i++) {
 					for (var j = 0; j < this.canonInfo.length; j++) {
 						if (annotations[i].canon === this.canonInfo[j].canon) {
@@ -110,11 +122,47 @@
 					}
 					found = false
 				}
-				for (var i = 0; i < this.canonInfo.length; i++) {
-					this.chartData.rows.push({ canon: this.canonInfo[i].canon, averageRating: this.canonInfo[i].sumRating / this.canonInfo[i].annotationCount, })
+				
+				// Orders the chartData.rows array by canon name.
+				const CANON_ORDER = ['Invention', 'Structure', 'Delivery', 'Visuals', 'Style']
+				for (var i = 0; i < CANON_ORDER.length; i++) {
+					for (var j = 0; j < this.canonInfo.length; j++) {
+						if (this.canonInfo[j].canon === CANON_ORDER[i]) {
+							 // We move an object by its canon name. The arrangement is determined by the CANON_ORDER array.
+							this.moveArrayItemByIndex(this.canonInfo, j, i)
+						}
+					}
 				}
-				console.log(this.chartData.rows)
+
+				for (var i = 0; i < this.canonInfo.length; i++) {
+					this.chartData.rows.push({ canon: this.canonInfo[i].canon, averageRating: this.canonInfo[i].sumRating / this.canonInfo[i].annotationCount })
+				}
+
+				// Fills the bars with the desired colors.
+				const CANONS_COLOR_LIST = []
+				for (var i = 0; i < this.canonInfo.length; i++) {
+					if (this.canonInfo[i].canon === 'Invention') CANONS_COLOR_LIST.push('#15314F')
+					else if (this.canonInfo[i].canon === 'Structure') CANONS_COLOR_LIST.push('#F2992E')
+					else if (this.canonInfo[i].canon === 'Delivery') CANONS_COLOR_LIST.push('#39A0ED')
+					else if (this.canonInfo[i].canon === 'Visuals') CANONS_COLOR_LIST.push('#717C89')
+					else if (this.canonInfo[i].canon === 'Style') CANONS_COLOR_LIST.push('#38C97C')
+				}
+				this.chartExtend = { // The chartExtend object is passed as a parameter to the ve-histogram element.
+					series (item) {
+						item[0].data = item[0].data.map((v, index) => ({
+							value: v,
+							itemStyle: { color: CANONS_COLOR_LIST[index] },
+						}))
+						return item
+					}
+				}
+
             },
+			moveArrayItemByIndex(array, from, to) {
+				// Helper function for canonAverageRating() function.
+				// Moves an array item by index.
+				array.splice(to, 0, array.splice(from, 1)[0])
+			},
 			toggleDeleteConfirmationModal() {
 				if (this.deleteModalIsOpen) {
 					this.deleteModalIsOpen = false
@@ -130,7 +178,6 @@
 				var eventVideoId = $(event.currentTarget).siblings()[4].getAttribute("href")
 				// The string '/video/' has 7 seven characters.
 				eventVideoId = eventVideoId.substring(7, eventVideoId.length)
-				// console.log(eventVideoId)
 
 				for (var i = 0, l = this.videos.length; i < l; i++) {
 					if (this.videos[i].id === eventVideoId) {
@@ -145,7 +192,6 @@
 				var eventVideoId = $(event.currentTarget).siblings()[4].getAttribute("href")
 				// The string '/video/' has 7 seven characters.
 				eventVideoId = eventVideoId.substring(7, eventVideoId.length)
-				// console.log(eventVideoId)
 
 				for (var i = 0, l = this.videos.length; i < l; i++) {
 					if (this.videos[i].id === eventVideoId) {
@@ -160,7 +206,6 @@
 				var eventVideoId = $(event.currentTarget).siblings()[4].getAttribute("href")
 				// The string '/video/' has 7 seven characters.
 				eventVideoId = eventVideoId.substring(7, eventVideoId.length)
-				// console.log(eventVideoId)
 
 				for (var i = 0, l = this.videos.length; i < l; i++) {
 					if (this.videos[i].id === eventVideoId) {
@@ -175,7 +220,6 @@
 				var eventVideoId = $(event.currentTarget).siblings()[4].getAttribute("href")
 				// The string '/video/' has 7 seven characters.
 				eventVideoId = eventVideoId.substring(7, eventVideoId.length)
-				// console.log(eventVideoId)
 
 				for (var i = 0, l = this.videos.length; i < l; i++) {
 					if (this.videos[i].id === eventVideoId) {
@@ -201,18 +245,16 @@
             ),
 		},
 		created() {
-			const COLOR_LIST = ['#15314F', '#F2992E', '#39A0ED', '#717C89', '#38C97C']
+			// const CANONS_COLOR_LIST = ['#15314F', '#F2992E', '#39A0ED', '#717C89', '#38C97C']
 
-			this.chartExtend = {
-				series (item) {
-					console.log(item)
-					item[0].data = item[0].data.map((v, index) => ({
-						value: v,
-						itemStyle: { color: COLOR_LIST[index] }
-					}))
-					return item
-				}
-			}
+			// this.chartExtend = {
+			// 	series: [
+			// 	  { itemStyle: {color: '#15314F '}, value: 5 },
+			// 	  { itemStyle: {color: 'yellow '}, value: 4 },
+			// 	  { itemStyle: {color: 'blue '}, value: 3 },
+			// 	]
+			// }
+
 		},
 		mounted() {
 			var self = this
@@ -231,16 +273,12 @@
 				})
 				.catch(function (err) { console.log(err) })
 			
-			// console.log(this.genres)
 			for (var i = 0; i < this.genres.length; i++) {
-				// console.log(this.genres[i].id,", ", this.currentVideo.id)
 				if (this.genres[i].id === this.currentVideo.genre){
-					// console.log("found it")
 					this.genreName = this.genres[i].name
 					break
 				}
 			}
-			// console.log(this.genreName)
 		}
 	}
 </script>
