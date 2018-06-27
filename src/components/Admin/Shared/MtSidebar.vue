@@ -3,53 +3,53 @@
 		<aside class="sidebar column is-2 aside">
 
 			<!-- Sidebar buttons/actions  -->
-			<div class="sidebar__actions" v-show="!loadingClasses">
-				<a class="sidebar__actionsLink" v-show="role === 'administrator' || role === 'professor'" @click="modalCreateClassIsOpen = true"><i class="fa fa-plus"></i>Create new class</a>
-				<a class="sidebar__actionsLink" v-show="role === 'administrator'" @click="modalInviteUserIsOpen = true"><i class="fa fa-plus"></i>Invite a new user</a>
-				<a class="sidebar__actionsLink" v-show="(role === 'administrator' || role === 'professor') && !(currentClass.name === 'Home')" @click="openAssignmentsModal()"><i class="fa fa-file-text-o"></i>Assignments</a>
-				<a class="sidebar__actionsLink" v-show="(role === 'administrator' || role === 'professor') && !(currentClass.name === 'Home')" @click="modalArchiveClassIsOpen = true"><i class="fa fa-archive"></i>Archive this class</a>
-				<a class="sidebar__actionsLink" v-show="(role === 'administrator' || role === 'professor') && !(currentClass.name === 'Home')" @click="toggleModalStudentRequests()"><i class="fa fa-file-text-o"></i>Student requests ({{ requestedStudents.length }})</a>
-				<!-- <a class="sidebar__actionsLink" v-show="role === 'administrator' || role === 'professor'" @click="createCategoriesTreeDataForm(); modalGenreCustomization = true"><i class="fa fa-commenting-o"></i>Categories</a> -->
-				<a class="sidebar__actionsLink" v-show="role === 'administrator' && (currentClass.name !== 'Home')" @click="modalDeleteClassIsOpen = true"><i class="fa fa-trash"></i>Delete this class</a>
-				<a class="sidebar__actionsLink" v-show="role === 'student'" @click="toggleModalClassesToEnroll()"><i class="fa fa-plus"></i>Find a class to enroll</a>
-				<a class="sidebar__actionsLink" v-show="role === 'student' && (currentClass.name !== 'Home')" @click="openAssignmentsModal()"><i class="fa fa-file-text-o"></i>Class Assignments</a>
+			<div class="sidebar__actions" v-if="!loadingClasses">
+				<a class="sidebar__actionsLink" v-if="role === 'administrator' || role === 'professor'" @click="modalCreateClassIsOpen = true"><i class="fa fa-plus"></i>Create new class</a>
+				<a class="sidebar__actionsLink" v-if="role === 'administrator'" @click="modalInviteUserIsOpen = true"><i class="fa fa-plus"></i>Invite a new user</a>
+				<a class="sidebar__actionsLink" v-if="(role === 'administrator' || role === 'professor') && !(currentClass.name === 'Home')" @click="openAssignmentsModal()"><i class="fa fa-file-text-o"></i>Assignments</a>
+				<a class="sidebar__actionsLink" v-if="(role === 'administrator' || role === 'professor') && !(currentClass.name === 'Home')" @click="modalArchiveClassIsOpen = true"><i class="fa fa-archive"></i>Archive this class</a>
+				<a class="sidebar__actionsLink" v-if="(role === 'administrator' || role === 'professor') && !(currentClass.name === 'Home')" @click="toggleModalStudentRequests()"><i class="fa fa-file-text-o"></i>Student requests ({{ requestedStudents.length }})</a>
+				<!-- <a class="sidebar__actionsLink" v-if="role === 'administrator' || role === 'professor'" @click="createCategoriesTreeDataForm(); modalGenreCustomization = true"><i class="fa fa-commenting-o"></i>Categories</a> -->
+				<a class="sidebar__actionsLink" v-if="role === 'administrator' && (currentClass.name !== 'Home')" @click="modalDeleteClassIsOpen = true"><i class="fa fa-trash"></i>Delete this class</a>
+				<a class="sidebar__actionsLink" v-if="role === 'student'" @click="toggleModalClassesToEnroll()"><i class="fa fa-plus"></i>Find a class to enroll</a>
+				<a class="sidebar__actionsLink" v-if="role === 'student' && (currentClass.name !== 'Home')" @click="openAssignmentsModal()"><i class="fa fa-file-text-o"></i>Class Assignments</a>
 			</div>
 
 			<!-- Sidebar Classes menu for student -->
-			<div class="sidebar__classes" v-show="role === 'student'">	
+			<div class="sidebar__classes" v-if="role === 'student'">	
 				<!-- Loading -->
 				<div class="uploadvid__sync-load" 
 					v-loading="loadingClasses" 
-					v-show="loadingClasses"
+					v-if="loadingClasses"
 					element-loading-text="Loading..." 
 					element-loading-spinner="el-icon-loading"
 					element-loading-background="rgba(0, 0, 0, 0.8)"><br><br><br><br><br></div>
-				<!-- The two lines below don't show if the acceptedClasses array is empty, so there is no need for a v-show="!loadingClasses" -->
-				<el-input class="sidebar__classesInput" v-show="acceptedClasses.length !== 0" icon="search" v-model="searchInputClassSidebar" @change="filterClassArray('acceptedClasses', 'filteredAcceptedClasses', searchInputClassSidebar)" placeholder="Search for a class..."></el-input>
+				<!-- The two lines below don't show if the acceptedClasses array is empty, so there is no need for a v-if="!loadingClasses" -->
+				<el-input class="sidebar__classesInput" v-if="acceptedClasses.length !== 0" icon="search" v-model="searchInputClassSidebar" @change="filterClassArray('acceptedClasses', 'filteredAcceptedClasses', searchInputClassSidebar)" placeholder="Search for a class..."></el-input>
 				<a class="sidebar__classesLink" v-for="c in filteredAcceptedClasses" :class="{ 'is-bg-light' : (currentClass.name === c.name) }"  :key="c.id" @click="setCurrentClass(c)">{{ c.number }} - {{ c.name }}</a>
 			</div>
 
 			<!-- Sidebar Classes menu for administrator-->
-			<div class="sidebar__classes" v-show="role === 'administrator'">
+			<div class="sidebar__classes" v-if="role === 'administrator'">
 				<!-- Loading -->
 				<div class="uploadvid__sync-load" 
 					v-loading="loadingClasses" 
-					v-show="loadingClasses"
+					v-if="loadingClasses"
 					element-loading-text="Loading..." 
 					element-loading-spinner="el-icon-loading"
 					element-loading-background="rgba(0, 0, 0, 0.8)"><br><br><br><br><br></div>
-				<el-tabs v-model="sidebarClassesTab" v-show="!loadingClasses">
+				<el-tabs v-model="sidebarClassesTab" v-if="!loadingClasses">
 					<el-tab-pane label="Active classes" name="activeClasses">
 						<div class="sidebar__classes">
-							<i v-show="adminActiveClasses.length === 0"> &nbsp;&nbsp; No classes </i>
-							<el-input class="sidebar__classesInput" v-show="adminActiveClasses.length !== 0" icon="search" v-model="searchInputActiveClassSidebar" @change="filterClassArray('adminActiveClasses', 'filteredAdminActiveClasses', searchInputActiveClassSidebar)" placeholder="Search for a class..."></el-input>
+							<i v-if="adminActiveClasses.length === 0"> &nbsp;&nbsp; No classes </i>
+							<el-input class="sidebar__classesInput" v-if="adminActiveClasses.length !== 0" icon="search" v-model="searchInputActiveClassSidebar" @change="filterClassArray('adminActiveClasses', 'filteredAdminActiveClasses', searchInputActiveClassSidebar)" placeholder="Search for a class..."></el-input>
 							<a class="sidebar__classesLink" v-for="c in filteredAdminActiveClasses"  :class="{ 'is-bg-light' : (currentClass.name === c.name) }" :key="c.id" @click="setCurrentClass(c)">{{ c.number }} - {{ c.name }}</a>
 						</div>
 					</el-tab-pane>
 					<el-tab-pane label="Archived" name="archivedClasses">
 						<div class="sidebar__classes">
-							<i v-show="adminArchivedClasses.length === 0"> &nbsp;&nbsp; No archived classes </i>
-							<el-input class="sidebar__classesInput" v-show="adminArchivedClasses.length !== 0" icon="search" v-model="searchInputArchivedClassSidebar" @change="filterClassArray('adminArchivedClasses', 'filteredAdminArchivedClasses', searchInputArchivedClassSidebar)" placeholder="Search archived classes..."></el-input>							
+							<i v-if="adminArchivedClasses.length === 0"> &nbsp;&nbsp; No archived classes </i>
+							<el-input class="sidebar__classesInput" v-if="adminArchivedClasses.length !== 0" icon="search" v-model="searchInputArchivedClassSidebar" @change="filterClassArray('adminArchivedClasses', 'filteredAdminArchivedClasses', searchInputArchivedClassSidebar)" placeholder="Search archived classes..."></el-input>							
 							<a class="sidebar__classesLink" v-for="c in filteredAdminArchivedClasses" :key="c.id" :class="{ 'is-bg-light' : (currentClass.name === c.name) }" @click="openModalUnarchiveClass(c.id)">{{ c.number }} - {{ c.name }}</a>
 						</div>
 					</el-tab-pane>
@@ -57,26 +57,26 @@
 			</div>
 			
 			<!-- Sidebar Classes menu for professor-->
-			<div class="sidebar__classes" v-show="role === 'professor'">
+			<div class="sidebar__classes" v-if="role === 'professor'">
 				<!-- Loading -->
 				<div class="uploadvid__sync-load" 
 					v-loading="loadingClasses" 
-					v-show="loadingClasses"
+					v-if="loadingClasses"
 					element-loading-text="Loading..." 
 					element-loading-spinner="el-icon-loading"
 					element-loading-background="rgba(0, 0, 0, 0.8)"><br><br><br><br><br></div>
-				<el-tabs v-model="sidebarClassesTab" v-show="!loadingClasses">
+				<el-tabs v-model="sidebarClassesTab" v-if="!loadingClasses">
 					<el-tab-pane label="Active classes" name="activeClasses">
 						<div class="sidebar__classes">
-							<i v-show="professorActiveClasses.length === 0"> &nbsp;&nbsp; No classes - create one </i>
-							<el-input class="sidebar__classesInput" v-show="professorActiveClasses.length !== 0" icon="search" v-model="searchInputActiveClassSidebar" @change="filterClassArray('professorActiveClasses', 'filteredProfessorActiveClasses', searchInputActiveClassSidebar)" placeholder="Search for a class..."></el-input>
+							<i v-if="professorActiveClasses.length === 0"> &nbsp;&nbsp; No classes - create one </i>
+							<el-input class="sidebar__classesInput" v-if="professorActiveClasses.length !== 0" icon="search" v-model="searchInputActiveClassSidebar" @change="filterClassArray('professorActiveClasses', 'filteredProfessorActiveClasses', searchInputActiveClassSidebar)" placeholder="Search for a class..."></el-input>
 							<a class="sidebar__classesLink" v-for="c in filteredProfessorActiveClasses" :class="{ 'is-bg-light' : (currentClass.name === c.name) }" :key="c.id" @click="setCurrentClass(c)">{{ c.number }} - {{ c.name }}</a>
 						</div>
 					</el-tab-pane>
 					<el-tab-pane label="Archived" name="archivedClasses">
 						<div class="sidebar__classes">
-							<i v-show="professorArchivedClasses.length === 0"> &nbsp;&nbsp; No archived classes </i>
-							<el-input class="sidebar__classesInput" v-show="professorArchivedClasses.length !== 0" icon="search" v-model="searchInputArchivedClassSidebar" @change="filterClassArray('professorArchivedClasses', 'filteredProfessorArchivedClasses', searchInputArchivedClassSidebar)" placeholder="Search archived classes..."></el-input>							
+							<i v-if="professorArchivedClasses.length === 0"> &nbsp;&nbsp; No archived classes </i>
+							<el-input class="sidebar__classesInput" v-if="professorArchivedClasses.length !== 0" icon="search" v-model="searchInputArchivedClassSidebar" @change="filterClassArray('professorArchivedClasses', 'filteredProfessorArchivedClasses', searchInputArchivedClassSidebar)" placeholder="Search archived classes..."></el-input>							
 							<a class="sidebar__classesLink" v-for="c in filteredProfessorArchivedClasses" :key="c.id" :class="{ 'is-bg-light' : (currentClass.name === c.name) }" @click="openModalUnarchiveClass(c.id)">{{ c.number }} - {{ c.name }}</a>
 						</div>
 					</el-tab-pane>
@@ -124,12 +124,12 @@
 						<el-option v-for="g in genres" :key="g.name" :label="g.name" :value="g.name"></el-option>
 					</el-select>
 					<br>
-					<el-button v-show="currentGenre !== ''" style="margin-top:10px" @click="modalAddCategoryIsOpen = true"> Add category</el-button>
+					<el-button v-if="currentGenre !== ''" style="margin-top:10px" @click="modalAddCategoryIsOpen = true"> Add category</el-button>
 					<!-- <el-radio class="radio" v-model="currentGenre" v-for="g in genres" :key="g.name" :label="g.name"></el-radio> -->
 
 					<br/>
 					<br/>
-					<div v-show="currentGenre">
+					<div v-if="currentGenre">
 						<p>Choose canons:</p>
 						<el-tree :data="canons" :props="genreProps" @node-click="handleNodeClick" show-checkbox>
 						</el-tree>
@@ -192,9 +192,9 @@
 					element-loading-text="Loading..." 
 					element-loading-spinner="el-icon-loading"
 					element-loading-background="rgba(0, 0, 0, 0.8)"></div>
-                <el-tabs v-show="!!currentClass.id && !loadingAssignments">
+                <el-tabs v-show="!!currentClass.id && !loadingAssignments" @tab-click="changeAssignmentTabEvent">
                     <el-tab-pane v-for="a in assignments" :key="a.id" :label="a.title">
-                		<el-tabs v-show="!!currentClass.id && !loadingAssignments">
+                		<el-tabs v-if="!!currentClass.id && !loadingAssignments">
 							<el-tab-pane label="General">
 								<div class="assignments-content">
 									<span class="assignments__title">
@@ -241,7 +241,13 @@
 									</span>
 								</div>
 							</el-tab-pane>
-							<el-tab-pane label="Submissions">
+							<el-tab-pane label="My Submission" v-if="role === 'student'">
+								<mt-video-itemlist v-for="v in userCollaborated" v-bind:key="v.id" :currentVideo="v" v-if="v.assignmentId === a.id" :enableStatistics="false"></mt-video-itemlist>
+							</el-tab-pane>
+							<el-tab-pane label="Class Submissions" v-if="role ==='student'">
+								<mt-video-itemlist v-for="v in videosWithoutUserSubs" v-bind:key="v.id" :currentVideo="v" v-if="v.assignmentId === a.id" :enableStatistics="false"></mt-video-itemlist>
+							</el-tab-pane>
+							<el-tab-pane label="Class Submissions" v-if="(role === 'administrator' || role ==='professor')">
 								<mt-video-itemlist v-for="v in videos" v-bind:key="v.id" :currentVideo="v" v-if="v.assignmentId === a.id" :enableStatistics="false"></mt-video-itemlist>
 							</el-tab-pane>
                 		</el-tabs>
@@ -269,37 +275,37 @@
 				<!-- Loading -->
 				<div class="uploadvid__sync-load" 
 					v-loading="loadingModalStudents" 
-					v-show="loadingModalStudents"
+					v-if="loadingModalStudents"
 					element-loading-text="Loading..." 
 					element-loading-spinner="el-icon-loading"
 					element-loading-background="rgba(0, 0, 0, 0.8)"><br><br><br><br><br></div>
-                <el-tabs v-model="modalStudentRequestsTab" v-show="!loadingModalStudents">
+                <el-tabs v-model="modalStudentRequestsTab" v-if="!loadingModalStudents">
                     <el-tab-pane label="Enrolled students" name="enrolledStudents">
-						<p v-show="enrolledStudents.length === 0" ><i>No enrolled students</i></p>
-                        <el-input icon="search" v-show="enrolledStudents.length !== 0" v-model="searchInput" @change="filterStudentsArray('enrolledStudents', 'filteredEnrolledStudents', searchInput)" placeholder="Search for a student..." style="width:220px;margin-bottom:7px;" class="mt-search-input"></el-input>
+						<p v-if="enrolledStudents.length === 0" ><i>No enrolled students</i></p>
+                        <el-input icon="search" v-if="enrolledStudents.length !== 0" v-model="searchInput" @change="filterStudentsArray('enrolledStudents', 'filteredEnrolledStudents', searchInput)" placeholder="Search for a student..." style="width:220px;margin-bottom:7px;" class="mt-search-input"></el-input>
 						<div class="mt-table">
 							<li v-for="(s, index) in filteredEnrolledStudents" :key="s.id" style="list-style:none">
 								<span><i class="fa fa-user"></i> {{ s.firstName + " " + s.lastName}}</span>
-								<el-button v-show="role === 'administrator'" size="small" type="info" @click="deleteEnrollment(index, s)" style="float: right; margin: -2px;">Unenroll</el-button>
+								<el-button v-if="role === 'administrator'" size="small" type="info" @click="deleteEnrollment(index, s)" style="float: right; margin: -2px;">Unenroll</el-button>
 							</li>
 						</div>
                     </el-tab-pane>
                     <el-tab-pane name="requestedStudents">
-						<p v-show="requestedStudents.length === 0" ><i>No enrollment requests</i></p>
+						<p v-if="requestedStudents.length === 0" ><i>No enrollment requests</i></p>
     					<span slot="label">Enrollment requests ({{requestedStudents.length}})</span>
-                        <el-input icon="search" v-show="requestedStudents.length !== 0" v-model="searchInput" @change="filterStudentsArray('requestedStudents', 'filteredRequestedStudents', searchInput)" placeholder="Search for a student..." style="width:220px;margin-bottom:7px;"></el-input>
+                        <el-input icon="search" v-if="requestedStudents.length !== 0" v-model="searchInput" @change="filterStudentsArray('requestedStudents', 'filteredRequestedStudents', searchInput)" placeholder="Search for a student..." style="width:220px;margin-bottom:7px;"></el-input>
 						<div class="mt-table">
 							<li v-for="(s, index) in filteredRequestedStudents" :key="s.id" style="list-style:none">
 								<span><i class="fa fa-user"></i> {{ s.firstName + " " + s.lastName}}</span>
-								<el-button v-show="role === 'administrator'" size="small" type="info" @click="deleteRequest(index, s)" style="float: right; margin:-2px;">Delete request</el-button>
+								<el-button v-if="role === 'administrator'" size="small" type="info" @click="deleteRequest(index, s)" style="float: right; margin:-2px;">Delete request</el-button>
 								<el-button size="small" type="info" @click="acceptStudent(index, s)" style="float: right; margin: -2px; margin-right: 5px">Accept request</el-button>
 							</li>
 						</div>
-                        <el-button v-show="requestedStudents.length !== 0" sfize="small" type="info" @click="acceptAllStudents()" style="margin-top: 5px;">Accept all requests</el-button>
+                        <el-button v-if="requestedStudents.length !== 0" sfize="small" type="info" @click="acceptAllStudents()" style="margin-top: 5px;">Accept all requests</el-button>
                     </el-tab-pane>
                     <el-tab-pane label="Other students" name="otherStudents" v-if="role === 'administrator'">
-						<p v-show="otherStudents.length === 0" ><i>No other students</i></p>
-                        <el-input icon="search" v-show="otherStudents.length !== 0" v-model="searchInput" @change="filterStudentsArray('otherStudents', 'filteredOtherStudents', searchInput)" placeholder="Search for a student..." style="width:220px;margin-bottom:7px;"></el-input>
+						<p v-if="otherStudents.length === 0" ><i>No other students</i></p>
+                        <el-input icon="search" v-if="otherStudents.length !== 0" v-model="searchInput" @change="filterStudentsArray('otherStudents', 'filteredOtherStudents', searchInput)" placeholder="Search for a student..." style="width:220px;margin-bottom:7px;"></el-input>
 						<div class="mt-table">
 							<li v-for="(s, index) in filteredOtherStudents" :key="s.id" style="list-style:none">
 								<span><i class="fa fa-user"></i> {{ s.firstName + " " + s.lastName}}</span>
@@ -315,14 +321,14 @@
 				<!-- Loading -->
 				<div class="uploadvid__sync-load" 
 					v-loading="loadingModalClasses" 
-					v-show="loadingModalClasses"
+					v-if="loadingModalClasses"
 					element-loading-text="Loading..." 
 					element-loading-spinner="el-icon-loading"
 					element-loading-background="rgba(0, 0, 0, 0.8)"><br><br><br><br><br></div>
-				<el-tabs v-model="modalClassesRequestsTab" v-show="!loadingModalClasses">
+				<el-tabs v-model="modalClassesRequestsTab" v-if="!loadingModalClasses">
                     <el-tab-pane label="Classes to enroll" name="classesToEnroll">
-						<p v-show="notEnrolledClasses.length === 0" ><i>No classes to enroll</i></p>
-						<el-input icon="search" v-show="notEnrolledClasses.length !== 0" v-model="searchInputClassModal" @change="filterClassArray('notEnrolledClasses', 'filteredNotEnrolledClasses', searchInputClassModal)" placeholder="Search for a class..." style="width:220px;margin-bottom:7px;" class="mt-search-input"></el-input>
+						<p v-if="notEnrolledClasses.length === 0" ><i>No classes to enroll</i></p>
+						<el-input icon="search" v-if="notEnrolledClasses.length !== 0" v-model="searchInputClassModal" @change="filterClassArray('notEnrolledClasses', 'filteredNotEnrolledClasses', searchInputClassModal)" placeholder="Search for a class..." style="width:220px;margin-bottom:7px;" class="mt-search-input"></el-input>
                         <div class="mt-table">
 							<li class="mt-table__row" v-for="c in filteredNotEnrolledClasses" :key="c.id">
 								<span>
@@ -336,8 +342,8 @@
                     </el-tab-pane>
 					<el-tab-pane name="requestsPending">
     					<span slot="label">Requests pending ({{requestedClasses.length}})</span> <!-- Dynamic tab label --> 
-                        <span v-show="requestedClasses.length === 0"><i>No requests pending</i></span>
-						<div label="" class="mt-table" v-show="!loadingModalClasses">
+                        <span v-if="requestedClasses.length === 0"><i>No requests pending</i></span>
+						<div label="" class="mt-table" v-if="!loadingModalClasses">
 							<li v-for="c in requestedClasses" :key="c.id">
 								<a><i class="fa fa-book"></i> {{ c.number }} - {{ c.name }} - {{ c.department }} - {{ c.semester }}</a>
 							</li>
@@ -425,13 +431,14 @@
 				filteredProfessorArchivedClasses: [],
 
 				// MODALS
+				modalClassAssignmentsIsOpen: false,
 				// Student
 				modalClassesToEnrollIsOpen: false,
+				videosWithoutUserSubs: [], // List of all class videos for current assignment
 				// Professor, Administrator
 				modalCreateClassIsOpen: false,
 				modalArchiveClassIsOpen: false,
 				modalUnarchiveClassIsOpen: false,
-				modalClassAssignmentsIsOpen: false,
 				modalStudentRequestsIsOpen: false,
 				// Administrator
 				modalDeleteClassIsOpen: false,
@@ -602,7 +609,18 @@
 			}
 		},
 		methods: {
-			// TODO ADD REJECT ENROLLMENT REQUEST BuTTON FOR PROF/ADMIN WHICH DELETES THE ENROLLMENT REQUEST RESOURCE
+			changeAssignmentTabEvent() {
+				this.loadingAssignments = true
+				this.videosWithoutUserSubs = []
+				var self = this
+				this.updateAssignments()
+				.then(function() {
+					self.updateStudentMySubmissions()
+				})
+				.then(function() {
+					self.loadingAssignments = false
+				})
+			},
             filterClassArray: _.debounce(function (arrayName, filteredArrayName, filterString) {
 				// Filters any class array
 				// Requires the array's name as string in the first argument and 
@@ -743,6 +761,28 @@
 					}
 				})
 			},
+			updateStudentMySubmissions() {
+				// This method updates videosWithoutUserSubs used in the assignments modal, 
+				// It relies on the store's userCollaborated which gets updated first.
+
+				var self = this
+				return this.$store.dispatch("getCollaboratedVideosByUserId", self.userId) // Update state.userCollaborated
+				.then(function() {
+					for (var v = 0; v < self.videos.length; v++) {
+						// TODO this needs be improved when videos array gets big, check for class or - even better - assignment.
+						var found = false
+						for (var uc = 0; uc < self.userCollaborated.length; uc++) {
+							if (self.videos[v].id === self.userCollaborated[uc].id) {
+								found = true
+								break
+							}
+						}
+						if (!found) {
+							self.videosWithoutUserSubs.push(self.videos[v])
+						}
+					}
+				})
+			},
 			// Administrator
 			createInvitation() {
 				if (this.invitation.email === '' || this.invitation.role === '') {
@@ -766,7 +806,6 @@
 					this.repeatEmail = ''
 				}
 			},
-
 			deleteClass() {
 				var classId = this.currentClass.id
 
@@ -1188,8 +1227,12 @@
 			openAssignmentsModal(){
 				this.loadingAssignments = true
 				this.modalClassAssignmentsIsOpen = true
+				this.videosWithoutUserSubs = []
 				var self = this
 				this.updateAssignments()
+				.then(function() {
+					self.updateStudentMySubmissions()
+				})
 				.then(function() {
 					self.loadingAssignments = false
 				})
@@ -1406,7 +1449,8 @@
 				['videos', 'classes', 'currentClass',
 				 'assignments', 'genres', 'categories', 
 				 'enrollments', 'userEnrollments', 'enrolledClasses', // Mainly used for student side of enrollments
-				 'classEnrolledStudents', 'classEnrollments', 'users' // Mainly used for admin/professor side of enrollments
+				 'classEnrolledStudents', 'classEnrollments', 'users', // Mainly used for admin/professor side of enrollments
+				 'userCollaborated'
 				]
             )
 		},
