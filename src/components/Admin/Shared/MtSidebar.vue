@@ -38,7 +38,7 @@
 					element-loading-text="Loading..." 
 					element-loading-spinner="el-icon-loading"
 					element-loading-background="rgba(0, 0, 0, 0.8)"><br><br><br><br><br></div>
-				<el-tabs v-model="sidebarClassesTab" v-if="!loadingClasses">
+				<el-tabs v-model="sidebarClassesTab" v-show="!loadingClasses">
 					<el-tab-pane label="Active classes" name="activeClasses">
 						<div class="sidebar__classes">
 							<i v-if="adminActiveClasses.length === 0"> &nbsp;&nbsp; No classes </i>
@@ -65,7 +65,7 @@
 					element-loading-text="Loading..." 
 					element-loading-spinner="el-icon-loading"
 					element-loading-background="rgba(0, 0, 0, 0.8)"><br><br><br><br><br></div>
-				<el-tabs v-model="sidebarClassesTab" v-if="!loadingClasses">
+				<el-tabs v-model="sidebarClassesTab" v-show="!loadingClasses">
 					<el-tab-pane label="Active classes" name="activeClasses">
 						<div class="sidebar__classes">
 							<i v-if="professorActiveClasses.length === 0"> &nbsp;&nbsp; No classes - create one </i>
@@ -185,17 +185,17 @@
 			</el-dialog>
 
 			<!-- Administrator/Professor - Assignments -->
-			<el-dialog v-bind:title="this.currentClass.name + ' Class assignments'" :visible.sync="modalClassAssignmentsIsOpen" class="modal-class-assignments" v-if="(role === 'administrator' || role ==='professor')">
+			<el-dialog v-bind:title="this.currentClass.name + ' Class assignments'" :visible.sync="modalClassAssignmentsIsOpen" class="modal-class-assignments" v-if="!!currentClass.id && (role === 'administrator' || role ==='professor')">
 				<!-- Loading Screen -->
 				<div class="uploadvid__sync-load" 
 					v-loading="loadingAssignments" 
 					element-loading-text="Loading..." 
 					element-loading-spinner="el-icon-loading"
 					element-loading-background="rgba(0, 0, 0, 0.8)"></div>
-                <el-tabs v-show="!!currentClass.id && !loadingAssignments">
+                <el-tabs v-show="!loadingAssignments">
                     <el-tab-pane v-for="a in assignments" :key="a.id" :label="a.title">
-                		<el-tabs v-if="!!currentClass.id && !loadingAssignments">
-							<el-tab-pane label="General">
+                		<el-tabs v-model="assignmentsModalSubtab" v-if="!loadingAssignments">
+							<el-tab-pane label="General" name="General">
 								<div class="assignments-content">
 									<span class="assignments__title">
 										<strong>Title:</strong>
@@ -233,7 +233,7 @@
 									</span>
 								</div>
 							</el-tab-pane>
-							<el-tab-pane label="Class Submissions">
+							<el-tab-pane label="Class Submissions" name="ClassSubmissions">
 								<mt-video-itemlist v-for="v in videos" v-bind:key="v.id" :currentVideo="v" v-if="v.assignmentId === a.id" :enableStatistics="false"></mt-video-itemlist>
 							</el-tab-pane>
                 		</el-tabs>
@@ -255,17 +255,17 @@
             </el-dialog>
 
 			<!-- Student - Assignments -->
-			<el-dialog v-bind:title="this.currentClass.name + ' Class assignments'" :visible.sync="modalClassAssignmentsIsOpen" class="modal-class-assignments" v-if="role === 'student'">
+			<el-dialog v-bind:title="this.currentClass.name + ' Class assignments'" :visible.sync="modalClassAssignmentsIsOpen" class="modal-class-assignments" v-if="!!currentClass.id && 	role === 'student'">
 				<!-- Loading Screen -->
 				<div class="uploadvid__sync-load" 
 					v-loading="loadingAssignments" 
 					element-loading-text="Loading..." 
 					element-loading-spinner="el-icon-loading"
 					element-loading-background="rgba(0, 0, 0, 0.8)"></div>
-                <el-tabs v-show="!!currentClass.id && !loadingAssignments" @tab-click="changeAssignmentTabEvent">
+                <el-tabs v-show="!loadingAssignments" @tab-click="changeAssignmentTabEvent">
                     <el-tab-pane v-for="a in assignments" :key="a.id" :label="a.title">
-                		<el-tabs v-if="!!currentClass.id && !loadingAssignments">
-							<el-tab-pane label="General">
+                		<el-tabs v-model="assignmentsModalSubtab" v-if="!loadingAssignments">
+							<el-tab-pane label="General" name="General">
 								<div class="assignments-content">
 									<span class="assignments__title">
 										<strong>Title:</strong>
@@ -298,10 +298,10 @@
 									</span>
 								</div>
 							</el-tab-pane>
-							<el-tab-pane label="My Submission">
+							<el-tab-pane label="My Submission" name="MySubmission">
 								<mt-video-itemlist v-for="v in userCollaborated" v-bind:key="v.id" :currentVideo="v" v-if="v.assignmentId === a.id" :enableStatistics="false"></mt-video-itemlist>
 							</el-tab-pane>
-							<el-tab-pane label="Class Submissions">
+							<el-tab-pane label="Class Submissions" name="ClassSubmissions">
 								<mt-video-itemlist v-for="v in videosWithoutUserSubs" v-bind:key="v.id" :currentVideo="v" v-if="v.assignmentId === a.id" :enableStatistics="false"></mt-video-itemlist>
 							</el-tab-pane>
                 		</el-tabs>
@@ -424,7 +424,7 @@
 						</el-checkbox>
 					</el-checkbox-group>
 				</div>
-            </el-dialog> -->	
+            </el-dialog>	 -->
 		</aside>
 
 </template>
@@ -497,6 +497,7 @@
 				otherStudents: [],
 				filteredOtherStudents: [],
 				// ASSIGNMENTS
+				assignmentsModalSubtab: 'General',
 				assignmentSelectedId: '',
 				assignmentTitle: '',
 				assignmentDescription: '',
