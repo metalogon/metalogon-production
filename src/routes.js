@@ -79,7 +79,7 @@ export const routes = [
     },
     { 
         name: 'WikiTerm', 
-        path: '/wiki-term', 
+        path: '/term/:id', 
         component: WikiTerm, 
         beforeEnter: requiresAuth
     }
