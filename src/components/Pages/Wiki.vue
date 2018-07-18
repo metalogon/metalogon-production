@@ -5,16 +5,7 @@
 
         <div class="wiki__body">
 
-            <div class="wiki__subhead">
-
-                <div class="wiki__subheadMenu">
-                    <a class="wiki__subheadLink">HOW IT WORKS</a>
-                    <a class="wiki__subheadLink">BROWSE TERMS</a>
-                    <a class="wiki__subheadLink">FORUM <i class="fa fa-caret-down"></i></a>
-                    <button class="wiki__subheadLink wiki__subheadButton">Post a Term</button>
-                </div>
-
-            </div>
+            <wiki-subhead></wiki-subhead>
 
             <div class="wiki__hero">
 
@@ -30,32 +21,23 @@
             </div>
 
             <div class="wiki__content">
-                <el-tabs class="wiki__tabs">
+                <div class="wiki__contentdiv">
+                    <router-link :to="'/term/' + c.id" tag="div" class="term" v-for="c in categories" :key="c.id">
+                        <img src="../../assets/black-img.png" class="term__img">
+                        <div class="term__metadata">
+                            <span class="term__head">
+                                <h3 class="term__title">{{ c.name }}</h3>
+                            </span>
+                            <span class="term__content">{{ c.description }}</span>
+                            <span class="term__tags">
+
+                            </span>
+                        </div>
+                    </router-link>
+                </div>
+                <!-- <el-tabs class="wiki__tabs">
                     <el-tab-pane label="Recent Terms">
-                        <router-link to="/wiki-term" tag="div" class="term">
-                            <img src="../../assets/black-img.png" class="term__img">
-                            <div class="term__metadata">
-                                <span class="term__head">
-                                    <h3 class="term__title">Term 1</h3>
-                                </span>
-                                <span class="term__content">There are many variations of passages of Lorem Ipsum available, but the majority have suffered alteration in some form, by injected humour, or randomised words which don't look even slightly believable.</span>
-                                <span class="term__tags">
-
-                                </span>
-                            </div>
-                        </router-link>
-                        <router-link to="/wiki-term" tag="div" class="term">
-                            <img src="../../assets/black-img.png" class="term__img">
-                            <div class="term__metadata">
-                                <span class="term__head">
-                                    <h3 class="term__title">Term 2</h3>
-                                </span>
-                                <span class="term__content">Contrary to popular belief, Lorem Ipsum is not simply random text. It has roots in a piece of classical Latin literature from 45 BC, making it over 2000 years old. </span>
-                                <span class="term__tags">
-
-                                </span>
-                            </div>
-                        </router-link>
+                        
                     </el-tab-pane>
                     
                     <el-tab-pane label="Popular Terms">
@@ -65,7 +47,7 @@
                     <el-tab-pane label="Question Forum">
                         Question Forum
                     </el-tab-pane>
-                </el-tabs>
+                </el-tabs> -->
             </div>
 
         </div>
@@ -78,11 +60,20 @@
 <script>
     import MyHeader from '../Layout/MyHeader.vue'
     import MyFooter from '../Layout/MyFooter.vue'
+    import WikiSubhead from '../Pages/WikiSubhead.vue'
+    import { mapGetters } from 'vuex'
+	import { mapMutations } from 'vuex'
     
     export default {
+        computed: {
+			...mapGetters(
+				[ 'categories' ]
+			)
+		},
         components: {
             'my-header': MyHeader,
             'my-footer': MyFooter,
+            'wiki-subhead': WikiSubhead,
         }
     }
 </script>
@@ -92,6 +83,11 @@
 .wiki__body {
     
 }
+
+    .wiki__contentdiv {
+        display: flex;
+        flex-direction: column;
+    }
 
 /* ==============================================
                     #WIKI-SUBMENU
@@ -185,7 +181,7 @@
 
     .wiki__content {
         margin-bottom: 80px;
-        height: 300px;
+        height: auto;
         display: flex;
         justify-content: center;
     }
@@ -221,19 +217,22 @@
 ================================================= */
 
             .term {
-                display: flex;
-                justify-content: center;
-                padding-top: 20px;
-                padding-bottom: 20px;
+                margin: 15px;
                 cursor: pointer;
+                display: flex;
+            }
+            .term:hover {
+                background-color: #eeeeee;
             }
 
                 .term__img {
                     margin-right: 20px;
+                    width: 70px;
+                    height: 70px;
                 }
 
                 .term__metadata {
-
+                    height: 100%;
                 }
 
                     .term__head {

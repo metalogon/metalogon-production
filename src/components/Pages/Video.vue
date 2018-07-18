@@ -95,6 +95,7 @@
                                     <h1>{{ annotateCurrentSubcategoryObject.name }}</h1>
                                     <p>{{ annotateCurrentSubcategoryObject.description }}</p>
                                 </div>
+                                <router-link :to="'/term/' + annotateCurrentCategoryObject.id" tag="a" class="annotate-desc-text__wiki"><i class="fa fa-commenting"></i>Wiki</router-link>
                                 <div class="annotate-menu__canons-close"><span @click="annotatingMode = false; isAnnotateFields = false; isVideoline = false; selectedMove = 'Other';">X</span></div>
                             </div>  
                             <div class="annotate-comment field" v-show="selectedMove === 'Other'">
@@ -1893,15 +1894,23 @@
 
             .annotate-desc-text {
                 margin-left: 60px;
+                color: #FFF;
             }
                 .annotate-desc-text h1{
-                    color: #FFF;
                     font-size: 1.3em;
                     text-transform: uppercase;
                 }
                 .annotate-desc-text p{
                     font-style: italic;
                 }
+
+                .annotate-desc-text__wiki {
+                    color: #fff;
+                    margin-left: 10px;
+                }
+                    .annotate-desc-text__wiki i {
+                        margin-right: 2px;
+                    }
 
             .annotate-effectiveness {
                 display: flex;
