@@ -2007,7 +2007,7 @@
         }
 
     .timeline-container {
-        height: 556px;
+        height: 37.76vw;
         overflow-y: scroll;
         margin-top: 20px;
     }
