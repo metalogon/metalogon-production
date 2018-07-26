@@ -31,7 +31,8 @@ export const store = new Vuex.Store({
             id: '',
             number: '',
             department: '',
-            professorId: ''
+            professorId: '',
+            catFilter: []
         },
         currentVideoID: null,
         uploadingVideo: false,
@@ -370,14 +371,14 @@ export const store = new Vuex.Store({
         },
         /* GENRES */ 
         getGenres: function ({ commit }) {
-            secureHTTPService.get("genre")
-                .then(function (response)
-                {
-                    commit('GET_GENRES', response.data.data)
-                })
-                .catch(function (err) {
-                    
-                })
+            return secureHTTPService.get("genre")
+            .then(function (response)
+            {
+                commit('GET_GENRES', response.data.data)
+            })
+            .catch(function (err) {
+                console.log('getGenres GET err: ', err)
+            })
         },
         /* CANONS */ 
         getCanons: function ({ commit }) {

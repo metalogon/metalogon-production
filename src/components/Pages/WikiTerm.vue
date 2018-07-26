@@ -5,16 +5,7 @@
 
         <div class="wiki__body">
 
-            <div class="wiki__subhead">
-
-                <div class="wiki__subheadMenu">
-                    <a class="wiki__subheadLink">HOW IT WORKS</a>
-                    <a class="wiki__subheadLink">BROWSE TERMS</a>
-                    <a class="wiki__subheadLink">FORUM <i class="fa fa-caret-down"></i></a>
-                    <button class="wiki__subheadLink wiki__subheadButton">Post a Term</button>
-                </div>
-
-            </div>
+            <wiki-subhead></wiki-subhead>
 
             <div class="term__hero">
 
@@ -28,13 +19,13 @@
             <div class="term__body">
 
                 <div class="term__headings">
-                    <h1 class="term__heading">Term 1</h1>
+                    <h1 class="term__heading">{{ currentTerm.name }}</h1>
                     <p class="term__description">noun | pronounciation</p>
                 </div>
 
                 <div class="term__definition">
                     <h3 class="definition__title">Definition</h3>
-                    <p class="definition__content">It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout. The point of using Lorem Ipsum is that it has a more-or-less normal distribution of letters, as opposed to using 'Content here, content here', making it look like readable English. Many desktop publishing packages and web page editors now use Lorem Ipsum as their default model text, and a search for 'lorem ipsum' will uncover many web sites still in their infancy.</p>
+                    <p class="definition__content">{{ currentTerm.description }}</p>
                 </div>
 
                 <div class="term__X">
@@ -83,11 +74,32 @@
 <script>
     import MyHeader from '../Layout/MyHeader.vue'
     import MyFooter from '../Layout/MyFooter.vue'
+    import WikiSubhead from '../Pages/WikiSubhead.vue'
+    import { mapGetters } from 'vuex'
+	import { mapMutations } from 'vuex'
     
     export default {
+        data() {
+            return {
+                currentTerm: {}
+            }
+        },
+        created() {
+            for (var i = 0; i < this.categories.length; i++) {
+                if ( this.categories[i].id === this.$route.params.id) {
+                    this.currentTerm = this.categories[i]
+                }
+            }
+        },
+        computed: {
+			...mapGetters(
+				[ 'categories' ]
+			)
+		},
         components: {
             'my-header': MyHeader,
             'my-footer': MyFooter,
+            'wiki-subhead': WikiSubhead,
         }
     }
 </script>

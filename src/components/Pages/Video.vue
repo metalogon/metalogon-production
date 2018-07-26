@@ -61,12 +61,12 @@
 
                     <div class="annotate-menu"> 
                         <nav class="annotate-menu__canons" v-if="isAnnotateCanons">
-                            <a :class="canon.name" @click="chooseCanonAnnotate(canon.name)" v-for="canon in canons" :key="canon.name" >{{ canon.name }}</a>
+                            <a :class="canon.name" @click="chooseCanonAnnotate(canon.name)" v-for="canon in customCanonTree" :key="canon.name" >{{ canon.name }}</a>
                             <div class="annotate-menu__canons-close">
                                 <span @click="closeAnnotationMenu()">X</span>
                             </div>
                         </nav>
-                        <nav class="annotate-menu__categories" v-for="canon in canons" :key="canon.name" v-if="isAnnotateCategories && canon.name === annotateCanon">
+                        <nav class="annotate-menu__categories" v-for="canon in customCanonTree" :key="canon.name" v-if="isAnnotateCategories && canon.name === annotateCanon">
                             <a :class="canon.name" v-for="cat in canon.categories" :key="cat.name" @click="chooseCategoryAnnotate(cat.id)" :title="cat.desc">{{ cat.name }}</a>  
                         </nav>
                         <nav class="annotate-menu__subcategories" v-if="isAnnotateSubcategories">
@@ -95,6 +95,7 @@
                                     <h1>{{ annotateCurrentSubcategoryObject.name }}</h1>
                                     <p>{{ annotateCurrentSubcategoryObject.description }}</p>
                                 </div>
+                                <router-link :to="'/term/' + annotateCurrentCategoryObject.id" tag="a" class="annotate-desc-text__wiki"><i class="fa fa-commenting"></i>Wiki</router-link>
                                 <div class="annotate-menu__canons-close"><span @click="annotatingMode = false; isAnnotateFields = false; isVideoline = false; selectedMove = 'Other';">X</span></div>
                             </div>  
                             <div class="annotate-comment field" v-show="selectedMove === 'Other'">
@@ -122,10 +123,10 @@
                     <!-- FUTURE
                         <div class="annotate-menu" v-show="isEditMenu">
                             <nav class="annotate-menu__canons">
-                                <a @click="chooseCanonAnnotate(c.name, $event)" v-for="c in canons">{{ c.name }}</a>
+                                <a @click="chooseCanonAnnotate(c.name, $event)" v-for="c in customCanonTree">{{ c.name }}</a>
                                 <div class="annotate-menu__canons-close"><span @click="isEditing = false">X</span></div>
                             </nav>
-                            <nav class="annotate-menu__categories" v-for="canon in canons" v-if="canon.name === annotateCanon">
+                            <nav class="annotate-menu__categories" v-for="canon in customCanonTree" v-if="canon.name === annotateCanon">
                                 <a v-for="cat in canon.categories" @click="chooseCategoryAnnotate(cat.name)" v-bind:title="cat.description">{{ cat.name }}</a>  
                             </nav>
                         </div> 
@@ -139,7 +140,7 @@
                             </div>
                         -->
                         <div class="annotate-fields-right">
-                            <div class="annotate-desc field" v-for="canon in canons" :key="canon.name" v-if="canon.name === annotateCanon">
+                            <div class="annotate-desc field" v-for="canon in customCanonTree" :key="canon.name" v-if="canon.name === annotateCanon">
                                 <p class="control" v-for="cat in canon.categories" :key="cat.id" v-if="cat.id === annotateCategoryId">"{{ cat.description }}"</p>
                                 <div class="annotate-menu__canons-close"><span @click="isEditing = false; isVideoline = false; isEditFields = false">X</span></div>
                             </div>
@@ -225,7 +226,7 @@
                 <div class="cards-content" v-if="canonLoadingDone">
                     <nav class="card-menu">
                         <!-- <a style="display:flex;flex-direction:column;justify-content:center;margin:5px;color:#4a4a4a;"><i class="fa fa-graduation-cap" style="text-align:center;"></i><span style="font-size:10px;margin-top:-3px;">Professor only</span></a> -->
-                        <a class="card-menu__item" :class="canon.name" v-for="canon in canons" :key="canon.name"  @click="chooseCanonFilter($event, canon.name)" >
+                        <a class="card-menu__item" :class="canon.name" v-for="canon in customCanonTree" :key="canon.name"  @click="chooseCanonFilter($event, canon.name)" >
                             <i class="card-menu__icon fa fa_1x" style="margin-top:20px;" :class="{ 'fa-pencil-square-o': (canon.name === 'Invention'), 'fa-book': (canon.name === 'Structure'), 'fa-commenting': (canon.name === 'Delivery'), 'fa-eye': (canon.name === 'Visuals'), 'fa-diamond': (canon.name === 'Style') }"></i>
                             <span class="card-menu__title">{{ canon.name }}</span>
                             <div class="card-menu__triangle" :class="canon.name + '-border-triangle'" ></div> 
@@ -314,8 +315,10 @@
                 videoCurrentTimeMMSS: 0,
                 videoIndex: 0,
                 // ANNOTATE SECTION
+                customCanonTree: [],
                 annotatingMode: false,
                 annotateCanon: 'Delivery',
+                annotateCanonIndex: 0,
                 annotateCategoryId: '', // The category id from the category that is chosen.
                 annotateSubcategoryId: '', // The subcategory id from the category that is chosen.
                 annotateCurrentCategoryObject: { canon: '', description: '', id: '', name: '', subcategories: [] },
@@ -393,7 +396,16 @@
                 this.isAnnotateCanons = false
 
                 // Fills the current category object.
-                var categories = this.canons[this.annotateCanon].categories
+                // Need to find where the annotateCanon is in customCanonTree due to 
+                // the fact that customCanonTree is array of objects, not object of objects
+                for (var c = 0; c < this.customCanonTree.length; c++) {
+                    if (this.customCanonTree[c].name === this.annotateCanon) {
+                        // console.log("found canon!")
+                        this.annotateCanonIndex = c
+                        break
+                    }
+                }
+                var categories = this.customCanonTree[this.annotateCanonIndex].categories
                 for (var i = 0; i < categories.length; i++) {
                     if (categories[i].id === currentCategoryId) {
                         this.annotateCurrentCategoryObject = categories[i]
@@ -442,6 +454,22 @@
                 
                 // Checking for new annotations in current video (for real time annotating)
                 this.$store.dispatch('getVideoAnnotations', this.id)
+
+                // Custom categories trees
+                // console.log(this.canons, this.currentClass)
+                // console.log(this.videos)
+                // Find the customized tree for this video's genre
+                var self = this
+				this.$store.dispatch('getGenres')
+				.then(function() {
+					for (var g = 0; g < self.currentClass.catFilter.length; g++) {
+                        if (self.currentClass.catFilter[g].genreId === self.videos.genre) {
+                            // console.log("found genre!")
+                            self.customCanonTree = self.currentClass.catFilter[g].tree
+                            break
+                        }
+                    }
+                })
 
                 this.annotatingMode = true
                 this.isAnnotateCanons = true // Opens canons menu.
@@ -674,7 +702,7 @@
                 // Find the description of the chosen annotate category.
                 // This is for category annotation only.
                 var annotateDesc
-                var annotateCategories = this.canons[this.annotateCanon].categories
+                var annotateCategories = this.customCanonTree[this.annotateCanonIndex].categories
                 for (var i = 0, l = annotateCategories.length; i < l; i++) {
                     if (this.annotateCategoryId === annotateCategories[i].id)
                         annotateDesc = annotateCategories[i].description
@@ -1893,15 +1921,23 @@
 
             .annotate-desc-text {
                 margin-left: 60px;
+                color: #FFF;
             }
                 .annotate-desc-text h1{
-                    color: #FFF;
                     font-size: 1.3em;
                     text-transform: uppercase;
                 }
                 .annotate-desc-text p{
                     font-style: italic;
                 }
+
+                .annotate-desc-text__wiki {
+                    color: #fff;
+                    margin-left: 10px;
+                }
+                    .annotate-desc-text__wiki i {
+                        margin-right: 2px;
+                    }
 
             .annotate-effectiveness {
                 display: flex;
@@ -1998,7 +2034,7 @@
         }
 
     .timeline-container {
-        height: 556px;
+        height: 37.76vw;
         overflow-y: scroll;
         margin-top: 20px;
     }
