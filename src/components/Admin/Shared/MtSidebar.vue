@@ -4,13 +4,13 @@
 
 			<!-- Sidebar buttons/actions  -->
 			<div class="sidebar__actions" v-if="!loadingClasses">
-				<a class="sidebar__actionsLink" v-if="role === 'administrator' || role === 'professor'" @click="modalCreateClassIsOpen = true"><i class="fa fa-plus"></i>Create new class</a>
+				<a class="sidebar__actionsLink" v-if="role === 'administrator' || role === 'professor'" @click="createNewClassModalOpen();"><i class="fa fa-plus"></i>Create new class</a>
 				<a class="sidebar__actionsLink" v-if="role === 'administrator'" @click="modalInviteUserIsOpen = true"><i class="fa fa-plus"></i>Invite a new user</a>
 				<a class="sidebar__actionsLink" v-if="role === 'administrator' && (currentClass.name !== 'Home')" @click="modalDeleteClassIsOpen = true"><i class="fa fa-trash"></i>Delete this class</a>
 				<a class="sidebar__actionsLink" v-if="(role === 'administrator' || role === 'professor') && !(currentClass.name === 'Home')" @click="openAssignmentsModal()"><i class="fa fa-file-text-o"></i>Assignments</a>
 				<a class="sidebar__actionsLink" v-if="(role === 'administrator' || role === 'professor') && !(currentClass.name === 'Home')" @click="modalArchiveClassIsOpen = true"><i class="fa fa-archive"></i>Archive this class</a>
 				<a class="sidebar__actionsLink" v-if="(role === 'administrator' || role === 'professor') && !(currentClass.name === 'Home')" @click="toggleModalStudentRequests()"><i class="fa fa-file-text-o"></i>Student requests ({{ requestedStudents.length }})</a>
-				<a class="sidebar__actionsLink" v-if="role === 'administrator' || role === 'professor'" @click="createCategoriesTreeDataForm(); modalGenreCustomization = true"><i class="fa fa-commenting-o"></i>Categories</a>
+				<!-- <a class="sidebar__actionsLink" v-if="role === 'administrator' || role === 'professor'" @click="createElementTree(); modalGenreCustomization = true"><i class="fa fa-commenting-o"></i>Categories</a> -->
 				<a class="sidebar__actionsLink" v-if="role === 'student'" @click="toggleModalClassesToEnroll()"><i class="fa fa-plus"></i>Find a class to enroll</a>
 				<a class="sidebar__actionsLink" v-if="role === 'student' && (currentClass.name !== 'Home')" @click="openAssignmentsModal()"><i class="fa fa-file-text-o"></i>Class Assignments</a>
 			</div>
@@ -84,28 +84,56 @@
 			</div>
 
 			<!-- administrator, professor -->
-			<el-dialog title="Add new class" :visible.sync="modalCreateClassIsOpen">
-					<el-form :model="newClass">
-							<el-form-item label="Name">
-									<el-input v-model="newClass.name" placeholder="Advanced Essay Workshop"></el-input>
-							</el-form-item>
-							<el-form-item label="Department">
-								<el-input v-model="newClass.department" placeholder="Comparative Media Studies / Writing"></el-input>
-									<!-- <el-select  placeholder="Choose a department" >
-										<el-option v-model="newClass.department" :label="c.department" :value="c.department" v-for="c in classes" v-bind:key="c.title"></el-option>
-									</el-select> -->
-							</el-form-item>
-							<el-form-item label="Number">
-									<el-input v-model="newClass.number" placeholder="21W.745"></el-input>
-							</el-form-item>
-							<el-form-item label="Semester">
-									<el-input v-model="newClass.semester" placeholder="Spring 2018"></el-input>
-							</el-form-item>
-					</el-form>
-					<span slot="footer" class="dialog-footer">
-							<el-button @click="modalCreateClassIsOpen = false">Cancel</el-button>
-							<el-button class="add-class-btn" @click="createClass(); modalCreateClassIsOpen = false;">Create Class</el-button>
-					</span>
+			<el-dialog title="Add new class" :visible.sync="modalCreateClassIsOpen" :before-close="handleNewClassClose">
+				<el-steps :active="createModalActive" finish-status="success" space="97%">
+					<el-step></el-step>
+					<el-step></el-step>
+				</el-steps>
+				
+				<!-- First Step -->
+				<el-form :model="newClass" v-if="createModalActive == 0">
+					<el-form-item label="Name">
+						<el-input v-model="newClass.name" placeholder="Advanced Essay Workshop" required></el-input>
+					</el-form-item>
+					<el-form-item label="Department">
+						<el-input v-model="newClass.department" placeholder="Comparative Media Studies / Writing" required></el-input>
+						<!-- <el-select  placeholder="Choose a department" >
+							<el-option v-model="newClass.department" :label="c.department" :value="c.department" v-for="c in classes" v-bind:key="c.title"></el-option>
+						</el-select> -->
+					</el-form-item>
+					<el-form-item label="Number">
+						<el-input v-model="newClass.number" placeholder="21W.745" required></el-input>
+					</el-form-item>
+					<el-form-item label="Semester">
+						<el-input v-model="newClass.semester" placeholder="Spring 2018" required></el-input>
+					</el-form-item>
+				</el-form>
+				<!-- /First Step -->
+				
+				<!-- Second Step -->
+				<div v-if="createModalActive == 1">
+					<h3 style="margin-bottom:10px;">Choose genre:</h3>
+					<el-select v-model="currentGenre" placeholder="Choose a genre" style="width:300px" @change="handleGenreSelection()">
+						<el-option v-for="g in genres" :key="g.name" :label="g.name" :value="g.name"></el-option>
+					</el-select>
+					<br>
+					<!-- <el-button v-if="currentGenre !== ''" style="margin-top:10px" @click="modalAddCategoryIsOpen = true"> Add category</el-button> -->
+					<!-- <el-radio class="radio" v-model="currentGenre" v-for="g in genres" :key="g.name" :label="g.name"></el-radio> -->
+					<br>
+					<br>
+					<div v-if="currentGenre">
+						<p>Choose canons:</p>
+						<el-tree :data="elementTreeForm" :props="genreProps" @check-change="handleCheckChange" show-checkbox ref='elementTreeRef' node-key='id'></el-tree>
+					</div>
+				</div>
+				<!-- /Second Step -->
+
+				<span slot="footer" class="dialog-footer">
+					<el-button v-if="createModalActive == 0" style="float:left;" @click="handleNewClassClose">Cancel</el-button>
+					<el-button v-if="createModalActive == 0" class="add-class-btn" @click="nextStep">Next Step</el-button>
+					<el-button v-if="createModalActive == 1" style="float:left;" @click="previousStep">Previous Step</el-button>
+					<el-button v-if="createModalActive == 1" class="add-class-btn" @click="createClass(); modalCreateClassIsOpen = false;">Create Class</el-button>
+				</span>
 			</el-dialog>
 
 			<el-dialog :title="'Do you want to archive `' + currentClass.name + '` class?'" :visible.sync="modalArchiveClassIsOpen">
@@ -118,27 +146,27 @@
 				<el-button class="add-class-btn" @click="unArchiveClass()"><strong>Unarchive Class</strong></el-button>
 			</el-dialog>	
 
-			<el-dialog title="Genre customization" :visible.sync="modalGenreCustomization" size="large">
-					<h3 style="margin-bottom:10px;">Choose genre:</h3>
-					<el-select v-model="currentGenre" placeholder="Choose a genre" style="width:300px">
-						<el-option v-for="g in genres" :key="g.name" :label="g.name" :value="g.name"></el-option>
-					</el-select>
-					<br>
-					<el-button v-if="currentGenre !== ''" style="margin-top:10px" @click="modalAddCategoryIsOpen = true"> Add category</el-button>
-					<!-- <el-radio class="radio" v-model="currentGenre" v-for="g in genres" :key="g.name" :label="g.name"></el-radio> -->
+			<!-- <el-dialog title="Categories customization" :visible.sync="modalGenreCustomization" size="large">
+				<h3 style="margin-bottom:10px;">Choose genre:</h3>
+				<el-select v-model="currentGenre" placeholder="Choose a genre" style="width:300px">
+					<el-option v-for="g in genres" :key="g.name" :label="g.name" :value="g.name"></el-option>
+				</el-select>
+				<br>
+				<el-button v-if="currentGenre !== ''" style="margin-top:10px" @click="modalAddCategoryIsOpen = true"> Add category</el-button>
+				<el-radio class="radio" v-model="currentGenre" v-for="g in genres" :key="g.name" :label="g.name"></el-radio>
 
-					<br/>
-					<br/>
-					<div v-if="currentGenre">
-						<p>Choose canons:</p>
-						<el-tree :data="canons" :props="genreProps" @node-click="handleNodeClick" show-checkbox>
-						</el-tree>
-					</div>
-					
-					<span slot="footer" class="dialog-footer">
-							<el-button @click="modalGenreCustomization = false; currentGenre = ''">Close</el-button>
-					</span>
-			</el-dialog>	
+				<br/>
+				<br/>
+				<div v-if="currentGenre">
+					<p>Choose canons:</p>
+					<el-tree :data="canons" :props="genreProps" @node-click="handleNodeClick" show-checkbox>
+					</el-tree>
+				</div>
+				
+				<span slot="footer" class="dialog-footer">
+						<el-button @click="modalGenreCustomization = false; currentGenre = ''">Close</el-button>
+				</span>
+			</el-dialog>	 -->
 
 			<el-dialog title="Add category" :visible.sync="modalAddCategoryIsOpen" size="small">
 					<el-select style="margin-bottom:10px;" v-model="newCategoryCanon" placeholder="Choose a canon">
@@ -310,8 +338,7 @@
                 </el-tabs>
 				<p v-if="assignments.length === 0 && role === 'student' && !loadingAssignments" ><i>No assignments</i></p>
             </el-dialog>
-
-			
+	
 			<!-- Administrator/Professor - Student requests -->
 			<el-dialog :visible.sync="modalStudentRequestsIsOpen">
 				<span class="modal-student-requests" slot="title"><b><i class="fa fa-book"></i> {{currentClass.name}} - Enrollments</b></span>
@@ -480,6 +507,7 @@
 				videosWithoutUserSubs: [], // List of all class videos for current assignment
 				// Professor, Administrator
 				modalCreateClassIsOpen: false,
+				createModalActive: 0,
 				modalArchiveClassIsOpen: false,
 				modalUnarchiveClassIsOpen: false,
 				modalStudentRequestsIsOpen: false,
@@ -510,99 +538,22 @@
 				// Categories
 				// categoriesGenre: '',
 				currentGenre: '',
+				previousGenre: '',
+				firstTimeSelectingGenre: true,
 				modalGenreCustomization: false,
 				modalAddCategoryIsOpen: false,
 				newCategoryCanon: "",
 				newCategoryName: "",
 				newCategoryDesc: "",
-				// Genre customization
-				// Genre version 1
-				canons: [
-					{
-						label: 'Moves',
-						children: [
-					// 		{ label: 'Introduction', children: [
-					// 			{ label: 'Shows that the research area is important/central/interesting/problematic/relevant and narrows down to the topic of the research' },
-					// 			{ label: 'States the value of the present research and explains why it was conducted' },
-					// 			{ label: 'Discusses the definitions of key terms' },
-					// 			{ label: 'Summarizes and previews the methods used' },
-					// 			{ label: 'Presents basic equations' },
-					// 		]},
-					// 		{ label: 'Methodology', children: [
-					// 			{ label: 'Describes materials and instrumentation in the study' },
-					// 			{ label: 'Describes tasks (actions) in the study' },
-					// 			{ label: 'Describes the procedures of an experiment (activities)' },
-					// 			{ label: 'Presents justification of techniques' },
-					// 			{ label: 'Describes variables in the study' },
-					// 			{ label: 'Describes the procedures used in data analysis' },
-					// 			{ label: 'Describes the relations between the experiment and prior/subsequent experiments' },
-					// 		]},
-					// 		{ label: 'Results and Discussion', children: [
-					// 			{ label: 'Shows that the research area is important/central/interesting/problematic/relevant and narrows down to the topic of the research' },
-					// 			{ label: 'States the value of the present research and explains why it was conducted' },
-					// 			{ label: 'Discusses the definitions of key terms' },
-					// 			{ label: 'Summarizes and previews the methods used' },
-					// 			{ label: 'Presents basic equations' },
-					// 		]},
-					// 		{ label: 'Conclusion', children: [
-					// 			{ label: 'xxxxxxxxxx' },
-					// 		]},
-					// 		{ label: 'Question and Answer', children: [
-					// 			{ label: 'xxxxxxxxxx' },
-					// 		]},
-						]
-					}, 
-					{
-						label: 'Structure',
-						children: [
-							// {
-							// 	"_id": "59a86e7e0110587e400ff79b",
-							// 	"name": "Coherence", // child label
-							// 	"canon": "Structure", // canon label
-							// 	"description": "Connects the central rhetorical moves for each section explicitly to each other" //desc
-							// }
-							// { label: 'Terms', desc: 'Provides overview of the talk, emphasizing the connection between key terms and concepts'},
-							// { label: 'Conceptual transitions' },
-							// { label: 'Line of argument' },
-							// { label: 'Central moves' },
-						]
-					}, 
-					{
-						label: 'Delivery',
-						children: [
-							// { label: 'Volume' },
-							// { label: 'Gestures' },
-							// { label: 'Metadiscourse' },
-							// { label: 'Posture' },
-							// { label: 'Language' },
-						]
-					}, 
-					{
-						label: 'Style',
-						children: [
-							// { label: 'Coherence' },
-							// { label: 'Concision' },
-							// { label: 'Flow' },
-							// { label: 'Emphasis' },
-							// { label: 'Figures of Speech' },
-							// { label: 'Figures of Sound' },
-						]
-					},
-					{
-						label: 'Visuals',
-						children: [
-							// { label: 'Pictorial cues' },
-							// { label: 'Slide titles' },
-							// { label: 'Image-text highlight' },
-							// { label: 'Graphics' },
-							// { label: 'Memorable images' }
-						]
-					},
-				],
+				// Categories customization
+				localTrees: [], // Data structure that contains a customized tree for each genre
+				elementTreeForm: [], // Data structure for the element library to read from
 				genreProps: {
 					children: 'children',
 					label: 'label',
-					desc: 'desc'
+					desc: 'desc',
+					checked: 'checked',
+					indeterminate: 'indeterminate'
 				},
 				categoryProps: {
 					children: 'children',
@@ -614,7 +565,8 @@
 					department: '',
 					name: '',
 					number: '',
-					semester: ''
+					semester: '',
+					catFilter: []
 				},
 				invitation: {
 					"email": '',
@@ -653,6 +605,149 @@
 			}
 		},
 		methods: {
+			handleGenreSelection() {
+				if (this.firstTimeSelectingGenre) {
+					this.previousGenre = this.currentGenre
+					this.firstTimeSelectingGenre = false
+				}
+				else {
+					console.log("customizeLocalTreeFromElTree with genre:", this.previousGenre)
+					this.customizeLocalTreeFromElTree(this.previousGenre)
+				}
+				console.log("creating basic element tree from:", this.canons)
+				this.createElementTree(this.canons)
+				console.log("currentGenre: ", this.currentGenre, " - previous: ", this.previousGenre)
+				this.previousGenre = this.currentGenre
+				
+			},
+			createNewClassModalOpen() {
+				var self = this
+				// Initialize the local cat filters, etc
+				this.$store.dispatch('getCanons')
+				.then(function() {
+					return self.$store.dispatch('getGenres')
+				})
+				.then(function() {
+					// Initialize localTrees with objects. Each object corresponds to a genre from the backend.
+					// Contains genre name and id, plus the tree for this genre
+					for (var g = 0; g < self.genres.length; g++) {
+						self.localTrees.push({
+							genreName: self.genres[g].name,
+							genreId: self.genres[g].id,
+							// tree defaults to the basic tree from the backend
+							// This is done for deep copying of the values instead of references
+							// tree: JSON.parse(JSON.stringify(self.canons)) // TODO this is probably bad
+							tree: []
+						})
+						var ltGenLen = self.localTrees.length
+						// Add tree, deep copying manually and converting to array
+						for (var canonName in self.canons) {
+							var canonObject = self.canons[canonName]
+							// Add new canon
+							self.localTrees[ltGenLen - 1].tree.push({
+								categories: [],
+								name: canonObject.name
+							})
+							var ltTreeLen = self.localTrees[ltGenLen - 1].tree.length
+							for (var catName in canonObject.categories) {
+								var catObject = canonObject.categories[catName]
+								self.localTrees[ltGenLen - 1].tree[ltTreeLen - 1].categories.push({
+									canon: canonObject.name,
+									description: catObject.description,
+									id: catObject.id,
+									name: catObject.name,
+									subcategories: []
+								})
+								var ltTreeCatLen = self.localTrees[ltGenLen - 1].tree[ltTreeLen - 1].categories.length
+								if (catObject.subcategories.length != 0) { // This category has subcategories
+									for (var subcatName in catObject.subcategories) {
+										var subcatObject = catObject.subcategories[subcatName]
+										self.localTrees[ltGenLen - 1].tree[ltTreeLen - 1].categories[ltTreeCatLen - 1].subcategories.push({
+											canon: subcatObject.canon,
+											description: subcatObject.description,
+											id: subcatObject.id,
+											name: subcatObject.name,
+											parentId: subcatObject.parentId,
+										})
+									}
+								}
+							}
+						}
+					}
+				})
+				.then(function() {
+					self.modalCreateClassIsOpen = true
+				})
+			},
+			setCheckedTreeNodes(){
+				// for (var canonName in this.elementTreeForm) {
+				// 	var canonObject = this.elementTreeForm[canonName]
+				// 	// console.log(this.elementTreeForm[canonName].label)
+				// 	// console.log(this.$refs.elementTreeRef)
+				// 	this.$refs.elementTreeRef.setChecked({
+				// 		label: canonObject.label,
+				// 		desc: canonObject.desc,
+				// 		checked: canonObject.checked,
+				// 		indeterminate: canonObject.indeterminate,
+				// 		children: canonObject.children
+				// 	})
+        		// 	// console.log(this.$refs.elementTreeRef.getCheckedNodes());
+					
+				// 	for (var catName in this.elementTreeForm[canonName].children) {
+				// 		var catObject = canonObject.children[catName]
+				// 		this.$refs.elementTreeRef.setChecked({
+				// 			label: catObject.label
+				// 		})
+				// 		for (var subcatName in catObject.children) {
+				// 			var subcatObject = catObject.children[subcatName]
+				// 			this.$refs.elementTreeRef.setChecked({
+				// 				label: subcatObject.label
+				// 			})
+				// 		}
+				// 	}
+				// }
+			},
+			nextStep() {
+				if(this.newClass.department !== '' && this.newClass.name !== '' && this.newClass.number !== '' && this.newClass.semester !== ''){
+					// Cycle
+					// if(this.createModalActive++ > 2) {
+					// 	this.createModalActive = 0;
+					// } 
+					this.createModalActive++
+				}
+				else {
+					this.$message({
+						showClose: true,
+						message: 'Please fill out all the fields.',
+						type: 'warning'
+					});
+				}
+			},
+			previousStep() {
+				if(this.createModalActive-- <= 0) {
+					this.createModalActive = 0;
+				}
+			},
+			handleNewClassClose() { //(done) {
+				// this.$confirm('Are you sure to close this dialog?')
+				// .then(_ => {
+				// 	done();
+				// })
+				// .catch(_ => {});
+				this.currentGenre = ''
+				this.previousGenre = ''
+				this.firstTimeSelectingGenre = true
+				this.createModalActive = 0
+				this.newClass = {
+					archived: false,
+					department: '',
+					name: '',
+					number: '',
+					semester: '',
+					catFilter: []
+				}
+				this.modalCreateClassIsOpen = false
+			},
 			changeAssignmentTabEvent() {
 				this.loadingAssignments = true
 				this.videosWithoutUserSubs = []
@@ -899,39 +994,42 @@
 
 			},
 			createClass() {	
-				this.newClass['professorId'] = this.userId
-				var self = this
-				this.$store.dispatch('createClass', {newClass: this.newClass})
-				.then(function(response) {
-					if (self.role === 'administrator') {
-						self.loadingClasses = true
-						self.updateAdminClasses()
-						.then(function () {
-							self.loadingClasses = false
-						})
-					}
-					else if (self.role === 'professor') {
-						self.loadingClasses = true
-						self.updateProfessorClasses()
-						.then(function () {
-							self.loadingClasses = false
-						})
-					}
-					// Select created class
-					self.$store.commit('CURRENT_CLASS_SELECT', {
-						name: response.data.data.name, 
-						id: response.data.data.id, 
-						number: response.data.data.number, 
-						department: response.data.data.department
-					})
-				})
-				this.newClass = {
-					archived: false,
-					department: '',
-					name: '',
-					number: '',
-					semester: ''
-				}
+				console.log("Now sending new class to server...")
+				// this.newClass['professorId'] = this.userId
+				// var self = this
+				// this.$store.dispatch('createClass', {newClass: this.newClass})
+				// .then(function(response) {
+				// 	if (self.role === 'administrator') {
+				// 		self.loadingClasses = true
+				// 		self.updateAdminClasses()
+				// 		.then(function () {
+				// 			self.loadingClasses = false
+				// 		})
+				// 	}
+				// 	else if (self.role === 'professor') {
+				// 		self.loadingClasses = true
+				// 		self.updateProfessorClasses()
+				// 		.then(function () {
+				// 			self.loadingClasses = false
+				// 		})
+				// 	}
+				// 	// Select created class
+				// 	self.$store.commit('CURRENT_CLASS_SELECT', {
+				// 		name: response.data.data.name, 
+				// 		id: response.data.data.id, 
+				// 		number: response.data.data.number, 
+				// 		department: response.data.data.department,
+				// 		catFilter: response.data.data.catFilter
+				// 	})
+				// })
+				// this.newClass = {
+				// 	archived: false,
+				// 	department: '',
+				// 	name: '',
+				// 	number: '',
+				// 	semester: '',
+				// 	catFilter: []
+				// }
 			},
 			archiveClass() {
 				// 1. Adds current class to Archived Classes.
@@ -1394,55 +1492,175 @@
 				})
 			},
 			// CATEGORIES
-			createCategoriesTreeDataForm() {
-				try{
-					// Clear out canon children, to get fresh ones from server
-					for (var canon = 0; canon < this.canons.length; canon++) {
-						this.canons[canon].children = []
+			createElementTree(tree) {
+				// Create the element tree from the given tree
+				// console.log(this.currentGenre)
+				// var genreIndex = 0
+				// for (var g = 0; g < this.genres.length; g++) {
+				// 	if (this.localTrees[g].genreName === this.currentGenre) {
+				// 		genreIndex = g
+				// 		break
+				// 	}
+				// }
+				console.log("creating element tree from:", tree)
+				// Clear out elementTreeForm to get fresh ones
+				this.elementTreeForm = []
+				// Loop through given tree's canons
+				for (var canon in tree) {
+					// console.log(tree[canon])
+					// Add canon
+					this.elementTreeForm.push({
+						label: canon,
+						id: '', //tree[canon].id, // doesnt exist on backend
+						desc: '',
+						children: []
+					})						
+					// Add canon description, if one exists
+					if (tree[canon].description) {
+						this.elementTreeForm[this.elementTreeForm.length - 1].desc = 
+							tree[canon].description
 					}
-					// Loop through server categories
-					for (var category = 0; category < this.categories.length; category++) {
-						// Search for this category.canon in canons array
-						for (var canon = 0; canon < this.canons.length; canon++) {
-							if (this.canons[canon].label === this.categories[category].canon){
-								// Push this category to the appropriate canon children array
-								this.canons[canon].children.push(
-									{
-										label: this.categories[category].name, 
-										desc: this.categories[category].description
+					// Loop through this canon's categories
+					for (var cat in tree[canon].categories) {
+						// console.log(tree[canon].categories[cat])
+						// Add canon's category
+						this.elementTreeForm[this.elementTreeForm.length - 1].children.push({
+							label: tree[canon].categories[cat].name,
+							id: tree[canon].categories[cat].id,
+							desc: '', 
+							children: []
+						})
+						// Add category's description, if one exists
+						if (tree[canon].categories[cat].description) {
+							this.elementTreeForm[this.elementTreeForm.length - 1].children[this.elementTreeForm[this.elementTreeForm.length - 1].children.length - 1].desc = 
+								tree[canon].categories[cat].description
+						}
+						// Loop through this category's subcategories if there are any
+						for (var subCat in tree[canon].categories[cat].subcategories) {
+							// console.log(tree[canon].categories[cat].subcategories[subCat])
+							// Add subcategory
+							this.elementTreeForm[this.elementTreeForm.length - 1].children[this.elementTreeForm[this.elementTreeForm.length - 1].children.length - 1].children.push({
+								label: tree[canon].categories[cat].subcategories[subCat].name,
+								id: tree[canon].categories[cat].subcategories[subCat].id,
+								desc: '',
+								//children: [] //sub-subcategories
+							})
+							// Add subcategory's description, if one exists
+							if (tree[canon].categories[cat].subcategories[tree[canon].categories[cat].subcategories.length - 1].description) {
+								this.elementTreeForm[this.elementTreeForm.length - 1].children[this.elementTreeForm[this.elementTreeForm.length - 1].children.length - 1].children[this.elementTreeForm[this.elementTreeForm.length - 1].children[this.elementTreeForm[this.elementTreeForm.length - 1].children.length - 1].children.length - 1].desc = 
+									tree[canon].categories[cat].subcategories[subCat].description
+							}
+							// More subcategories/children can be added here
+						}
+					}
+				}
+			},
+			customizeLocalTreeFromElTree(gen) {
+				// Get checked data from elementTree and save the customized trees to localTree for genre 'gen'
+				var checkedNodesArray = this.$refs.elementTreeRef.getCheckedNodes()
+				console.log(this.$refs.elementTreeRef.getCheckedNodes());
+				
+				console.log("Getting customized tree")
+				var genreIndex = 0
+				for (var i = 0; i < this.localTrees.length; i++) {
+					if (this.localTrees[i].genreName == gen) {
+						genreIndex = i
+						break
+					}
+				}
+				console.log("Genre index:",genreIndex)
+				console.log("localtrees[genreIndex]:", this.localTrees[genreIndex])
+				for (var canonName in this.localTrees[genreIndex].tree) {
+					var canonObject = this.localTrees[genreIndex].tree[canonName]
+					// console.log(canonObject)
+					for (var i = 0; i < canonObject.categories.length; i ++) {
+						var catObject = canonObject.categories[i]
+						// console.log(catObject)
+
+						if (catObject.subcategories.length != 0) {
+							for (var j = 0; j < catObject.subcategories.length; j ++) {
+								var subcatObject = catObject.subcategories[j]
+								var found = false
+								// console.log("searching for ", subcatObject.name)
+								for (var checkedNodeName in checkedNodesArray) {
+									if (checkedNodesArray[checkedNodeName].id == subcatObject.id) {
+										found = true
+										// console.log("found ", checkedNodesArray[checkedNodeName].name)
 									}
-								)
+								}
+								if (!found) {
+									// console.log("deleting ", subcatObject.name)
+									catObject.subcategories.splice(j, 1)
+									j--
+								}
+
+							}
+						}
+						else {
+							var found = false
+							// console.log("searching for ", catObject.name)
+							for (var checkedNodeName in checkedNodesArray) {
+								if (checkedNodesArray[checkedNodeName].id == catObject.id) {
+									found = true
+									// console.log("found ", checkedNodesArray[checkedNodeName].name)
+								}
+							}
+							if (!found) {
+								// console.log("deleting ", catObject.name)
+								canonObject.categories.splice(i, 1)
+								i--
 							}
 						}
 					}
 				}
-				catch (err) {
-					console.log("MtSidebar.vue: createCategoriesTreeDataForm error: ", err)
+				// Clean up canons with no children categories
+				for (var i = 0; i < this.localTrees[genreIndex].tree.length; i ++) {
+					if (this.localTrees[genreIndex].tree[i].categories.length == 0) {
+						this.localTrees[genreIndex].tree.splice(i, 1)
+						i --
+					}
 				}
+				// This code handles Invention's categories clean up
+				// TODO This is not dynamic. If new canons with subcats are added, this needs to be changed!
+				for (var i = 0; i < this.localTrees[genreIndex].tree.length; i ++) {
+					if (this.localTrees[genreIndex].tree[i].name == "Invention") {
+						for (var j = 0; j < this.localTrees[genreIndex].tree[i].categories.length; j++) {
+							if (this.localTrees[genreIndex].tree[i].categories[j].subcategories.length == 0) {
+								this.localTrees[genreIndex].tree[i].categories.splice(j, 1)
+								j--
+							}
+						}
+						if (this.localTrees[genreIndex].tree[i].categories.length == 0) {
+							this.localTrees[genreIndex].tree.splice(i, 1)
+						}
+					}
+				}
+				console.log("Saved tree:", this.localTrees[genreIndex].tree)
 			},
 			addNewCategory() {
 				console.log("Adding ", this.newCategoryName, "category to ", this.newCategoryCanon, "canon")
 				console.log("With description ", this.newCategoryDesc)
-				for (var canon = 0; canon < this.canons.length; canon++) {
-					if (this.canons[canon].label === this.newCategoryCanon){
-						this.canons[canon].children.push(
-							{
-								label: this.newCategoryName, 
-								desc: this.newCategoryName
-							}
-						)
-						this.newCategoryName = ''
-						this.newCategoryDesc = ''
-						this.newCategoryCanon = ''
-					}
-				}
+				console.log("TODO")
+				// for (var canon = 0; canon < this.canons.length; canon++) {
+				// 	if (this.canons[canon].label === this.newCategoryCanon) {
+				// 		this.canons[canon].children.push(
+				// 			{
+				// 				label: this.newCategoryName, 
+				// 				desc: this.newCategoryName
+				// 			}
+				// 		)
+				// 		this.newCategoryName = ''
+				// 		this.newCategoryDesc = ''
+				// 		this.newCategoryCanon = ''
+				// 	}
+				// }
 			},
 			// categoriesListChanged() {
 			// 	console.log(this.categoriesCheckList)
 			// 	console.log('fetchCategories')
 			// },
-			handleNodeClick(data) {
-				console.log(data);
+			handleCheckChange(data, checked, indeterminate) {
+				// console.log(data, checked, indeterminate);
 			},
 			// Student
 			toggleModalClassesToEnroll() {
@@ -1494,7 +1712,7 @@
 				 'assignments', 'genres', 'categories', 
 				 'enrollments', 'userEnrollments', 'enrolledClasses', // Mainly used for student side of enrollments
 				 'classEnrolledStudents', 'classEnrollments', 'users', // Mainly used for admin/professor side of enrollments
-				 'userCollaborated'
+				 'userCollaborated', 'canons'
 				]
             )
 		},
