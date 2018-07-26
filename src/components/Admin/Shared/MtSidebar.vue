@@ -994,42 +994,48 @@
 
 			},
 			createClass() {	
-				console.log("Now sending new class to server...")
-				// this.newClass['professorId'] = this.userId
-				// var self = this
-				// this.$store.dispatch('createClass', {newClass: this.newClass})
-				// .then(function(response) {
-				// 	if (self.role === 'administrator') {
-				// 		self.loadingClasses = true
-				// 		self.updateAdminClasses()
-				// 		.then(function () {
-				// 			self.loadingClasses = false
-				// 		})
-				// 	}
-				// 	else if (self.role === 'professor') {
-				// 		self.loadingClasses = true
-				// 		self.updateProfessorClasses()
-				// 		.then(function () {
-				// 			self.loadingClasses = false
-				// 		})
-				// 	}
-				// 	// Select created class
-				// 	self.$store.commit('CURRENT_CLASS_SELECT', {
-				// 		name: response.data.data.name, 
-				// 		id: response.data.data.id, 
-				// 		number: response.data.data.number, 
-				// 		department: response.data.data.department,
-				// 		catFilter: response.data.data.catFilter
-				// 	})
-				// })
-				// this.newClass = {
-				// 	archived: false,
-				// 	department: '',
-				// 	name: '',
-				// 	number: '',
-				// 	semester: '',
-				// 	catFilter: []
-				// }
+				this.newClass.catFilter = this.localTrees
+				this.newClass['professorId'] = this.userId
+				var self = this
+				// console.log("Now POSTing new class to server:", this.newClass)
+				this.$store.dispatch('createClass', {newClass: this.newClass})
+				.then(function(response) {
+					if (self.role === 'administrator') {
+						self.loadingClasses = true
+						self.updateAdminClasses()
+						.then(function () {
+							self.loadingClasses = false
+						})
+					}
+					else if (self.role === 'professor') {
+						self.loadingClasses = true
+						self.updateProfessorClasses()
+						.then(function () {
+							self.loadingClasses = false
+						})
+					}
+					// Select created class
+					self.$store.commit('CURRENT_CLASS_SELECT', {
+						name: response.data.data.name, 
+						id: response.data.data.id, 
+						number: response.data.data.number, 
+						department: response.data.data.department,
+						catFilter: response.data.data.catFilter
+					})
+				})
+				// console.log("Current class after post:", this.currentClass)
+				this.currentGenre = ''
+				this.previousGenre = ''
+				this.firstTimeSelectingGenre = true
+				this.createModalActive = 0
+				this.newClass = {
+					archived: false,
+					department: '',
+					name: '',
+					number: '',
+					semester: '',
+					catFilter: []
+				}
 			},
 			archiveClass() {
 				// 1. Adds current class to Archived Classes.
