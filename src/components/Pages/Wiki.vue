@@ -21,8 +21,14 @@
             </div>
 
             <div class="wiki__content">
-                <div class="wiki__contentdiv">
-                    <router-link :to="'/term/' + c.id" tag="div" class="term" v-for="c in categories" :key="c.id">
+                <div class="wiki__canons">
+                    <a v-for="canon in canons" :key="canon.id" :class="{'chosen-canon': (canon.name === currentCanon)}" class="wiki__canonsItem" @click="chooseWikiCanon(canon.name)">
+                        <i class="card-menu__icon fa fa_1x" :class="{ 'fa-pencil-square-o': (canon.name === 'Invention'), 'fa-book': (canon.name === 'Structure'), 'fa-commenting': (canon.name === 'Delivery'), 'fa-eye': (canon.name === 'Visuals'), 'fa-diamond': (canon.name === 'Style') }"></i>
+                        <span class="card-menu__title">{{ canon.name }}</span>
+                    </a>
+                </div>
+                <div class="wiki__terms">
+                    <router-link :to="'/term/' + c.id" tag="div" class="term" v-for="c in categories" :key="c.id" v-if="c.canon === currentCanon">
                         <img src="../../assets/black-img.png" class="term__img">
                         <div class="term__metadata">
                             <span class="term__head">
@@ -65,9 +71,19 @@
 	import { mapMutations } from 'vuex'
     
     export default {
+        data() {
+            return {
+                currentCanon: ''
+            }
+        },
+        methods: {
+            chooseWikiCanon(chosenCanon) {
+                this.currentCanon = chosenCanon
+            }
+        },
         computed: {
 			...mapGetters(
-				[ 'categories' ]
+				[ 'canons', 'categories' ]
 			)
 		},
         components: {
@@ -83,11 +99,15 @@
 .wiki__body {
     
 }
-
-    .wiki__contentdiv {
+    .wiki__content {
         display: flex;
         flex-direction: column;
     }
+
+        .wiki__terms {
+            display: flex;
+            flex-direction: column;
+        }
 
 /* ==============================================
                     #WIKI-SUBMENU
@@ -251,5 +271,43 @@
 
                     }
 
+
+
+
+
+/* ==============================================
+                #WIKI-CANONS
+================================================= */
+
+    .wiki__canons {
+        display: flex;
+        justify-content: center;
+    }
+        .wiki__canonsItem {
+            color: #000;
+            padding: 20px;
+            font-size: 18px;
+            border-left: 1px solid #000;
+            border-right: 1px solid #000;
+            border-bottom: 1px solid #000;
+        }
+        .wiki__canonsItem:hover, .chosen-canon {
+            color: #fff;
+            background-color: #000;
+        }
+
+    .Invention { background-color: #15314F;}
+    .Structure { background-color: #F2992E; }
+    .Delivery { background-color: #39A0ED; }
+    .Visuals { background-color: #717C89; }
+    .Style { background-color: #38C97C; }
+
+
+
+
+
+/* ==============================================
+                #TRUMPS
+================================================= */
 
 </style>
