@@ -11,13 +11,16 @@
         <el-dialog title="Post a term" :visible.sync="modalPostATermIsOpen">
             <el-form :model="term">
                     <el-form-item label="Name">
-                        <el-input v-model="term.email" placeholder="Type a name"></el-input>
+                        <el-input v-model="term.name" placeholder="Type a name"></el-input>
                     </el-form-item>
                     <el-form-item label="Canon">
-                            <br/>
+                        <br/>
                         <el-select v-model="term.canon" placeholder="Choose a canon">
-                            <!-- <el-option v-for="r in roles" :key="r.value" :label="r.label" :value="r.value" ></el-option> -->
+                            <el-option v-for="c in canons" :key="c.name" :label="c.name" :value="c.name" ></el-option>
                         </el-select>
+                    </el-form-item>
+                    <el-form-item label="Definition">
+                        <el-input></el-input>
                     </el-form-item>
                     <el-form-item label="Description">
                         <el-input v-model="term.description" type="textarea"></el-input>
@@ -25,7 +28,7 @@
             </el-form>
             <span slot="footer" class="dialog-footer">
                     <el-button @click="modalPostATermIsOpen = false">Cancel</el-button>
-                    <el-button class="add-class-btn">Post a term</el-button>
+                    <el-button class="add-class-btn" @click="postCategory()">Post a term</el-button>
             </span>
         </el-dialog>
 
@@ -33,6 +36,8 @@
 </template>
 
 <script>
+    import { mapGetters } from 'vuex'
+	import { mapMutations } from 'vuex'
     export default {
         data() {
             return {
@@ -43,7 +48,20 @@
                     description: ''
                 }
             }
-        }
+        },
+        methods: {
+            postCategory() {
+                if (this.term.name !== '' && this.term.canon !== '' && this.term.description !== '')
+                    this.$store.dispatch('postCategory', this.term)
+
+                this.modalPostATermIsOpen = false
+            }
+        },
+        computed: {
+			...mapGetters(
+				[ 'categories', 'canons' ]
+			)
+		},
     }
 </script>
 

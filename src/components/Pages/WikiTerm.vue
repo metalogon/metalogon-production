@@ -18,17 +18,31 @@
 
             <div class="term__body">
 
+                <nav class="breadcrumb term__breadcrumb">
+                    <ul>
+                        <li><a @click="goWiki()">{{ currentTerm.canon }}</a></li>
+                        <li class="is-active"><a href="#" aria-current="page">{{ currentTerm.name }}</a></li>
+                    </ul>
+                </nav>
+
                 <div class="term__headings">
                     <h1 class="term__heading">{{ currentTerm.name }}</h1>
                     <p class="term__description">noun | pronounciation</p>
                 </div>
 
-                <div class="term__definition">
-                    <h3 class="definition__title">Definition</h3>
-                    <p class="definition__content">{{ currentTerm.description }}</p>
+                <div class="term__rowtext">
+                    <h3 class="rowtext-title">Definition</h3>
+                    <div class="rowtext-content" @click="definitionIsOpen = true" v-if="!definitionIsOpen">{{ currentTerm.description }}</div>
+                    <textarea class="textarea" v-model="currentTerm.description" @blur="saveEdit(currentTerm.id, 'description')" type="text" v-if="definitionIsOpen"></textarea>
                 </div>
 
-                <div class="term__X">
+                <div class="term__rowtext">
+                    <h3 class="rowtext-title">Description</h3>
+                    <div class="rowtext-content" @click="descriptionIsOpen = true" v-if="!descriptionIsOpen">{{ currentTerm.description }}</div>
+                    <textarea class="textarea" v-model="currentTerm.description" @blur="saveEdit(currentTerm.id, 'description')" type="text" v-if="descriptionIsOpen"></textarea>
+                </div>
+
+                <div class="term__largerow">
                     <div class="term__examples">
 
                         <h3 class="examples__heading">Examples</h3>
@@ -81,7 +95,9 @@
     export default {
         data() {
             return {
-                currentTerm: {}
+                currentTerm: {},
+                definitionIsOpen: false,
+                descriptionIsOpen: false,
             }
         },
         created() {
@@ -89,6 +105,24 @@
                 if ( this.categories[i].id === this.$route.params.id) {
                     this.currentTerm = this.categories[i]
                 }
+            }
+        },
+        methods: {
+            saveEdit(categoryId, field) {
+                this.$store.dispatch('editCategory', { 
+                    id: categoryId, 
+                    categoryBody: { [field]: this.currentTerm[field] } 
+                })
+
+                if (field === 'description') {
+                    this.descriptionIsOpen = false
+                    this.definitionIsOpen = false
+                }
+                // else 
+            },
+            goWiki() {
+                this.$store.commit('SELECT_CURRENT_WIKI_CANON', this.currentTerm.canon)
+                this.$router.push('/wiki')
             }
         },
         computed: {
@@ -189,6 +223,10 @@
         padding: 30px 225px;      
     }
 
+        .term__breadcrumb {
+            margin: 0 !important;
+        }
+
         .term__headings {
             text-align: center;
             padding: 15px 0px;
@@ -211,27 +249,34 @@
                 #TERM-DEFINITION
 ================================================= */
 
-        .term__definition {
+        .term__rowtext {
             padding: 20px 0px;
             border-bottom: 2px solid #eee;
         }
-            .definition__title {
+            .rowtext-title {
                 font-size: 20px;
                 font-weight: 600;
                 color: #1d1f1e;
                 margin-bottom: 5px;
             }
 
-            .definition__content {
+            .rowtext-content {
                 color: gray;
+                padding-bottom: 20px;
+                display: flex;
             }
+
+            .rowtext-content:hover { 
+                background-color: #f5f5f5;
+            }
+
 
 
 /* ==============================================
                 #TERM-EXAMPLES
 ================================================= */
 
-        .term__X {
+        .term__largerow {
             padding: 20px 0px;
             display: flex;
             justify-content: space-between;

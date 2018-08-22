@@ -14,7 +14,8 @@
                 <span class="wiki__heroDescription">If you don't know what a term means just look it up below.</span>
 
                 <span class="wiki__search">
-                    <input class="wiki__searchInput input" type="text" placeholder="Type your search terms here">
+                    <!-- <input class="wiki__searchInput input" type="text" placeholder="Type your search terms here"> -->
+                    <el-autocomplete class="inline-input wiki__searchInput " v-model="searchInputTerm" :fetch-suggestions="querySearch" @select="handleSelect" placeholder="Type your search terms here"></el-autocomplete>
                     <button class="wiki__searchButton button">Search</button>
                 </span>
 
@@ -22,13 +23,13 @@
 
             <div class="wiki__content">
                 <div class="wiki__canons">
-                    <a v-for="canon in canons" :key="canon.id" :class="{'chosen-canon': (canon.name === currentCanon)}" class="wiki__canonsItem" @click="chooseWikiCanon(canon.name)">
+                    <a v-for="canon in canons" :key="canon.id" :class="{'chosen-canon': (canon.name === currentWikiCanon)}" class="wiki__canonsItem" @click="chooseWikiCanon(canon.name)">
                         <i class="card-menu__icon fa fa_1x" :class="{ 'fa-pencil-square-o': (canon.name === 'Invention'), 'fa-book': (canon.name === 'Structure'), 'fa-commenting': (canon.name === 'Delivery'), 'fa-eye': (canon.name === 'Visuals'), 'fa-diamond': (canon.name === 'Style') }"></i>
                         <span class="card-menu__title">{{ canon.name }}</span>
                     </a>
                 </div>
                 <div class="wiki__terms">
-                    <router-link :to="'/term/' + c.id" tag="div" class="term" v-for="c in categories" :key="c.id" v-if="c.canon === currentCanon">
+                    <router-link :to="'/term/' + c.id" tag="div" class="term" v-for="c in categories" :key="c.id" v-if="c.canon === currentWikiCanon">
                         <img src="../../assets/black-img.png" class="term__img">
                         <div class="term__metadata">
                             <span class="term__head">
@@ -73,17 +74,46 @@
     export default {
         data() {
             return {
-                currentCanon: ''
+                searchInputTerm: '',
+                terms: []
             }
+        },
+        mounted() {
+            this.terms = this.loadAll();
         },
         methods: {
             chooseWikiCanon(chosenCanon) {
-                this.currentCanon = chosenCanon
+                this.$store.commit('SELECT_CURRENT_WIKI_CANON', chosenCanon)
+            },
+            querySearch(queryString, cb) {
+                var terms = this.terms;
+                var results = queryString ? terms.filter(this.createFilter(queryString)) : terms;
+                // call callback function to return suggestions
+                cb(results);
+            },
+            createFilter(queryString) {
+                return (term) => {
+                    return (term.value.toLowerCase().indexOf(queryString.toLowerCase()) === 0);
+                };
+            },
+            loadAll() {
+                var allTerms = []
+                for (var i = 0; i < this.categories.length; i++) {
+                    allTerms.push({ value: this.categories[i].name, termId: this.categories[i].id })
+                }
+                return allTerms
+            },
+            handleSelect(term) {
+                console.log(term);
+                this.$router.push('/term/' + term.termId)
+            },
+            goToTerm() {
+                
             }
         },
         computed: {
 			...mapGetters(
-				[ 'canons', 'categories' ]
+				[ 'canons', 'categories', 'currentWikiCanon' ]
 			)
 		},
         components: {
