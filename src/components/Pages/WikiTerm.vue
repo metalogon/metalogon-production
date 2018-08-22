@@ -32,14 +32,18 @@
 
                 <div class="term__rowtext">
                     <h3 class="rowtext-title">Definition</h3>
-                    <div class="rowtext-content" @click="definitionIsOpen = true" v-if="!definitionIsOpen">{{ currentTerm.description }}</div>
-                    <textarea class="textarea" v-model="currentTerm.description" @blur="saveEdit(currentTerm.id, 'description')" type="text" v-if="definitionIsOpen"></textarea>
+                    <div class="rowtext__content" v-if="!definitionIsOpen">{{ currentTerm.description }}</div>
+                    <span class="rowtext__edit" @click="editContent('definition')" v-if="!definitionIsOpen"><i class="fa fa-pencil fa-1x"></i><p>Edit</p></span>
+                    <textarea class="textarea" v-model="currentTerm.description" type="text" v-if="definitionIsOpen"></textarea>
+                    <span class="rowtext__save" v-if="definitionIsOpen" @click="saveContent(currentTerm.id, 'definition')"><i class="fa fa-check"></i>Save</span>
                 </div>
 
                 <div class="term__rowtext">
                     <h3 class="rowtext-title">Description</h3>
-                    <div class="rowtext-content" @click="descriptionIsOpen = true" v-if="!descriptionIsOpen">{{ currentTerm.description }}</div>
-                    <textarea class="textarea" v-model="currentTerm.description" @blur="saveEdit(currentTerm.id, 'description')" type="text" v-if="descriptionIsOpen"></textarea>
+                    <div class="rowtext__content" @click="editContent('description')" v-if="!descriptionIsOpen">{{ currentTerm.description }}</div>
+                    <span class="rowtext__edit" @click="editContent('description')" v-if="!descriptionIsOpen"><i class="fa fa-pencil fa-1x"></i><p>Edit</p></span>
+                    <textarea class="textarea" v-model="currentTerm.description" type="text" v-if="descriptionIsOpen"></textarea>
+                    <span class="rowtext__save" v-if="descriptionIsOpen" @click="saveContent(currentTerm.id, 'description')"><i class="fa fa-check"></i>Save</span>
                 </div>
 
                 <div class="term__largerow">
@@ -101,6 +105,7 @@
                 currentTerm: {},
                 definitionIsOpen: false,
                 descriptionIsOpen: false,
+                pencilIconIsActive: false,
                 relatedTerms: [ 'Metadiscourse', 'Posture and stance', 'Language'],
                 searchInputRelated: '',
                 relatedInputIsOpen: false,
@@ -119,7 +124,13 @@
             this.terms = this.loadAll();
         },
         methods: {
-            saveEdit(categoryId, field) {
+            editContent(type){
+                if (type === 'definition')
+                    this.definitionIsOpen = true
+                else
+                    this.descriptionIsOpen = true
+            },
+            saveContent(categoryId, field) {
                 this.$store.dispatch('editCategory', { 
                     id: categoryId, 
                     categoryBody: { [field]: this.currentTerm[field] } 
@@ -134,6 +145,12 @@
             goWiki() {
                 this.$store.commit('SELECT_CURRENT_WIKI_CANON', this.currentTerm.canon)
                 this.$router.push('/wiki')
+            },
+            enablePencilIcon() {
+                this.pencilIconIsActive = true
+            },
+            disablePencilIcon() {
+                this.pencilIconIsActive = false
             },
             openRelatedSearch() {
                 this.relatedInputIsOpen = true
@@ -302,14 +319,24 @@
                 margin-bottom: 5px;
             }
 
-            .rowtext-content {
+            .rowtext__content {
                 color: gray;
-                padding-bottom: 20px;
+                padding-top: 15px;
+                padding-bottom: 15px;
                 display: flex;
             }
 
-            .rowtext-content:hover { 
-                background-color: #f5f5f5;
+            .rowtext__edit {
+                display: flex;
+            }
+                .rowtext__edit p {
+                    cursor: pointer;
+                    margin-left: 3px;
+                    text-decoration: underline;
+                }
+
+            .rowtext__save {
+                cursor: pointer;
             }
 
 
@@ -398,6 +425,7 @@
                         .related__save {
                             text-align: end;
                             cursor: pointer;
+                            font-weight: bold;
                         }
                         .related__close {
                             cursor: pointer;
