@@ -85,6 +85,7 @@
             chooseWikiCanon(chosenCanon) {
                 this.$store.commit('SELECT_CURRENT_WIKI_CANON', chosenCanon)
             },
+            /* SEARCH A TERM */
             querySearch(queryString, cb) {
                 var terms = this.terms;
                 var results = queryString ? terms.filter(this.createFilter(queryString)) : terms;
@@ -106,9 +107,6 @@
             handleSelect(term) {
                 console.log(term);
                 this.$router.push('/term/' + term.termId)
-            },
-            goToTerm() {
-                
             }
         },
         computed: {

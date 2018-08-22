@@ -9,10 +9,10 @@
 
             <div class="term__hero">
 
-                <span class="term__search">
+                <!-- <span class="term__search">
                     <input class="term__searchInput input" type="text" placeholder="Type your search terms here">
                     <button class="term__searchButton button">Search</button>
-                </span>
+                </span> -->
 
             </div>
 
@@ -68,10 +68,13 @@
                     <div class="term__related">
                         <h3 class="related__heading">Related Terms</h3>
                         <div class="related__menu">
-                            <a class="related__menuItem">Term 2</a>
-                            <a class="related__menuItem">Term 3</a>
-                            <a class="related__menuItem">Term 4</a>
-                            <a class="related__menuItem">Term 5</a>
+                            <a class="related__menuItem" v-for="rt in relatedTerms" :key="rt">{{ rt }}</a>
+                            <a class="related__menuItem related__addNew" v-if="!relatedInputIsOpen" @click="openRelatedSearch()"><i class="fa fa-plus"></i> Add new</a>
+                            <el-autocomplete class="inline-input related__input" v-if="relatedInputIsOpen" v-model="searchInputRelated" :fetch-suggestions="querySearch" @select="handleSelect"></el-autocomplete>
+                            <div class="related__actions">
+                                <span class="related__close" @click="relatedInputIsOpen = false" v-if="relatedInputIsOpen"><i class="fa fa-times" aria-hidden="true"></i></span>
+                                <span class="related__save" @click="saveRelatedTerm()" v-if="relatedInputIsOpen">Save</span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -98,6 +101,11 @@
                 currentTerm: {},
                 definitionIsOpen: false,
                 descriptionIsOpen: false,
+                relatedTerms: [ 'Metadiscourse', 'Posture and stance', 'Language'],
+                searchInputRelated: '',
+                relatedInputIsOpen: false,
+                terms: [],
+                newTerm: { termId: '', value: '' } 
             }
         },
         created() {
@@ -106,6 +114,9 @@
                     this.currentTerm = this.categories[i]
                 }
             }
+        },
+        mounted() {
+            this.terms = this.loadAll();
         },
         methods: {
             saveEdit(categoryId, field) {
@@ -123,6 +134,37 @@
             goWiki() {
                 this.$store.commit('SELECT_CURRENT_WIKI_CANON', this.currentTerm.canon)
                 this.$router.push('/wiki')
+            },
+            openRelatedSearch() {
+                this.relatedInputIsOpen = true
+                this.searchInputRelated = ''
+            },
+            querySearch(queryString, cb) {
+                var terms = this.terms;
+                var results = queryString ? terms.filter(this.createFilter(queryString)) : terms;
+                // call callback function to return suggestions
+                cb(results);
+            },
+            createFilter(queryString) {
+                return (term) => {
+                    return (term.value.toLowerCase().indexOf(queryString.toLowerCase()) === 0);
+                };
+            },
+            loadAll() {
+                var allTerms = []
+                for (var i = 0; i < this.categories.length; i++) {
+                    allTerms.push({ value: this.categories[i].name, termId: this.categories[i].id })
+                }
+                return allTerms
+            },
+            handleSelect(term) {
+                console.log(term);
+                this.newTerm.termId = term.termId
+                this.newTerm.value = term.value
+            },
+            saveRelatedTerm() {
+                this.relatedTerms.push(this.newTerm.value)
+                this.relatedInputIsOpen = false
             }
         },
         computed: {
@@ -336,8 +378,30 @@
 
                     .related__menuItem {
                         color: gray;
-                        margin: 8px 0px;
+                        margin: 5px 0px;
+                        width: 150px;
                     }
+
+                    .related__addNew {
+                        font-weight: bold;
+                    }
+
+                    .related__input {
+                        width: inherit;
+                        width: 150px;
+                    }
+                    
+                    .related__actions {
+                        display: flex;
+                        justify-content: space-between;
+                    }
+                        .related__save {
+                            text-align: end;
+                            cursor: pointer;
+                        }
+                        .related__close {
+                            cursor: pointer;
+                        }
 
 
 </style>
