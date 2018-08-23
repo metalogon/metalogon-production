@@ -406,14 +406,14 @@ export const store = new Vuex.Store({
         },
         postCategory: function ({ commit }, payload) {
             return secureHTTPService.post("category", payload)
-            .then(function (response)
-            {
-                console.log(response)
-                commit('POST_CATEGORY', response.data.data)
-            })
-            .catch(function (err) {
-                console.log('createAssignment POST error: ', err)
-            })
+                .then(function (response)
+                {
+                    console.log(response)
+                    commit('POST_CATEGORY', response.data.data)
+                })
+                .catch(function (err) {
+                    console.log('createAssignment POST error: ', err)
+                })
         },
         editCategory: function ({ commit }, payload) {
             secureHTTPService.put("category/" + payload.id, payload.categoryBody)

@@ -78,6 +78,9 @@
                 terms: []
             }
         },
+        created() {
+            this.$store.dispatch('getAllClasses')
+        },
         mounted() {
             this.terms = this.loadAll();
         },

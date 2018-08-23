@@ -51,10 +51,16 @@
         },
         methods: {
             postCategory() {
+                var that = this
                 if (this.term.name !== '' && this.term.canon !== '' && this.term.description !== '')
                     this.$store.dispatch('postCategory', this.term)
-
-                this.modalPostATermIsOpen = false
+                        .then(function ()
+                        {
+                            that.modalPostATermIsOpen = false
+                            // The above is used for navigating 
+                            // directly to the new created term.
+                            that.$router.push('/term/' + that.categories[that.categories.length-1].id)
+                        })
             }
         },
         computed: {

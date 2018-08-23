@@ -114,14 +114,22 @@
             }
         },
         created() {
+			this.$store.dispatch('getAllClasses')
+            this.$store.dispatch('getCategories')
+        },
+        mounted() {
+            var that = this
+            this.terms = this.loadAll();
+            // Creates an object that contains 
+            // the current term information.
+            // .then(function() {
+            //     console.log(that.categories)
+            // }) 
             for (var i = 0; i < this.categories.length; i++) {
-                if ( this.categories[i].id === this.$route.params.id) {
+                if (this.categories[i].id === this.$route.params.id) {
                     this.currentTerm = this.categories[i]
                 }
             }
-        },
-        mounted() {
-            this.terms = this.loadAll();
         },
         methods: {
             editContent(type){
@@ -321,8 +329,8 @@
 
             .rowtext__content {
                 color: gray;
-                padding-top: 15px;
-                padding-bottom: 15px;
+                padding-top: 10px;
+                padding-bottom: 10px;
                 display: flex;
             }
 
