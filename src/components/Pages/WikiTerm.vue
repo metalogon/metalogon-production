@@ -9,26 +9,44 @@
 
             <div class="term__hero">
 
-                <span class="term__search">
+                <!-- <span class="term__search">
                     <input class="term__searchInput input" type="text" placeholder="Type your search terms here">
                     <button class="term__searchButton button">Search</button>
-                </span>
+                </span> -->
 
             </div>
 
             <div class="term__body">
+
+                <nav class="breadcrumb term__breadcrumb">
+                    <ul>
+                        <li><a @click="goWiki()">{{ currentTerm.canon }}</a></li>
+                        <li class="is-active"><a href="#" aria-current="page">{{ currentTerm.name }}</a></li>
+                    </ul>
+                </nav>
 
                 <div class="term__headings">
                     <h1 class="term__heading">{{ currentTerm.name }}</h1>
                     <p class="term__description">noun | pronounciation</p>
                 </div>
 
-                <div class="term__definition">
-                    <h3 class="definition__title">Definition</h3>
-                    <p class="definition__content">{{ currentTerm.description }}</p>
+                <div class="term__rowtext">
+                    <h3 class="rowtext-title">Definition</h3>
+                    <div class="rowtext__content" v-if="!definitionIsOpen">{{ currentTerm.description }}</div>
+                    <span class="rowtext__edit" @click="editContent('definition')" v-if="!definitionIsOpen"><i class="fa fa-pencil fa-1x"></i><p>Edit</p></span>
+                    <textarea class="textarea" v-model="currentTerm.description" type="text" v-if="definitionIsOpen"></textarea>
+                    <span class="rowtext__save" v-if="definitionIsOpen" @click="saveContent(currentTerm.id, 'definition')"><i class="fa fa-check"></i>Save</span>
                 </div>
 
-                <div class="term__X">
+                <div class="term__rowtext">
+                    <h3 class="rowtext-title">Description</h3>
+                    <div class="rowtext__content" @click="editContent('description')" v-if="!descriptionIsOpen">{{ currentTerm.description }}</div>
+                    <span class="rowtext__edit" @click="editContent('description')" v-if="!descriptionIsOpen"><i class="fa fa-pencil fa-1x"></i><p>Edit</p></span>
+                    <textarea class="textarea" v-model="currentTerm.description" type="text" v-if="descriptionIsOpen"></textarea>
+                    <span class="rowtext__save" v-if="descriptionIsOpen" @click="saveContent(currentTerm.id, 'description')"><i class="fa fa-check"></i>Save</span>
+                </div>
+
+                <div class="term__largerow">
                     <div class="term__examples">
 
                         <h3 class="examples__heading">Examples</h3>
@@ -54,10 +72,13 @@
                     <div class="term__related">
                         <h3 class="related__heading">Related Terms</h3>
                         <div class="related__menu">
-                            <a class="related__menuItem">Term 2</a>
-                            <a class="related__menuItem">Term 3</a>
-                            <a class="related__menuItem">Term 4</a>
-                            <a class="related__menuItem">Term 5</a>
+                            <a class="related__menuItem" v-for="rt in relatedTerms" :key="rt">{{ rt }}</a>
+                            <a class="related__menuItem related__addNew" v-if="!relatedInputIsOpen" @click="openRelatedSearch()"><i class="fa fa-plus"></i> Add new</a>
+                            <el-autocomplete class="inline-input related__input" v-if="relatedInputIsOpen" v-model="searchInputRelated" :fetch-suggestions="querySearch" @select="handleSelect"></el-autocomplete>
+                            <div class="related__actions">
+                                <span class="related__close" @click="relatedInputIsOpen = false" v-if="relatedInputIsOpen"><i class="fa fa-times" aria-hidden="true"></i></span>
+                                <span class="related__save" @click="saveRelatedTerm()" v-if="relatedInputIsOpen">Save</span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -81,14 +102,94 @@
     export default {
         data() {
             return {
-                currentTerm: {}
+                currentTerm: {},
+                definitionIsOpen: false,
+                descriptionIsOpen: false,
+                pencilIconIsActive: false,
+                relatedTerms: [ 'Metadiscourse', 'Posture and stance', 'Language'],
+                searchInputRelated: '',
+                relatedInputIsOpen: false,
+                terms: [],
+                newTerm: { termId: '', value: '' } 
             }
         },
         created() {
+			this.$store.dispatch('getAllClasses')
+            this.$store.dispatch('getCategories')
+        },
+        mounted() {
+            var that = this
+            this.terms = this.loadAll();
+            // Creates an object that contains 
+            // the current term information.
+            // .then(function() {
+            //     console.log(that.categories)
+            // }) 
             for (var i = 0; i < this.categories.length; i++) {
-                if ( this.categories[i].id === this.$route.params.id) {
+                if (this.categories[i].id === this.$route.params.id) {
                     this.currentTerm = this.categories[i]
                 }
+            }
+        },
+        methods: {
+            editContent(type){
+                if (type === 'definition')
+                    this.definitionIsOpen = true
+                else
+                    this.descriptionIsOpen = true
+            },
+            saveContent(categoryId, field) {
+                this.$store.dispatch('editCategory', { 
+                    id: categoryId, 
+                    categoryBody: { [field]: this.currentTerm[field] } 
+                })
+
+                if (field === 'description') {
+                    this.descriptionIsOpen = false
+                    this.definitionIsOpen = false
+                }
+                // else 
+            },
+            goWiki() {
+                this.$store.commit('SELECT_CURRENT_WIKI_CANON', this.currentTerm.canon)
+                this.$router.push('/wiki')
+            },
+            enablePencilIcon() {
+                this.pencilIconIsActive = true
+            },
+            disablePencilIcon() {
+                this.pencilIconIsActive = false
+            },
+            openRelatedSearch() {
+                this.relatedInputIsOpen = true
+                this.searchInputRelated = ''
+            },
+            querySearch(queryString, cb) {
+                var terms = this.terms;
+                var results = queryString ? terms.filter(this.createFilter(queryString)) : terms;
+                // call callback function to return suggestions
+                cb(results);
+            },
+            createFilter(queryString) {
+                return (term) => {
+                    return (term.value.toLowerCase().indexOf(queryString.toLowerCase()) === 0);
+                };
+            },
+            loadAll() {
+                var allTerms = []
+                for (var i = 0; i < this.categories.length; i++) {
+                    allTerms.push({ value: this.categories[i].name, termId: this.categories[i].id })
+                }
+                return allTerms
+            },
+            handleSelect(term) {
+                console.log(term);
+                this.newTerm.termId = term.termId
+                this.newTerm.value = term.value
+            },
+            saveRelatedTerm() {
+                this.relatedTerms.push(this.newTerm.value)
+                this.relatedInputIsOpen = false
             }
         },
         computed: {
@@ -189,6 +290,10 @@
         padding: 30px 225px;      
     }
 
+        .term__breadcrumb {
+            margin: 0 !important;
+        }
+
         .term__headings {
             text-align: center;
             padding: 15px 0px;
@@ -211,27 +316,44 @@
                 #TERM-DEFINITION
 ================================================= */
 
-        .term__definition {
+        .term__rowtext {
             padding: 20px 0px;
             border-bottom: 2px solid #eee;
         }
-            .definition__title {
+            .rowtext-title {
                 font-size: 20px;
                 font-weight: 600;
                 color: #1d1f1e;
                 margin-bottom: 5px;
             }
 
-            .definition__content {
+            .rowtext__content {
                 color: gray;
+                padding-top: 10px;
+                padding-bottom: 10px;
+                display: flex;
             }
+
+            .rowtext__edit {
+                display: flex;
+            }
+                .rowtext__edit p {
+                    cursor: pointer;
+                    margin-left: 3px;
+                    text-decoration: underline;
+                }
+
+            .rowtext__save {
+                cursor: pointer;
+            }
+
 
 
 /* ==============================================
                 #TERM-EXAMPLES
 ================================================= */
 
-        .term__X {
+        .term__largerow {
             padding: 20px 0px;
             display: flex;
             justify-content: space-between;
@@ -291,8 +413,31 @@
 
                     .related__menuItem {
                         color: gray;
-                        margin: 8px 0px;
+                        margin: 5px 0px;
+                        width: 150px;
                     }
+
+                    .related__addNew {
+                        font-weight: bold;
+                    }
+
+                    .related__input {
+                        width: inherit;
+                        width: 150px;
+                    }
+                    
+                    .related__actions {
+                        display: flex;
+                        justify-content: space-between;
+                    }
+                        .related__save {
+                            text-align: end;
+                            cursor: pointer;
+                            font-weight: bold;
+                        }
+                        .related__close {
+                            cursor: pointer;
+                        }
 
 
 </style>

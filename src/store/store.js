@@ -56,7 +56,9 @@ export const store = new Vuex.Store({
         classEnrollments: [],      // Current class enrollments (both accepted/not accepted)
         // For Student
         userEnrollments: [],       // Current student's enrollments
-        enrolledClasses: []        // Current student's classes (both accepted/not accepted)
+        enrolledClasses: [],       // Current student's classes (both accepted/not accepted),
+        // WIKI
+        currentWikiCanon: ''
     },
 
     actions: {
@@ -412,6 +414,27 @@ export const store = new Vuex.Store({
                     console.log('getCategories GET err: ', err)
                 })
         },
+        postCategory: function ({ commit }, payload) {
+            return secureHTTPService.post("category", payload)
+                .then(function (response)
+                {
+                    console.log(response)
+                    commit('POST_CATEGORY', response.data.data)
+                })
+                .catch(function (err) {
+                    console.log('createAssignment POST error: ', err)
+                })
+        },
+        editCategory: function ({ commit }, payload) {
+            secureHTTPService.put("category/" + payload.id, payload.categoryBody)
+                .then( response => {
+                    console.log(response)
+                })
+                .catch( function(err) {
+                    console.log(err)
+                    console.log('categoryBody: ', payload.categoryBody)
+                })
+        },
         /* COLLABORATORS */
         getAllCollaborations: function({commit}) {
             return secureHTTPService.get("collaboration")
@@ -652,6 +675,9 @@ export const store = new Vuex.Store({
         GET_CATEGORIES: (state, categories) => {
             state.categories = categories
         },
+        POST_CATEGORY: (state, newCategory) => {
+            state.categories.push(newCategory)
+        },
         /* COLLABORATORS */
         GET_ALL_COLLABORATIONS: (state, allCollaborations) => {
             state.allCollaborations = allCollaborations
@@ -726,6 +752,9 @@ export const store = new Vuex.Store({
                     state.enrollments.splice(i,1)
                     break
             }
+        },
+        SELECT_CURRENT_WIKI_CANON: (state, canon) => {
+            state.currentWikiCanon = canon
         }
     },
 
@@ -807,6 +836,9 @@ export const store = new Vuex.Store({
         },
         uploadingVideo: state => {
             return state.uploadingVideo
+        },
+        currentWikiCanon: state => {
+            return state.currentWikiCanon
         }
     }
 })

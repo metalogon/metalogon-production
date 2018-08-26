@@ -95,7 +95,9 @@
                                     <h1>{{ annotateCurrentSubcategoryObject.name }}</h1>
                                     <p>{{ annotateCurrentSubcategoryObject.description }}</p>
                                 </div>
-                                <router-link :to="'/term/' + annotateCurrentCategoryObject.id" tag="a" class="annotate-desc-text__wiki"><i class="fa fa-commenting"></i>Wiki</router-link>
+                                <router-link :to="'/term/' + annotateCurrentCategoryObject.id" tag="a" class="annotate-desc-text__wiki"> <!-- target="_blank" -->
+                                    <i class="fa fa-commenting"></i>Wiki
+                                </router-link>
                                 <div class="annotate-menu__canons-close"><span @click="annotatingMode = false; isAnnotateFields = false; isVideoline = false; selectedMove = 'Other';">X</span></div>
                             </div>  
                             <div class="annotate-comment field" v-show="selectedMove === 'Other'">
