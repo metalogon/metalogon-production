@@ -1106,15 +1106,6 @@
 							self.loadingClasses = false
 						})
 					}
-					// Select created class
-					self.$store.commit('CURRENT_CLASS_SELECT', {
-						name: response.data.data.name, 
-						id: response.data.data.id, 
-						number: response.data.data.number, 
-						department: response.data.data.department,
-						catFilter: response.data.data.catFilter
-					})
-					console.log("response:", response)
 				})
 				this.handleEditCategoriesClose()
 			},
