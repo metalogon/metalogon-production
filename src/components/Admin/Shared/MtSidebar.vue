@@ -10,7 +10,7 @@
 				<a class="sidebar__actionsLink" v-if="(role === 'administrator' || role === 'professor') && !(currentClass.name === 'Home')" @click="openAssignmentsModal()"><i class="fa fa-file-text-o"></i>Assignments</a>
 				<a class="sidebar__actionsLink" v-if="(role === 'administrator' || role === 'professor') && !(currentClass.name === 'Home')" @click="modalArchiveClassIsOpen = true"><i class="fa fa-archive"></i>Archive this class</a>
 				<a class="sidebar__actionsLink" v-if="(role === 'administrator' || role === 'professor') && !(currentClass.name === 'Home')" @click="toggleModalStudentRequests()"><i class="fa fa-file-text-o"></i>Student requests ({{ requestedStudents.length }})</a>
-				<!-- <a class="sidebar__actionsLink" v-if="role === 'administrator' || role === 'professor'" @click="createElementTree(); modalGenreCustomization = true"><i class="fa fa-commenting-o"></i>Categories</a> -->
+				<a class="sidebar__actionsLink" v-if="(role === 'administrator' || role === 'professor') && !(currentClass.name === 'Home')" @click="editCategoriesModalOpen()"><i class="fa fa-commenting-o"></i>Edit categories</a>
 				<a class="sidebar__actionsLink" v-if="role === 'student'" @click="toggleModalClassesToEnroll()"><i class="fa fa-plus"></i>Find a class to enroll</a>
 				<a class="sidebar__actionsLink" v-if="role === 'student' && (currentClass.name !== 'Home')" @click="openAssignmentsModal()"><i class="fa fa-file-text-o"></i>Class Assignments</a>
 			</div>
@@ -123,7 +123,7 @@
 					<br>
 					<div v-if="currentGenre">
 						<p>Choose canons:</p>
-						<el-tree :data="elementTreeForm" :props="genreProps" @check-change="handleCheckChange" show-checkbox ref='elementTreeRef' node-key='id'></el-tree>
+						<el-tree :data="elementTreeForm" :props="genreProps" show-checkbox ref='elementTreeRef' node-key='id'></el-tree>
 					</div>
 				</div>
 				<!-- /Second Step -->
@@ -132,43 +132,32 @@
 					<el-button v-if="createModalActive == 0" style="float:left;" @click="handleNewClassClose">Cancel</el-button>
 					<el-button v-if="createModalActive == 0" class="add-class-btn" @click="nextStep">Next Step</el-button>
 					<el-button v-if="createModalActive == 1" style="float:left;" @click="previousStep">Previous Step</el-button>
-					<el-button v-if="createModalActive == 1" class="add-class-btn" @click="createClass(); modalCreateClassIsOpen = false;">Create Class</el-button>
+					<el-button v-if="createModalActive == 1" class="add-class-btn" @click="createClass()">Create Class</el-button>
 				</span>
 			</el-dialog>
 
-			<el-dialog :title="'Do you want to archive `' + currentClass.name + '` class?'" :visible.sync="modalArchiveClassIsOpen">
-				<el-button @click="modalArchiveClassIsOpen = false">Go back</el-button>
-				<el-button class="add-class-btn" @click="archiveClass()"><strong>Archive Class</strong></el-button>
-			</el-dialog>
-
-			<el-dialog :title="'Do you want to unarchive this class?'" :visible.sync="modalUnarchiveClassIsOpen">
-				<el-button @click="modalUnarchiveClassIsOpen = false">Go back</el-button>
-				<el-button class="add-class-btn" @click="unArchiveClass()"><strong>Unarchive Class</strong></el-button>
-			</el-dialog>	
-
-			<!-- <el-dialog title="Categories customization" :visible.sync="modalGenreCustomization" size="large">
+			<el-dialog title="Categories customization" :visible.sync="modalGenreCustomization" size="large">
 				<h3 style="margin-bottom:10px;">Choose genre:</h3>
-				<el-select v-model="currentGenre" placeholder="Choose a genre" style="width:300px">
+				<el-select v-model="currentGenre" placeholder="Choose a genre" style="width:300px" @change="handleGenreSelection()">
 					<el-option v-for="g in genres" :key="g.name" :label="g.name" :value="g.name"></el-option>
 				</el-select>
 				<br>
-				<el-button v-if="currentGenre !== ''" style="margin-top:10px" @click="modalAddCategoryIsOpen = true"> Add category</el-button>
-				<el-radio class="radio" v-model="currentGenre" v-for="g in genres" :key="g.name" :label="g.name"></el-radio>
-
-				<br/>
-				<br/>
+				<!-- <el-button v-if="currentGenre !== ''" style="margin-top:10px" @click="modalAddCategoryIsOpen = true"> Add category</el-button> -->
+				<!-- <el-radio class="radio" v-model="currentGenre" v-for="g in genres" :key="g.name" :label="g.name"></el-radio> -->
+				<br>
+				<br>
 				<div v-if="currentGenre">
 					<p>Choose canons:</p>
-					<el-tree :data="canons" :props="genreProps" @node-click="handleNodeClick" show-checkbox>
-					</el-tree>
+					<el-tree :data="elementTreeForm" :props="genreProps" show-checkbox ref='elementTreeRef' node-key='id'></el-tree>
 				</div>
 				
 				<span slot="footer" class="dialog-footer">
-						<el-button @click="modalGenreCustomization = false; currentGenre = ''">Close</el-button>
+						<el-button @click="handleEditCategoriesClose()">Cancel</el-button>
+						<el-button @click="saveNewCustomCategories()">Save</el-button>
 				</span>
-			</el-dialog>	 -->
+			</el-dialog>
 
-			<el-dialog title="Add category" :visible.sync="modalAddCategoryIsOpen" size="small">
+			<!-- <el-dialog title="Add category" :visible.sync="modalAddCategoryIsOpen" size="small">
 					<el-select style="margin-bottom:10px;" v-model="newCategoryCanon" placeholder="Choose a canon">
 						<el-option v-for="c in canons" :key="c.label" :label="c.label" :value="c.label"></el-option>
 					</el-select>
@@ -182,7 +171,17 @@
 					<span slot="footer" class="dialog-footer">
 							<el-button @click="modalAddCategoryIsOpen = false; addNewCategory()">Add</el-button>
 					</span>
-			</el-dialog>	
+			</el-dialog>	 -->
+
+			<el-dialog :title="'Do you want to archive `' + currentClass.name + '` class?'" :visible.sync="modalArchiveClassIsOpen">
+				<el-button @click="modalArchiveClassIsOpen = false">Go back</el-button>
+				<el-button class="add-class-btn" @click="archiveClass()"><strong>Archive Class</strong></el-button>
+			</el-dialog>
+
+			<el-dialog :title="'Do you want to unarchive this class?'" :visible.sync="modalUnarchiveClassIsOpen">
+				<el-button @click="modalUnarchiveClassIsOpen = false">Go back</el-button>
+				<el-button class="add-class-btn" @click="unArchiveClass()"><strong>Unarchive Class</strong></el-button>
+			</el-dialog>		
 
 			<!-- administrator -->
 			<el-dialog :title="'Do you want to delete `' + currentClass.name + '` class?'" :visible.sync="modalDeleteClassIsOpen">
@@ -546,14 +545,12 @@
 				newCategoryName: "",
 				newCategoryDesc: "",
 				// Categories customization
-				localTrees: [], // Data structure that contains a customized tree for each genre
+				selectedNodes: [], // Data structure that contains the selected categories ids for each genre
 				elementTreeForm: [], // Data structure for the element library to read from
 				genreProps: {
 					children: 'children',
 					label: 'label',
-					desc: 'desc',
-					checked: 'checked',
-					indeterminate: 'indeterminate'
+					desc: 'desc'
 				},
 				categoryProps: {
 					children: 'children',
@@ -606,106 +603,113 @@
 		},
 		methods: {
 			handleGenreSelection() {
+				// Saving previous genre tree
 				if (this.firstTimeSelectingGenre) {
 					this.previousGenre = this.currentGenre
 					this.firstTimeSelectingGenre = false
 				}
 				else {
-					console.log("customizeLocalTreeFromElTree with genre:", this.previousGenre)
-					this.customizeLocalTreeFromElTree(this.previousGenre)
+					// console.log("saved new custom tree with genre:", this.previousGenre)
+					for(var g in this.selectedNodes) {
+						if (this.selectedNodes[g].genreName === this.previousGenre) {
+							var self = this
+							new Promise(function () {
+								self.selectedNodes[g].selectedNodes = self.$refs.elementTreeRef.getCheckedKeys(true)
+							})
+							break
+						}
+					}
 				}
-				console.log("creating basic element tree from:", this.canons)
-				this.createElementTree(this.canons)
-				console.log("currentGenre: ", this.currentGenre, " - previous: ", this.previousGenre)
+				// Set up new genre tree
+				for(var g in this.selectedNodes) {
+					if (this.selectedNodes[g].genreName === this.currentGenre) {
+						var self = this
+						new Promise(function () {
+							// leaves only = false
+							self.$refs.elementTreeRef.setCheckedKeys(self.selectedNodes[g].selectedNodes, false)
+						})
+						break
+					}
+				}
+				
+				// console.log("currentGenre: ", this.currentGenre, " - previous: ", this.previousGenre)
+				// console.log(this.selectedNodes)
 				this.previousGenre = this.currentGenre
 				
 			},
 			createNewClassModalOpen() {
+				// This function runs when the create class modal first opens
+				// It updates canon tree, genres and categories and then
+				// initializes the selectedNodes array which contains the edited
+				// category trees for each genre with default tree
+
 				var self = this
-				// Initialize the local cat filters, etc
+				// Update canon tree
+				this.$store.dispatch('getCanons')
+				.then(function() {
+					// Get the default tree form from the /tree resource (this.canons)
+					self.elementTreeForm = self.createElementTree(self.canons)
+					return self.$store.dispatch('getGenres')
+				})
+				// Update categories
+				.then(function() {
+					return self.$store.dispatch('getCategories')
+				}) 
+				.then(function() {
+					self.modalCreateClassIsOpen = true
+					self.selectedNodes = []
+					// Initialize one genre object for each genre in selected nodes
+					// First get all leaf ids (categories id)
+					// These are all the leaf nodes of the tree which are selected by default
+					var defaultSelectedNodes = []
+					for (var cat in self.categories) {
+						try {
+							defaultSelectedNodes.push(self.categories[cat].id)
+						}
+						catch (err) {
+							console.log("createNewClassModalOpen err:", err)
+						}
+					}
+					for (var g in self.genres) {
+						self.selectedNodes.push({
+							"genreId": self.genres[g].id,
+							"genreName": self.genres[g].name,
+							selectedNodes: defaultSelectedNodes
+						})
+					}
+				})
+			},
+			editCategoriesModalOpen() {
+				// This function runs when the edit categories modal first opens
+				// It updates canon tree, genres and categories and then
+				// initializes the selectedNodes array which contains the edited
+				// category trees for each genre
+
+				var self = this
+				// Update canon tree
 				this.$store.dispatch('getCanons')
 				.then(function() {
 					return self.$store.dispatch('getGenres')
 				})
+				// Update categories
 				.then(function() {
-					// Initialize localTrees with objects. Each object corresponds to a genre from the backend.
-					// Contains genre name and id, plus the tree for this genre
-					for (var g = 0; g < self.genres.length; g++) {
-						self.localTrees.push({
-							genreName: self.genres[g].name,
-							genreId: self.genres[g].id,
-							// tree defaults to the basic tree from the backend
-							// This is done for deep copying of the values instead of references
-							// tree: JSON.parse(JSON.stringify(self.canons)) // TODO this is probably bad
-							tree: []
+					return self.$store.dispatch('getCategories')
+				}) 
+				.then(function() {
+					self.modalGenreCustomization = true
+					self.selectedNodes = []
+					// Initialize one genre object for each genre in selected nodes
+					for (var g = 0; g < self.currentClass.catFilter.length; g++) {
+						self.selectedNodes.push({
+							"genreId": self.genres[g].id,
+							"genreName": self.genres[g].name,
+							selectedNodes: self.currentClass.catFilter[g].selectedNodes
 						})
-						var ltGenLen = self.localTrees.length
-						// Add tree, deep copying manually and converting to array
-						for (var canonName in self.canons) {
-							var canonObject = self.canons[canonName]
-							// Add new canon
-							self.localTrees[ltGenLen - 1].tree.push({
-								categories: [],
-								name: canonObject.name
-							})
-							var ltTreeLen = self.localTrees[ltGenLen - 1].tree.length
-							for (var catName in canonObject.categories) {
-								var catObject = canonObject.categories[catName]
-								self.localTrees[ltGenLen - 1].tree[ltTreeLen - 1].categories.push({
-									canon: canonObject.name,
-									description: catObject.description,
-									id: catObject.id,
-									name: catObject.name,
-									subcategories: []
-								})
-								var ltTreeCatLen = self.localTrees[ltGenLen - 1].tree[ltTreeLen - 1].categories.length
-								if (catObject.subcategories.length != 0) { // This category has subcategories
-									for (var subcatName in catObject.subcategories) {
-										var subcatObject = catObject.subcategories[subcatName]
-										self.localTrees[ltGenLen - 1].tree[ltTreeLen - 1].categories[ltTreeCatLen - 1].subcategories.push({
-											canon: subcatObject.canon,
-											description: subcatObject.description,
-											id: subcatObject.id,
-											name: subcatObject.name,
-											parentId: subcatObject.parentId,
-										})
-									}
-								}
-							}
-						}
 					}
+					// Get the default tree form from the /tree resource (this.canons)
+					var customTree = self.createCustomCanonTree(self.selectedNodes[self.selectedNodes.length - 1].selectedNodes)
+					self.elementTreeForm = self.createElementTree(customTree)
 				})
-				.then(function() {
-					self.modalCreateClassIsOpen = true
-				})
-			},
-			setCheckedTreeNodes(){
-				// for (var canonName in this.elementTreeForm) {
-				// 	var canonObject = this.elementTreeForm[canonName]
-				// 	// console.log(this.elementTreeForm[canonName].label)
-				// 	// console.log(this.$refs.elementTreeRef)
-				// 	this.$refs.elementTreeRef.setChecked({
-				// 		label: canonObject.label,
-				// 		desc: canonObject.desc,
-				// 		checked: canonObject.checked,
-				// 		indeterminate: canonObject.indeterminate,
-				// 		children: canonObject.children
-				// 	})
-        		// 	// console.log(this.$refs.elementTreeRef.getCheckedNodes());
-					
-				// 	for (var catName in this.elementTreeForm[canonName].children) {
-				// 		var catObject = canonObject.children[catName]
-				// 		this.$refs.elementTreeRef.setChecked({
-				// 			label: catObject.label
-				// 		})
-				// 		for (var subcatName in catObject.children) {
-				// 			var subcatObject = catObject.children[subcatName]
-				// 			this.$refs.elementTreeRef.setChecked({
-				// 				label: subcatObject.label
-				// 			})
-				// 		}
-				// 	}
-				// }
 			},
 			nextStep() {
 				if(this.newClass.department !== '' && this.newClass.name !== '' && this.newClass.number !== '' && this.newClass.semester !== ''){
@@ -728,7 +732,11 @@
 					this.createModalActive = 0;
 				}
 			},
-			handleNewClassClose() { //(done) {
+			handleNewClassClose() { 
+				// This function gets called when the create class modal closes
+				// It resets all necessary variables and closes the modal
+
+				//(done) {
 				// this.$confirm('Are you sure to close this dialog?')
 				// .then(_ => {
 				// 	done();
@@ -747,6 +755,30 @@
 					catFilter: []
 				}
 				this.modalCreateClassIsOpen = false
+			},
+			handleEditCategoriesClose() { 
+				// This function gets called when the edit categories modal closes
+				// It resets all necessary variables and closes the modal
+
+				//(done) {
+				// this.$confirm('Are you sure to close this dialog?')
+				// .then(_ => {
+				// 	done();
+				// })
+				// .catch(_ => {});
+				this.currentGenre = ''
+				this.previousGenre = ''
+				this.firstTimeSelectingGenre = true
+				this.createModalActive = 0
+				this.newClass = {
+					archived: false,
+					department: '',
+					name: '',
+					number: '',
+					semester: '',
+					catFilter: []
+				}
+				this.modalGenreCustomization = false
 			},
 			changeAssignmentTabEvent() {
 				this.loadingAssignments = true
@@ -980,22 +1012,36 @@
 			},
 			// Administrator, professor
 			setCurrentClass(classObject) {
-				if (this.role === "professor" || this.role === "administrator")
+				if (this.role === "professor" || this.role === "administrator") {
 					this.loadingClasses = true
+					// Update students. This is needed to show the little number of requested enrollments in the sidebar
+					var self = this
+					this.updateStudents()
+					.then(function() {
+						if (self.role === "professor" || self.role === "administrator")
+							self.loadingClasses = false
+					})
+
+				}
 				this.$store.commit('CURRENT_CLASS_SELECT', classObject)
-
-				// Update students. This is needed to show the little number of requested enrollments in the sidebar
-				var self = this
-				this.updateStudents()
-				.then(function() {
-					if (self.role === "professor" || self.role === "administrator")
-						self.loadingClasses = false
-				})
-
 			},
 			createClass() {	
-				this.newClass.catFilter = this.localTrees
+				// This function runs when user clicks create class
+				// It saves the last genre tree and then POSTs the class
+
+				for(var g in this.selectedNodes) {
+					if (this.selectedNodes[g].genreName === this.currentGenre) {
+						var self = this
+						new Promise(function () {
+							self.selectedNodes[g].selectedNodes = self.$refs.elementTreeRef.getCheckedKeys(true)
+						})
+						break
+					}
+				}
+
+				this.newClass.catFilter = this.selectedNodes
 				this.newClass['professorId'] = this.userId
+
 				var self = this
 				// console.log("Now POSTing new class to server:", this.newClass)
 				this.$store.dispatch('createClass', {newClass: this.newClass})
@@ -1023,19 +1069,54 @@
 						catFilter: response.data.data.catFilter
 					})
 				})
-				// console.log("Current class after post:", this.currentClass)
-				this.currentGenre = ''
-				this.previousGenre = ''
-				this.firstTimeSelectingGenre = true
-				this.createModalActive = 0
-				this.newClass = {
-					archived: false,
-					department: '',
-					name: '',
-					number: '',
-					semester: '',
-					catFilter: []
+				this.handleNewClassClose()
+			},
+			saveNewCustomCategories() {
+				// This function runs when user clicks save on edit categories modal
+				// It saves the last genre tree and then PUTs the class with the new cat filter
+
+
+				for(var g in this.selectedNodes) {
+					if (this.selectedNodes[g].genreName === this.currentGenre) {
+						var self = this
+						new Promise(function () {
+							self.selectedNodes[g].selectedNodes = self.$refs.elementTreeRef.getCheckedKeys(true)
+						})
+						break
+					}
 				}
+
+				this.currentClass.catFilter = this.selectedNodes
+
+				var self = this
+				console.log("Now PUTing edited class to server:", this.currentClass)
+				this.$store.dispatch('editClass', {currentClass: this.currentClass})
+				.then(function(response) {
+					if (self.role === 'administrator') {
+						self.loadingClasses = true
+						self.updateAdminClasses()
+						.then(function () {
+							self.loadingClasses = false
+						})
+					}
+					else if (self.role === 'professor') {
+						self.loadingClasses = true
+						self.updateProfessorClasses()
+						.then(function () {
+							self.loadingClasses = false
+						})
+					}
+					// Select created class
+					self.$store.commit('CURRENT_CLASS_SELECT', {
+						name: response.data.data.name, 
+						id: response.data.data.id, 
+						number: response.data.data.number, 
+						department: response.data.data.department,
+						catFilter: response.data.data.catFilter
+					})
+					console.log("response:", response)
+				})
+				this.handleEditCategoriesClose()
 			},
 			archiveClass() {
 				// 1. Adds current class to Archived Classes.
@@ -1499,23 +1580,15 @@
 			},
 			// CATEGORIES
 			createElementTree(tree) {
-				// Create the element tree from the given tree
-				// console.log(this.currentGenre)
-				// var genreIndex = 0
-				// for (var g = 0; g < this.genres.length; g++) {
-				// 	if (this.localTrees[g].genreName === this.currentGenre) {
-				// 		genreIndex = g
-				// 		break
-				// 	}
-				// }
-				console.log("creating element tree from:", tree)
-				// Clear out elementTreeForm to get fresh ones
-				this.elementTreeForm = []
+				// This function gets a tree in the backend form and returns an element tree
+
+				// console.log("creating element tree from:", tree)
+				var elementTreeForm = []
 				// Loop through given tree's canons
 				for (var canon in tree) {
 					// console.log(tree[canon])
 					// Add canon
-					this.elementTreeForm.push({
+					elementTreeForm.push({
 						label: canon,
 						id: '', //tree[canon].id, // doesnt exist on backend
 						desc: '',
@@ -1523,14 +1596,14 @@
 					})						
 					// Add canon description, if one exists
 					if (tree[canon].description) {
-						this.elementTreeForm[this.elementTreeForm.length - 1].desc = 
+						elementTreeForm[elementTreeForm.length - 1].desc = 
 							tree[canon].description
 					}
 					// Loop through this canon's categories
 					for (var cat in tree[canon].categories) {
 						// console.log(tree[canon].categories[cat])
 						// Add canon's category
-						this.elementTreeForm[this.elementTreeForm.length - 1].children.push({
+						elementTreeForm[elementTreeForm.length - 1].children.push({
 							label: tree[canon].categories[cat].name,
 							id: tree[canon].categories[cat].id,
 							desc: '', 
@@ -1538,111 +1611,91 @@
 						})
 						// Add category's description, if one exists
 						if (tree[canon].categories[cat].description) {
-							this.elementTreeForm[this.elementTreeForm.length - 1].children[this.elementTreeForm[this.elementTreeForm.length - 1].children.length - 1].desc = 
+							elementTreeForm[elementTreeForm.length - 1].children[elementTreeForm[elementTreeForm.length - 1].children.length - 1].desc = 
 								tree[canon].categories[cat].description
 						}
 						// Loop through this category's subcategories if there are any
 						for (var subCat in tree[canon].categories[cat].subcategories) {
 							// console.log(tree[canon].categories[cat].subcategories[subCat])
 							// Add subcategory
-							this.elementTreeForm[this.elementTreeForm.length - 1].children[this.elementTreeForm[this.elementTreeForm.length - 1].children.length - 1].children.push({
+							elementTreeForm[elementTreeForm.length - 1].children[elementTreeForm[elementTreeForm.length - 1].children.length - 1].children.push({
 								label: tree[canon].categories[cat].subcategories[subCat].name,
 								id: tree[canon].categories[cat].subcategories[subCat].id,
-								desc: '',
+								desc: ''
 								//children: [] //sub-subcategories
 							})
 							// Add subcategory's description, if one exists
 							if (tree[canon].categories[cat].subcategories[tree[canon].categories[cat].subcategories.length - 1].description) {
-								this.elementTreeForm[this.elementTreeForm.length - 1].children[this.elementTreeForm[this.elementTreeForm.length - 1].children.length - 1].children[this.elementTreeForm[this.elementTreeForm.length - 1].children[this.elementTreeForm[this.elementTreeForm.length - 1].children.length - 1].children.length - 1].desc = 
+								elementTreeForm[elementTreeForm.length - 1].children[elementTreeForm[elementTreeForm.length - 1].children.length - 1].children[elementTreeForm[elementTreeForm.length - 1].children[elementTreeForm[elementTreeForm.length - 1].children.length - 1].children.length - 1].desc = 
 									tree[canon].categories[cat].subcategories[subCat].description
 							}
 							// More subcategories/children can be added here
 						}
 					}
 				}
+				return elementTreeForm
 			},
-			customizeLocalTreeFromElTree(gen) {
-				// Get checked data from elementTree and save the customized trees to localTree for genre 'gen'
-				var checkedNodesArray = this.$refs.elementTreeRef.getCheckedNodes()
-				console.log(this.$refs.elementTreeRef.getCheckedNodes());
+            findCatId(id, array) {
+                for(var i in array) {
+                    if (array[i] === id) {
+                        return true
+                    }
+                }
+                return false
+            },
+            copy(o) {
+                var output, v, key
+                output = Array.isArray(o) ? [] : {}
+                for (key in o) {
+                    v = o[key]
+                    output[key] = (typeof v === "object") ? this.copy(v) : v
+                }
+                return output
+            },
+			createCustomCanonTree(idArray) {
+				// Gets an idArray and returns a custom backend form tree
 				
-				console.log("Getting customized tree")
-				var genreIndex = 0
-				for (var i = 0; i < this.localTrees.length; i++) {
-					if (this.localTrees[i].genreName == gen) {
-						genreIndex = i
-						break
-					}
+                // Deep copy basic tree
+                var customCanonTree = this.copy(this.canons)
+                var cans = customCanonTree
+                for(var can in cans) {
+                    var cats = customCanonTree[can].categories
+                    for(var cat = 0; cat < cats.length; cat++) {
+                        if (cats[cat].subcategories.length != 0) {
+                            var subcats = cats[cat].subcategories
+                            for (var subcat = 0; subcat < subcats.length; subcat++) {
+                                // FIND ID IN ID ARRAY, FALSE -> DELETE SUBCAT
+                                if (!this.findCatId(subcats[subcat].id, idArray)) {
+                                    // console.log("found subcat")
+                                    subcats.splice(subcat, 1)
+                                    subcat --
+                                    if (subcats.length == 0) {
+                                        cats.splice(cat, 1)
+                                        cat --
+                                    }
+                                    if (cats.length == 0) {
+                                        delete cans[can]
+                                        break
+                                    }
+                                }
+                            }
+                        }
+                        else if (cats[cat].subcategories.length == 0) {
+                            // FIND ID IN ID ARRAY, FALSE -> DELETE CAT
+                            if (!this.findCatId(cats[cat].id, idArray)) {
+                                // console.log("found cat")
+                                cats.splice(cat, 1)
+                                cat --
+                                if (cats.length == 0) {
+                                    delete cans[can]
+                                    break
+                                }
+                            }
+                        }
+                    }
 				}
-				console.log("Genre index:",genreIndex)
-				console.log("localtrees[genreIndex]:", this.localTrees[genreIndex])
-				for (var canonName in this.localTrees[genreIndex].tree) {
-					var canonObject = this.localTrees[genreIndex].tree[canonName]
-					// console.log(canonObject)
-					for (var i = 0; i < canonObject.categories.length; i ++) {
-						var catObject = canonObject.categories[i]
-						// console.log(catObject)
-
-						if (catObject.subcategories.length != 0) {
-							for (var j = 0; j < catObject.subcategories.length; j ++) {
-								var subcatObject = catObject.subcategories[j]
-								var found = false
-								// console.log("searching for ", subcatObject.name)
-								for (var checkedNodeName in checkedNodesArray) {
-									if (checkedNodesArray[checkedNodeName].id == subcatObject.id) {
-										found = true
-										// console.log("found ", checkedNodesArray[checkedNodeName].name)
-									}
-								}
-								if (!found) {
-									// console.log("deleting ", subcatObject.name)
-									catObject.subcategories.splice(j, 1)
-									j--
-								}
-
-							}
-						}
-						else {
-							var found = false
-							// console.log("searching for ", catObject.name)
-							for (var checkedNodeName in checkedNodesArray) {
-								if (checkedNodesArray[checkedNodeName].id == catObject.id) {
-									found = true
-									// console.log("found ", checkedNodesArray[checkedNodeName].name)
-								}
-							}
-							if (!found) {
-								// console.log("deleting ", catObject.name)
-								canonObject.categories.splice(i, 1)
-								i--
-							}
-						}
-					}
-				}
-				// Clean up canons with no children categories
-				for (var i = 0; i < this.localTrees[genreIndex].tree.length; i ++) {
-					if (this.localTrees[genreIndex].tree[i].categories.length == 0) {
-						this.localTrees[genreIndex].tree.splice(i, 1)
-						i --
-					}
-				}
-				// This code handles Invention's categories clean up
-				// TODO This is not dynamic. If new canons with subcats are added, this needs to be changed!
-				for (var i = 0; i < this.localTrees[genreIndex].tree.length; i ++) {
-					if (this.localTrees[genreIndex].tree[i].name == "Invention") {
-						for (var j = 0; j < this.localTrees[genreIndex].tree[i].categories.length; j++) {
-							if (this.localTrees[genreIndex].tree[i].categories[j].subcategories.length == 0) {
-								this.localTrees[genreIndex].tree[i].categories.splice(j, 1)
-								j--
-							}
-						}
-						if (this.localTrees[genreIndex].tree[i].categories.length == 0) {
-							this.localTrees[genreIndex].tree.splice(i, 1)
-						}
-					}
-				}
-				console.log("Saved tree:", this.localTrees[genreIndex].tree)
-			},
+				return customCanonTree
+            },
 			addNewCategory() {
 				console.log("Adding ", this.newCategoryName, "category to ", this.newCategoryCanon, "canon")
 				console.log("With description ", this.newCategoryDesc)
@@ -1665,9 +1718,6 @@
 			// 	console.log(this.categoriesCheckList)
 			// 	console.log('fetchCategories')
 			// },
-			handleCheckChange(data, checked, indeterminate) {
-				// console.log(data, checked, indeterminate);
-			},
 			// Student
 			toggleModalClassesToEnroll() {
 				if (this.modalClassesToEnrollIsOpen) {

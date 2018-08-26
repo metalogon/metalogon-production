@@ -221,6 +221,16 @@ export const store = new Vuex.Store({
                 console.log('createClass POST error: ', err)
             })
         },
+        editClass: function ({ commit }, payload) {
+            return secureHTTPService.put("class/" + payload.currentClass.id, payload.currentClass)
+            .then(response => {
+                commit('EDIT_CLASS', payload)
+                return response
+            })
+            .catch(function (err) {
+                console.log('editClass PUT error: ', err)
+            })
+        },
         deleteClass: function ({ commit }, payload) {
             return secureHTTPService.delete("class/" + payload)
             .then(response => {
@@ -395,13 +405,13 @@ export const store = new Vuex.Store({
         },
         /* CATEGORIES */ 
         getCategories: function ({ commit }) {
-            secureHTTPService.get("category")
+            return secureHTTPService.get("category")
                 .then(function (response)
                 {
                     commit('GET_CATEGORIES', response.data.data)
                 })
                 .catch(function (err) {
-                    
+                    console.log('getCategories GET err: ', err)
                 })
         },
         postCategory: function ({ commit }, payload) {
@@ -600,6 +610,17 @@ export const store = new Vuex.Store({
         },
         CREATE_CLASS: (state, payload) => {
             state.classes.push(payload)
+        },
+        EDIT_CLASS: (state, payload) => {
+            console.log("payload edit class:", payload)
+            for (var i = 0; i < state.classes.length; i++) {
+                // if (payload.annotationId === state.videoAnnotations[i].id) {
+                //     state.videoAnnotations[i].comment = payload.body.comment
+                //     state.videoAnnotations[i].from = payload.body.from
+                //     state.videoAnnotations[i].to = payload.body.to
+                //     state.videoAnnotations[i].rating = payload.body.rating
+                // }
+            }
         },
         // Only for admin.
         DELETE_CLASS: (state, payload) => {

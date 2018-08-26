@@ -320,7 +320,7 @@
                 customCanonTree: [],
                 annotatingMode: false,
                 annotateCanon: 'Delivery',
-                annotateCanonIndex: 0,
+                annotateCanonName: 0,
                 annotateCategoryId: '', // The category id from the category that is chosen.
                 annotateSubcategoryId: '', // The subcategory id from the category that is chosen.
                 annotateCurrentCategoryObject: { canon: '', description: '', id: '', name: '', subcategories: [] },
@@ -389,6 +389,65 @@
                 this.annotateCanon = canon
                 console.log("chooseCanonAnnotate", canon)
             },
+            findCatId(id, array) {
+                for(var i in array) {
+                    if (array[i] === id) {
+                        return true
+                    }
+                }
+                return false
+            },
+            copy(o) {
+                var output, v, key
+                output = Array.isArray(o) ? [] : {}
+                for (key in o) {
+                    v = o[key]
+                    output[key] = (typeof v === "object") ? this.copy(v) : v
+                }
+                return output
+            },
+            createCustomCanonTree(idArray) {
+                // Use the basic canon tree to create a custom one based on the idArray
+                // Deep copy basic tree
+                this.customCanonTree = this.copy(this.canons)
+                var cans = this.customCanonTree
+                for(var can in cans) {
+                    var cats = this.customCanonTree[can].categories
+                    for(var cat = 0; cat < cats.length; cat++) {
+                        if (cats[cat].subcategories.length != 0) {
+                            var subcats = cats[cat].subcategories
+                            for (var subcat = 0; subcat < subcats.length; subcat++) {
+                                // FIND ID IN ID ARRAY, FALSE -> DELETE SUBCAT
+                                if (!this.findCatId(subcats[subcat].id, idArray)) {
+                                    // console.log("found subcat")
+                                    subcats.splice(subcat, 1)
+                                    subcat --
+                                    if (subcats.length == 0) {
+                                        cats.splice(cat, 1)
+                                        cat --
+                                    }
+                                    if (cats.length == 0) {
+                                        delete cans[can]
+                                        break
+                                    }
+                                }
+                            }
+                        }
+                        else if (cats[cat].subcategories.length == 0) {
+                            // FIND ID IN ID ARRAY, FALSE -> DELETE CAT
+                            if (!this.findCatId(cats[cat].id, idArray)) {
+                                // console.log("found cat")
+                                cats.splice(cat, 1)
+                                cat --
+                                if (cats.length == 0) {
+                                    delete cans[can]
+                                    break
+                                }
+                            }
+                        }
+                    }
+                }
+            },
             chooseCategoryAnnotate(currentCategoryId) {
                 // The event that is fired, 
                 // when a user clicks on annotate menu categories.
@@ -400,14 +459,18 @@
                 // Fills the current category object.
                 // Need to find where the annotateCanon is in customCanonTree due to 
                 // the fact that customCanonTree is array of objects, not object of objects
-                for (var c = 0; c < this.customCanonTree.length; c++) {
-                    if (this.customCanonTree[c].name === this.annotateCanon) {
-                        // console.log("found canon!")
-                        this.annotateCanonIndex = c
+                console.log(this.customCanonTree)
+                console.log(this.annotateCanon)
+                for (var can in this.customCanonTree) {
+                    if (this.customCanonTree[can].name === this.annotateCanon) {
+                        // console.log("found canon!", can)
+                        this.annotateCanonName = can
                         break
                     }
                 }
-                var categories = this.customCanonTree[this.annotateCanonIndex].categories
+                console.log(this.annotateCanonName)
+                console.log(this.customCanonTree[this.annotateCanonName])
+                var categories = this.customCanonTree[this.annotateCanonName].categories
                 for (var i = 0; i < categories.length; i++) {
                     if (categories[i].id === currentCategoryId) {
                         this.annotateCurrentCategoryObject = categories[i]
@@ -466,8 +529,7 @@
 				.then(function() {
 					for (var g = 0; g < self.currentClass.catFilter.length; g++) {
                         if (self.currentClass.catFilter[g].genreId === self.videos.genre) {
-                            // console.log("found genre!")
-                            self.customCanonTree = self.currentClass.catFilter[g].tree
+                            self.createCustomCanonTree(self.currentClass.catFilter[g].selectedNodes)
                             break
                         }
                     }
@@ -704,7 +766,7 @@
                 // Find the description of the chosen annotate category.
                 // This is for category annotation only.
                 var annotateDesc
-                var annotateCategories = this.customCanonTree[this.annotateCanonIndex].categories
+                var annotateCategories = this.customCanonTree[this.annotateCanonName].categories
                 for (var i = 0, l = annotateCategories.length; i < l; i++) {
                     if (this.annotateCategoryId === annotateCategories[i].id)
                         annotateDesc = annotateCategories[i].description
