@@ -136,7 +136,7 @@
 				</span>
 			</el-dialog>
 
-			<el-dialog title="Categories customization" :visible.sync="modalGenreCustomization" size="large">
+			<el-dialog title="Categories customization" :visible.sync="modalGenreCustomization" size="large" :before-close="handleEditCategoriesClose">
 				<h3 style="margin-bottom:10px;">Choose genre:</h3>
 				<el-select v-model="currentGenre" placeholder="Choose a genre" style="width:300px" @change="handleGenreSelection()">
 					<el-option v-for="g in genres" :key="g.name" :label="g.name" :value="g.name"></el-option>
@@ -769,7 +769,6 @@
 				this.currentGenre = ''
 				this.previousGenre = ''
 				this.firstTimeSelectingGenre = true
-				this.createModalActive = 0
 				this.newClass = {
 					archived: false,
 					department: '',
