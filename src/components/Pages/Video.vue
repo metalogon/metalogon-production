@@ -58,8 +58,14 @@
                 </div>
 
                 <div class="annotate" v-show="isAnnotating">
-
-                    <div class="annotate-menu"> 
+                    <!-- Loading -->
+                    <div class="uploadvid__sync-load" 
+                        v-loading="loadingCanons" 
+                        v-if="loadingCanons"
+                        element-loading-text="Loading..." 
+                        element-loading-spinner="el-icon-loading"
+                        element-loading-background="rgba(0, 0, 0, 0.8)"><br><br><br><br><br></div>
+                    <div class="annotate-menu" v-show="!loadingCanons"> 
                         <nav class="annotate-menu__canons" v-if="isAnnotateCanons">
                             <a :class="canon.name" @click="chooseCanonAnnotate(canon.name)" v-for="canon in customCanonTree" :key="canon.name" >{{ canon.name }}</a>
                             <div class="annotate-menu__canons-close">
@@ -318,6 +324,7 @@
                 videoIndex: 0,
                 // ANNOTATE SECTION
                 customCanonTree: [],
+                loadingCanons: false,
                 isAnnotating: false,
                 annotateCanon: 'Delivery',
                 annotateCanonName: 0,
@@ -516,7 +523,7 @@
             },
             annotating() {
                 var self = this
-                
+                this.loadingCanons = true
                 // Checking for new annotations in current video (for real time annotating)
                 this.$store.dispatch('getVideoAnnotations', this.id)
 
@@ -533,6 +540,7 @@
                             break
                         }
                     }
+                    self.loadingCanons = false
                 })
 
                 this.isAnnotating = true
