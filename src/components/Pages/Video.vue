@@ -57,7 +57,7 @@
                     </div>
                 </div>
 
-                <div class="annotate" v-show="annotatingMode">
+                <div class="annotate" v-show="isAnnotating">
 
                     <div class="annotate-menu"> 
                         <nav class="annotate-menu__canons" v-if="isAnnotateCanons">
@@ -98,7 +98,7 @@
                                 <router-link :to="'/term/' + annotateCurrentCategoryObject.id" tag="a" class="annotate-desc-text__wiki"> <!-- target="_blank" -->
                                     <i class="fa fa-commenting"></i>Wiki
                                 </router-link>
-                                <div class="annotate-menu__canons-close"><span @click="annotatingMode = false; isAnnotateFields = false; isVideoline = false; selectedMove = 'Other';">X</span></div>
+                                <div class="annotate-menu__canons-close"><span @click="isAnnotating = false; isAnnotateFields = false; isVideoline = false; selectedMove = 'Other';">X</span></div>
                             </div>  
                             <div class="annotate-comment field" v-show="selectedMove === 'Other'">
                                 <label class="label">Comment</label>
@@ -144,7 +144,7 @@
                         <div class="annotate-fields-right">
                             <div class="annotate-desc field" v-for="canon in customCanonTree" :key="canon.name" v-if="canon.name === annotateCanon">
                                 <p class="control" v-for="cat in canon.categories" :key="cat.id" v-if="cat.id === annotateCategoryId">"{{ cat.description }}"</p>
-                                <div class="annotate-menu__canons-close"><span @click="isEditing = false; isVideoline = false; isEditFields = false">X</span></div>
+                                <div class="annotate-menu__canons-close"><span @click="isEditing = false; isVideoline = false; isEditFields = false; isAnnotating = false">X</span></div>
                             </div>
                             <div class="annotate-effectiveness field">
                                 <label class="label">Set effectiveness:</label>
@@ -174,7 +174,7 @@
                     </div>
                 </div>
 
-                <div class="add-annotation-area" @click="annotating()" v-show="!annotatingMode">
+                <div class="add-annotation-area" @click="annotating()" v-show="!isAnnotating">
                     <i class="fa fa-plus fa_1_5x" aria-hidden="true"></i><span>Add annotation</span>
                 </div>
 
@@ -318,7 +318,7 @@
                 videoIndex: 0,
                 // ANNOTATE SECTION
                 customCanonTree: [],
-                annotatingMode: false,
+                isAnnotating: false,
                 annotateCanon: 'Delivery',
                 annotateCanonName: 0,
                 annotateCategoryId: '', // The category id from the category that is chosen.
@@ -535,7 +535,7 @@
                     }
                 })
 
-                this.annotatingMode = true
+                this.isAnnotating = true
                 this.isAnnotateCanons = true // Opens canons menu.
                 this.isAnnotateCategories = true
                 this.annotateRating = null
@@ -800,7 +800,7 @@
                     this.annotateStart = null
                     this.annotateEnd = null
                     this.annotateRating = 1
-                    this.annotatingMode = false
+                    this.isAnnotating = false
                     this.isAnnotateCanons = false
                     this.isAnnotateFields = false
                     this.isVideoline = false
@@ -809,7 +809,7 @@
             },
             closeAnnotationMenu() {
                 console.log("closeAnnotationMenu")
-                this.annotatingMode = false
+                this.isAnnotating = false
                 this.isAnnotateCanons = false
                 this.isAnnotateSubcategories = false
 
@@ -817,6 +817,8 @@
                 this.annotateSubcategoryId = ''
             },
             editing(event) {
+                // This is logically incorrect, but it works with the current implementation.
+                this.isAnnotating = true 
                 // CHECKING for new annotations in current video (for real time annotating)
                 this.$store.dispatch('getVideoAnnotations', this.id)
 
@@ -834,10 +836,9 @@
                 if (this.player.getState() === 'playing')
                     this.player.pause()
 
-                if (this.annotatingMode) {
+                if (this.isAnnotating) {
                     this.isAnnotateFields = false
                     this.isAnnotateCanons = false
-                    this.annotatingMode = false
                     this.isVideoline = false
                 }
 
@@ -901,6 +902,7 @@
                 this.isEditFields = false
                 this.isEditing = false
                 this.isVideoline = false
+                this.isAnnotating = false
             },
             deleteAnnotation(event) {
                 var self = this

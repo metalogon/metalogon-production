@@ -31,7 +31,10 @@
 			</span>
 		</div>
 
-		<i class="el-icon-delete" v-show="role ==='administrator'" @click="toggleDeleteConfirmationModal()"></i>
+		<div class="classvideo__trash">
+			<i class="el-icon-delete" v-show="role ==='administrator'" @click="toggleDeleteConfirmationModal()"></i>
+		</div>
+
 
 
 		<!-- Canon statistics modal -->
@@ -298,6 +301,7 @@
 				.classvideo__favorite {
 					width: 30px;
 					height: 60px;
+					margin-top: 5px;
 				}
 
 				/* KOSTAS */
@@ -421,5 +425,23 @@
 									text-align: center;
 									height: 50%;
 								}
+
+					.classvideo__trash {
+						margin-left: 10px;
+						display: flex;
+						align-items: center;
+					}
+
+						.classvideo__trash i {
+							padding: 10px;
+							background-color: #eee;
+							border-radius: 50%;
+							cursor: pointer;
+						}
+					
+						.classvideo__trash i:hover {
+							color: #eee;
+							background-color: gray;
+						}
 
 </style>
