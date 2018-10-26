@@ -85,11 +85,12 @@
 
 			<!-- administrator, professor -->
 			<el-dialog title="Add new class" :visible.sync="modalCreateClassIsOpen" :before-close="handleNewClassClose">
-				<el-steps :active="createModalActive" finish-status="success" space="97%">
+				
+				<el-steps :active="createModalActive" finish-status="success" space="97%"> <!-- TODO change space to some function of the width of the modal -->
 					<el-step></el-step>
 					<el-step></el-step>
 				</el-steps>
-				
+
 				<!-- First Step -->
 				<el-form :model="newClass" v-if="createModalActive == 0">
 					<el-form-item label="Name">
@@ -109,7 +110,7 @@
 					</el-form-item>
 				</el-form>
 				<!-- /First Step -->
-				
+
 				<!-- Second Step -->
 				<div v-if="createModalActive == 1">
 					<h3 style="margin-bottom:10px;">Choose genre:</h3>
@@ -131,10 +132,12 @@
 				<span slot="footer" class="dialog-footer">
 					<el-button v-if="createModalActive == 0" style="float:left;" @click="handleNewClassClose">Cancel</el-button>
 					<el-button v-if="createModalActive == 0" class="add-class-btn" @click="nextStep">Next Step</el-button>
+
 					<el-button v-if="createModalActive == 1" style="float:left;" @click="previousStep">Previous Step</el-button>
 					<el-button v-if="createModalActive == 1" class="add-class-btn" @click="createClass()">Create Class</el-button>
 				</span>
 			</el-dialog>
+
 
 			<el-dialog title="Categories customization" :visible.sync="modalGenreCustomization" size="large" :before-close="handleEditCategoriesClose">
 				<h3 style="margin-bottom:10px;">Choose genre:</h3>
@@ -220,6 +223,13 @@
 					element-loading-spinner="el-icon-loading"
 					element-loading-background="rgba(0, 0, 0, 0.8)"></div>
                 <el-tabs v-show="!loadingAssignments">
+					
+					<el-dialog 
+						:visible.sync="startingAssignmentMessageVisible"
+						title="Create a starting assignment."
+						append-to-body>
+					</el-dialog>
+					
                     <el-tab-pane v-for="a in assignments" :key="a.id" :label="a.title">
                 		<el-tabs v-model="assignmentsModalSubtab" v-if="!loadingAssignments">
 							<el-tab-pane label="General" name="General">
@@ -290,6 +300,7 @@
 					element-loading-spinner="el-icon-loading"
 					element-loading-background="rgba(0, 0, 0, 0.8)"></div>
                 <el-tabs v-show="!loadingAssignments" @tab-click="changeAssignmentTabEvent">
+					
                     <el-tab-pane v-for="a in assignments" :key="a.id" :label="a.title">
                 		<el-tabs v-model="assignmentsModalSubtab" v-if="!loadingAssignments">
 							<el-tab-pane label="General" name="General">
@@ -532,6 +543,7 @@
 				assignmentCategorySelected: '',
 				assignmentDueDate: '',
 				categoriesCheckList: [],
+				startingAssignmentMessageVisible: false,
 
 				//-----------------------------------
 				// Categories
@@ -956,20 +968,37 @@
 			// Administrator
 			createInvitation() {
 				if (this.invitation.email === '' || this.invitation.role === '') {
-					alert("Please complete all the fields.")
+					this.$message({
+						showClose: true,
+						message: 'Please complete all the fields.',
+						type: 'warning'
+					});
 				}
 				else if (this.invitation.email != this.repeatEmail) {
-					alert("Please repeat e-mail address correctly.")
+					this.$message({
+						showClose: true,
+						message: 'Please repeat e-mail address correctly.',
+						type: 'warning'
+					});
 				}
 				else {
+					var self = this
 					this.secureHTTPService.post("invitation", this.invitation)
 					.then(function (response) {
 						// console.log(response)
-						alert("Invitation code: " + response.data.data.id)
+						self.$message({
+							showClose: true,
+							message: 'Invitation code: ' + response.data.data.id,
+							type: 'warning'
+						});
 					})
 					.catch(function (err) {
 						console.log("Error while posting invitation: ", err)
-						alert("Something went wrong.")
+						self.$message({
+							showClose: true,
+							message: "Something went wrong.",
+							type: 'warning'
+						});
 					})
 					this.modalInviteUserIsOpen = false
 					this.invitation = {"email": '', "role": ''} // Reset invitation
@@ -1015,7 +1044,11 @@
 					this.loadingClasses = true
 					// Update students. This is needed to show the little number of requested enrollments in the sidebar
 					var self = this
+					this.$store.commit('RESET_ASSIGNMENTS')
 					this.updateStudents()
+					.then(function() {
+						self.updateAssignments()
+					})
 					.then(function() {
 						if (self.role === "professor" || self.role === "administrator")
 							self.loadingClasses = false
@@ -1027,6 +1060,7 @@
 			createClass() {	
 				// This function runs when user clicks create class
 				// It saves the last genre tree and then POSTs the class
+				// It opens assignments modal to create first assignment
 
 				for(var g in this.selectedNodes) {
 					if (this.selectedNodes[g].genreName === this.currentGenre) {
@@ -1069,6 +1103,7 @@
 					})
 				})
 				this.handleNewClassClose()
+				this.openAssignmentsModal(true)
 			},
 			saveNewCustomCategories() {
 				// This function runs when user clicks save on edit categories modal
@@ -1427,7 +1462,7 @@
 				.then(function() {
 					var enrollmentToBeDeletedId = ''
 					for (var u = 0; u < self.userEnrollments.length; u++) {
-						if (self.userEnrollments[u].userId === usersId) {
+						if (self.userEnrollments[u].userId === usersId && self.userEnrollments[u].classId === self.currentClass.id) {
 							enrollmentToBeDeletedId = self.userEnrollments[u].id
 							break
 						}
@@ -1443,9 +1478,8 @@
 				})
 			},
 			// ASSIGNMENTS
-			openAssignmentsModal(){
+			openAssignmentsModal(firstTime = false){
 				this.loadingAssignments = true
-				this.modalClassAssignmentsIsOpen = true
 				this.videosWithoutUserSubs = []
 				var self = this
 				this.updateAssignments()
@@ -1454,6 +1488,12 @@
 				})
 				.then(function() {
 					self.loadingAssignments = false
+					if (firstTime) {
+						self.startingAssignmentMessageVisible = true
+					}
+				})
+				.then(function() {
+					self.modalClassAssignmentsIsOpen = true
 				})
 			},
 			updateAssignments() {
@@ -1472,7 +1512,11 @@
 					this.assignmentDescription = ''
 					this.assignmentGenre = ''
 				} else {
-					alert('Please complete all assignment fields.')
+					this.$message({
+						showClose: true,
+						message: "Please complete all assignment fields.",
+						type: 'warning'
+					});
 				}
 			},
 			deleteAssignment(assignmentId) {
@@ -1737,7 +1781,11 @@
 					.then(function() {
 					})
 					self.toggleModalClassesToEnroll()
-					alert("Enrollment request sent.")
+					self.$message({
+						showClose: true,
+						message: "Enrollment request sent.",
+						type: 'success'
+					});
 				})
 				// .catch(function(err) {
 				// 	console.log("requestToEnrollToClass error: ", err)

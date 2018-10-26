@@ -35,7 +35,7 @@
 					<mt-video-itemlist v-for="v in filteredVideos" v-bind:key="v.id" :currentVideo="v" v-if="v.class === currentClass.name && searchInputClassSidebar !== ''" :enableStatistics="true"></mt-video-itemlist>
 				</div>
 
-				<upload-video :currentClassProp="currentClass.name" v-show="currentClass.name !== 'Home'"></upload-video>
+				<upload-video :currentClassProp="currentClass.name" v-if="currentClass.name !== 'Home' && assignments.length !== 0"></upload-video>
 
 			</div>
 
@@ -87,7 +87,7 @@
 				this[filteredArrayName] = this[arrayName].filter(filterVideos(filterString))
 				
 			}, 500),
-
+		
 			wrongClassRedirect() {
 				if (this.role === 'student') {	
 					// If user is a student we have to check if they are enrolled to this class
@@ -130,7 +130,7 @@
 			this.$store.dispatch('getAllClasses')
 			this.$store.dispatch('getGenres')
 			this.$store.dispatch('getUsers')
-			this.$store.dispatch('getCanons')			
+			this.$store.dispatch('getCanons')				
 		},
 		mounted() {
 			this.loadingInstance = Loading.service({fullscreen: true});
@@ -164,7 +164,7 @@
 		computed: {
 			...mapGetters(
 				['videos', 'classes', 'currentClass',
-				 'enrolledClasses', 'userEnrollments'
+				 'enrolledClasses', 'userEnrollments', 'assignments'
 				]
 			)
 		},
