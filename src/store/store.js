@@ -422,7 +422,7 @@ export const store = new Vuex.Store({
                     commit('POST_CATEGORY', response.data.data)
                 })
                 .catch(function (err) {
-                    console.log('createAssignment POST error: ', err)
+                    console.log('postCategory POST error: ', err)
                 })
         },
         editCategory: function ({ commit }, payload) {
@@ -655,6 +655,9 @@ export const store = new Vuex.Store({
                 if (state.assignments[i].id === assignmentIdToBeDeleted) 
                     state.assignments.splice(i,1)
             }
+        },
+        RESET_ASSIGNMENTS: function (state) {
+            state.assignments = []
         },
         /* GENRES */
         GET_GENRES: (state, genres) => {
