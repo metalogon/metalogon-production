@@ -39,7 +39,9 @@
 
 			</div>
 
-			<mt-sidebar></mt-sidebar>
+			<mt-sidebar-admin v-if="role === 'administrator'"></mt-sidebar-admin>
+			<mt-sidebar-student v-if="role === 'student'"></mt-sidebar-student>
+			<mt-sidebar-professor v-if="role === 'professor'"></mt-sidebar-professor>
 
 		</div>
 		
@@ -56,6 +58,9 @@
 	import UploadVideo from '../Extra/UploadVideo.vue'
 	import MyHeader from '../Layout/MyHeader.vue'
 	import MtSidebar from './Shared/MtSidebar.vue'
+	import MtSidebarAdmin from './Sidebar/MtSidebarAdmin.vue'
+	import MtSidebarStudent from './Sidebar/MtSidebarStudent.vue'
+	import MtSidebarProfessor from './Sidebar/MtSidebarProfessor.vue'
 	import MyFooter from '../Layout/MyFooter.vue'
 	import MtVideoCard from './Shared/MtVideoCard.vue'
 	import MtVideoItemList from './Shared/MtVideoItemList.vue'
@@ -174,7 +179,10 @@
 			'my-footer': MyFooter,
 			'mt-video-card': MtVideoCard,
 			'mt-video-itemlist': MtVideoItemList,
-			'mt-sidebar': MtSidebar
+			'mt-sidebar': MtSidebar,
+			'mt-sidebar-admin': MtSidebarAdmin,
+			'mt-sidebar-student': MtSidebarStudent,
+			'mt-sidebar-professor': MtSidebarProfessor
 		}
 	}
 </script>
