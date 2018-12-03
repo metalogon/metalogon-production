@@ -3,53 +3,53 @@
 		<aside class="sidebar column is-2 aside">
 
 			<!-- Sidebar buttons/actions  -->
-			<div class="sidebar__actions" v-show="!loadingClasses">
-				<a class="sidebar__actionsLink" v-show="role === 'administrator' || role === 'professor'" @click="modalCreateClassIsOpen = true"><i class="fa fa-plus"></i>Create new class</a>
-				<a class="sidebar__actionsLink" v-show="role === 'administrator'" @click="modalInviteUserIsOpen = true"><i class="fa fa-plus"></i>Invite a new user</a>
-				<a class="sidebar__actionsLink" v-show="(role === 'administrator' || role === 'professor') && !(currentClass.name === 'Home')" @click="openAssignmentsModal()"><i class="fa fa-file-text-o"></i>Assignments</a>
-				<a class="sidebar__actionsLink" v-show="(role === 'administrator' || role === 'professor') && !(currentClass.name === 'Home')" @click="modalArchiveClassIsOpen = true"><i class="fa fa-archive"></i>Archive this class</a>
-				<a class="sidebar__actionsLink" v-show="(role === 'administrator' || role === 'professor') && !(currentClass.name === 'Home')" @click="toggleModalStudentRequests()"><i class="fa fa-file-text-o"></i>Student requests ({{ requestedStudents.length }})</a>
-				<!-- <a class="sidebar__actionsLink" v-show="role === 'administrator' || role === 'professor'" @click="createCategoriesTreeDataForm(); modalGenreCustomization = true"><i class="fa fa-commenting-o"></i>Categories</a> -->
-				<a class="sidebar__actionsLink" v-show="role === 'administrator' && (currentClass.name !== 'Home')" @click="modalDeleteClassIsOpen = true"><i class="fa fa-trash"></i>Delete this class</a>
-				<a class="sidebar__actionsLink" v-show="role === 'student'" @click="toggleModalClassesToEnroll()"><i class="fa fa-plus"></i>Find a class to enroll</a>
-				<a class="sidebar__actionsLink" v-show="role === 'student' && (currentClass.name !== 'Home')" @click="openAssignmentsModal()"><i class="fa fa-file-text-o"></i>Class Assignments</a>
+			<div class="sidebar__actions" v-if="!loadingClasses">
+				<a class="sidebar__actionsLink" v-if="role === 'administrator' || role === 'professor'" @click="createNewClassModalOpen();"><i class="fa fa-plus"></i>Create new class</a>
+				<a class="sidebar__actionsLink" v-if="role === 'administrator'" @click="modalInviteUserIsOpen = true"><i class="fa fa-plus"></i>Invite a new user</a>
+				<a class="sidebar__actionsLink" v-if="role === 'administrator' && (currentClass.name !== 'Home')" @click="modalDeleteClassIsOpen = true"><i class="fa fa-trash"></i>Delete this class</a>
+				<a class="sidebar__actionsLink" v-if="(role === 'administrator' || role === 'professor') && !(currentClass.name === 'Home')" @click="openAssignmentsModal()"><i class="fa fa-file-text-o"></i>Assignments</a>
+				<a class="sidebar__actionsLink" v-if="(role === 'administrator' || role === 'professor') && !(currentClass.name === 'Home')" @click="modalArchiveClassIsOpen = true"><i class="fa fa-archive"></i>Archive this class</a>
+				<a class="sidebar__actionsLink" v-if="(role === 'administrator' || role === 'professor') && !(currentClass.name === 'Home')" @click="toggleModalStudentRequests()"><i class="fa fa-file-text-o"></i>Student requests ({{ requestedStudents.length }})</a>
+				<a class="sidebar__actionsLink" v-if="(role === 'administrator' || role === 'professor') && !(currentClass.name === 'Home')" @click="editCategoriesModalOpen()"><i class="fa fa-commenting-o"></i>Edit categories</a>
+				<a class="sidebar__actionsLink" v-if="role === 'student'" @click="toggleModalClassesToEnroll()"><i class="fa fa-plus"></i>Find a class to enroll</a>
+				<a class="sidebar__actionsLink" v-if="role === 'student' && (currentClass.name !== 'Home')" @click="openAssignmentsModal()"><i class="fa fa-file-text-o"></i>Class Assignments</a>
 			</div>
 
 			<!-- Sidebar Classes menu for student -->
-			<div class="sidebar__classes" v-show="role === 'student'">	
+			<div class="sidebar__classes" v-if="role === 'student'">	
 				<!-- Loading -->
 				<div class="uploadvid__sync-load" 
 					v-loading="loadingClasses" 
-					v-show="loadingClasses"
+					v-if="loadingClasses"
 					element-loading-text="Loading..." 
 					element-loading-spinner="el-icon-loading"
 					element-loading-background="rgba(0, 0, 0, 0.8)"><br><br><br><br><br></div>
-				<!-- The two lines below don't show if the acceptedClasses array is empty, so there is no need for a v-show="!loadingClasses" -->
-				<el-input class="sidebar__classesInput" v-show="acceptedClasses.length !== 0" icon="search" v-model="searchInputClassSidebar" @change="filterClassArray('acceptedClasses', 'filteredAcceptedClasses', searchInputClassSidebar)" placeholder="Search for a class..."></el-input>
+				<!-- The two lines below don't show if the acceptedClasses array is empty, so there is no need for a v-if="!loadingClasses" -->
+				<el-input class="sidebar__classesInput" v-if="acceptedClasses.length !== 0" icon="search" v-model="searchInputClassSidebar" @change="filterClassArray('acceptedClasses', 'filteredAcceptedClasses', searchInputClassSidebar)" placeholder="Search for a class..."></el-input>
 				<a class="sidebar__classesLink" v-for="c in filteredAcceptedClasses" :class="{ 'is-bg-light' : (currentClass.name === c.name) }"  :key="c.id" @click="setCurrentClass(c)">{{ c.number }} - {{ c.name }}</a>
 			</div>
 
 			<!-- Sidebar Classes menu for administrator-->
-			<div class="sidebar__classes" v-show="role === 'administrator'">
+			<div class="sidebar__classes" v-if="role === 'administrator'">
 				<!-- Loading -->
 				<div class="uploadvid__sync-load" 
 					v-loading="loadingClasses" 
-					v-show="loadingClasses"
+					v-if="loadingClasses"
 					element-loading-text="Loading..." 
 					element-loading-spinner="el-icon-loading"
 					element-loading-background="rgba(0, 0, 0, 0.8)"><br><br><br><br><br></div>
 				<el-tabs v-model="sidebarClassesTab" v-show="!loadingClasses">
 					<el-tab-pane label="Active classes" name="activeClasses">
 						<div class="sidebar__classes">
-							<i v-show="adminActiveClasses.length === 0"> &nbsp;&nbsp; No classes </i>
-							<el-input class="sidebar__classesInput" v-show="adminActiveClasses.length !== 0" icon="search" v-model="searchInputActiveClassSidebar" @change="filterClassArray('adminActiveClasses', 'filteredAdminActiveClasses', searchInputActiveClassSidebar)" placeholder="Search for a class..."></el-input>
+							<i v-if="adminActiveClasses.length === 0"> &nbsp;&nbsp; No classes </i>
+							<el-input class="sidebar__classesInput" v-if="adminActiveClasses.length !== 0" icon="search" v-model="searchInputActiveClassSidebar" @change="filterClassArray('adminActiveClasses', 'filteredAdminActiveClasses', searchInputActiveClassSidebar)" placeholder="Search for a class..."></el-input>
 							<a class="sidebar__classesLink" v-for="c in filteredAdminActiveClasses"  :class="{ 'is-bg-light' : (currentClass.name === c.name) }" :key="c.id" @click="setCurrentClass(c)">{{ c.number }} - {{ c.name }}</a>
 						</div>
 					</el-tab-pane>
 					<el-tab-pane label="Archived" name="archivedClasses">
 						<div class="sidebar__classes">
-							<i v-show="adminArchivedClasses.length === 0"> &nbsp;&nbsp; No archived classes </i>
-							<el-input class="sidebar__classesInput" v-show="adminArchivedClasses.length !== 0" icon="search" v-model="searchInputArchivedClassSidebar" @change="filterClassArray('adminArchivedClasses', 'filteredAdminArchivedClasses', searchInputArchivedClassSidebar)" placeholder="Search archived classes..."></el-input>							
+							<i v-if="adminArchivedClasses.length === 0"> &nbsp;&nbsp; No archived classes </i>
+							<el-input class="sidebar__classesInput" v-if="adminArchivedClasses.length !== 0" icon="search" v-model="searchInputArchivedClassSidebar" @change="filterClassArray('adminArchivedClasses', 'filteredAdminArchivedClasses', searchInputArchivedClassSidebar)" placeholder="Search archived classes..."></el-input>							
 							<a class="sidebar__classesLink" v-for="c in filteredAdminArchivedClasses" :key="c.id" :class="{ 'is-bg-light' : (currentClass.name === c.name) }" @click="openModalUnarchiveClass(c.id)">{{ c.number }} - {{ c.name }}</a>
 						</div>
 					</el-tab-pane>
@@ -57,26 +57,26 @@
 			</div>
 			
 			<!-- Sidebar Classes menu for professor-->
-			<div class="sidebar__classes" v-show="role === 'professor'">
+			<div class="sidebar__classes" v-if="role === 'professor'">
 				<!-- Loading -->
 				<div class="uploadvid__sync-load" 
 					v-loading="loadingClasses" 
-					v-show="loadingClasses"
+					v-if="loadingClasses"
 					element-loading-text="Loading..." 
 					element-loading-spinner="el-icon-loading"
 					element-loading-background="rgba(0, 0, 0, 0.8)"><br><br><br><br><br></div>
 				<el-tabs v-model="sidebarClassesTab" v-show="!loadingClasses">
 					<el-tab-pane label="Active classes" name="activeClasses">
 						<div class="sidebar__classes">
-							<i v-show="professorActiveClasses.length === 0"> &nbsp;&nbsp; No classes - create one </i>
-							<el-input class="sidebar__classesInput" v-show="professorActiveClasses.length !== 0" icon="search" v-model="searchInputActiveClassSidebar" @change="filterClassArray('professorActiveClasses', 'filteredProfessorActiveClasses', searchInputActiveClassSidebar)" placeholder="Search for a class..."></el-input>
+							<i v-if="professorActiveClasses.length === 0"> &nbsp;&nbsp; No classes - create one </i>
+							<el-input class="sidebar__classesInput" v-if="professorActiveClasses.length !== 0" icon="search" v-model="searchInputActiveClassSidebar" @change="filterClassArray('professorActiveClasses', 'filteredProfessorActiveClasses', searchInputActiveClassSidebar)" placeholder="Search for a class..."></el-input>
 							<a class="sidebar__classesLink" v-for="c in filteredProfessorActiveClasses" :class="{ 'is-bg-light' : (currentClass.name === c.name) }" :key="c.id" @click="setCurrentClass(c)">{{ c.number }} - {{ c.name }}</a>
 						</div>
 					</el-tab-pane>
 					<el-tab-pane label="Archived" name="archivedClasses">
 						<div class="sidebar__classes">
-							<i v-show="professorArchivedClasses.length === 0"> &nbsp;&nbsp; No archived classes </i>
-							<el-input class="sidebar__classesInput" v-show="professorArchivedClasses.length !== 0" icon="search" v-model="searchInputArchivedClassSidebar" @change="filterClassArray('professorArchivedClasses', 'filteredProfessorArchivedClasses', searchInputArchivedClassSidebar)" placeholder="Search archived classes..."></el-input>							
+							<i v-if="professorArchivedClasses.length === 0"> &nbsp;&nbsp; No archived classes </i>
+							<el-input class="sidebar__classesInput" v-if="professorArchivedClasses.length !== 0" icon="search" v-model="searchInputArchivedClassSidebar" @change="filterClassArray('professorArchivedClasses', 'filteredProfessorArchivedClasses', searchInputArchivedClassSidebar)" placeholder="Search archived classes..."></el-input>							
 							<a class="sidebar__classesLink" v-for="c in filteredProfessorArchivedClasses" :key="c.id" :class="{ 'is-bg-light' : (currentClass.name === c.name) }" @click="openModalUnarchiveClass(c.id)">{{ c.number }} - {{ c.name }}</a>
 						</div>
 					</el-tab-pane>
@@ -84,63 +84,83 @@
 			</div>
 
 			<!-- administrator, professor -->
-			<el-dialog title="Add new class" :visible.sync="modalCreateClassIsOpen">
-					<el-form :model="newClass">
-							<el-form-item label="Name">
-									<el-input v-model="newClass.name" placeholder="Advanced Essay Workshop"></el-input>
-							</el-form-item>
-							<el-form-item label="Department">
-								<el-input v-model="newClass.department" placeholder="Comparative Media Studies / Writing"></el-input>
-									<!-- <el-select  placeholder="Choose a department" >
-										<el-option v-model="newClass.department" :label="c.department" :value="c.department" v-for="c in classes" v-bind:key="c.title"></el-option>
-									</el-select> -->
-							</el-form-item>
-							<el-form-item label="Number">
-									<el-input v-model="newClass.number" placeholder="21W.745"></el-input>
-							</el-form-item>
-							<el-form-item label="Semester">
-									<el-input v-model="newClass.semester" placeholder="Spring 2018"></el-input>
-							</el-form-item>
-					</el-form>
-					<span slot="footer" class="dialog-footer">
-							<el-button @click="modalCreateClassIsOpen = false">Cancel</el-button>
-							<el-button class="add-class-btn" @click="createClass(); modalCreateClassIsOpen = false;">Create Class</el-button>
-					</span>
-			</el-dialog>
+			<el-dialog title="Add new class" :visible.sync="modalCreateClassIsOpen" :before-close="handleNewClassClose">
+				
+				<el-steps :active="createModalActive" finish-status="success" space="97%"> <!-- TODO change space to some function of the width of the modal -->
+					<el-step></el-step>
+					<el-step></el-step>
+				</el-steps>
 
-			<el-dialog :title="'Do you want to archive `' + currentClass.name + '` class?'" :visible.sync="modalArchiveClassIsOpen">
-				<el-button @click="modalArchiveClassIsOpen = false">Go back</el-button>
-				<el-button class="add-class-btn" @click="archiveClass()"><strong>Archive Class</strong></el-button>
-			</el-dialog>
+				<!-- First Step -->
+				<el-form :model="newClass" v-if="createModalActive == 0">
+					<el-form-item label="Name">
+						<el-input v-model="newClass.name" placeholder="Advanced Essay Workshop" required></el-input>
+					</el-form-item>
+					<el-form-item label="Department">
+						<el-input v-model="newClass.department" placeholder="Comparative Media Studies / Writing" required></el-input>
+						<!-- <el-select  placeholder="Choose a department" >
+							<el-option v-model="newClass.department" :label="c.department" :value="c.department" v-for="c in classes" v-bind:key="c.title"></el-option>
+						</el-select> -->
+					</el-form-item>
+					<el-form-item label="Number">
+						<el-input v-model="newClass.number" placeholder="21W.745" required></el-input>
+					</el-form-item>
+					<el-form-item label="Semester">
+						<el-input v-model="newClass.semester" placeholder="Spring 2018" required></el-input>
+					</el-form-item>
+				</el-form>
+				<!-- /First Step -->
 
-			<el-dialog :title="'Do you want to unarchive this class?'" :visible.sync="modalUnarchiveClassIsOpen">
-				<el-button @click="modalUnarchiveClassIsOpen = false">Go back</el-button>
-				<el-button class="add-class-btn" @click="unArchiveClass()"><strong>Unarchive Class</strong></el-button>
-			</el-dialog>	
-
-			<el-dialog title="Genre customization" :visible.sync="modalGenreCustomization" size="large">
+				<!-- Second Step -->
+				<div v-if="createModalActive == 1">
 					<h3 style="margin-bottom:10px;">Choose genre:</h3>
-					<el-select v-model="currentGenre" placeholder="Choose a genre" style="width:300px">
+					<el-select v-model="currentGenre" placeholder="Choose a genre" style="width:300px" @change="handleGenreSelection()">
 						<el-option v-for="g in genres" :key="g.name" :label="g.name" :value="g.name"></el-option>
 					</el-select>
 					<br>
-					<el-button v-show="currentGenre !== ''" style="margin-top:10px" @click="modalAddCategoryIsOpen = true"> Add category</el-button>
+					<!-- <el-button v-if="currentGenre !== ''" style="margin-top:10px" @click="modalAddCategoryIsOpen = true"> Add category</el-button> -->
 					<!-- <el-radio class="radio" v-model="currentGenre" v-for="g in genres" :key="g.name" :label="g.name"></el-radio> -->
-
-					<br/>
-					<br/>
-					<div v-show="currentGenre">
+					<br>
+					<br>
+					<div v-if="currentGenre">
 						<p>Choose canons:</p>
-						<el-tree :data="canons" :props="genreProps" @node-click="handleNodeClick" show-checkbox>
-						</el-tree>
+						<el-tree :data="elementTreeForm" :props="genreProps" show-checkbox ref='elementTreeRef' node-key='id'></el-tree>
 					</div>
-					
-					<span slot="footer" class="dialog-footer">
-							<el-button @click="modalGenreCustomization = false; currentGenre = ''">Close</el-button>
-					</span>
-			</el-dialog>	
+				</div>
+				<!-- /Second Step -->
 
-			<el-dialog title="Add category" :visible.sync="modalAddCategoryIsOpen" size="small">
+				<span slot="footer" class="dialog-footer">
+					<el-button v-if="createModalActive == 0" style="float:left;" @click="handleNewClassClose">Cancel</el-button>
+					<el-button v-if="createModalActive == 0" class="add-class-btn" @click="nextStep">Next Step</el-button>
+
+					<el-button v-if="createModalActive == 1" style="float:left;" @click="previousStep">Previous Step</el-button>
+					<el-button v-if="createModalActive == 1" class="add-class-btn" @click="createClass()">Create Class</el-button>
+				</span>
+			</el-dialog>
+
+
+			<el-dialog title="Categories customization" :visible.sync="modalGenreCustomization" size="large" :before-close="handleEditCategoriesClose">
+				<h3 style="margin-bottom:10px;">Choose genre:</h3>
+				<el-select v-model="currentGenre" placeholder="Choose a genre" style="width:300px" @change="handleGenreSelection()">
+					<el-option v-for="g in genres" :key="g.name" :label="g.name" :value="g.name"></el-option>
+				</el-select>
+				<br>
+				<!-- <el-button v-if="currentGenre !== ''" style="margin-top:10px" @click="modalAddCategoryIsOpen = true"> Add category</el-button> -->
+				<!-- <el-radio class="radio" v-model="currentGenre" v-for="g in genres" :key="g.name" :label="g.name"></el-radio> -->
+				<br>
+				<br>
+				<div v-if="currentGenre">
+					<p>Choose canons:</p>
+					<el-tree :data="elementTreeForm" :props="genreProps" show-checkbox ref='elementTreeRef' node-key='id'></el-tree>
+				</div>
+				
+				<span slot="footer" class="dialog-footer">
+						<el-button @click="handleEditCategoriesClose()">Cancel</el-button>
+						<el-button @click="saveNewCustomCategories()">Save</el-button>
+				</span>
+			</el-dialog>
+
+			<!-- <el-dialog title="Add category" :visible.sync="modalAddCategoryIsOpen" size="small">
 					<el-select style="margin-bottom:10px;" v-model="newCategoryCanon" placeholder="Choose a canon">
 						<el-option v-for="c in canons" :key="c.label" :label="c.label" :value="c.label"></el-option>
 					</el-select>
@@ -154,7 +174,17 @@
 					<span slot="footer" class="dialog-footer">
 							<el-button @click="modalAddCategoryIsOpen = false; addNewCategory()">Add</el-button>
 					</span>
-			</el-dialog>	
+			</el-dialog>	 -->
+
+			<el-dialog :title="'Do you want to archive `' + currentClass.name + '` class?'" :visible.sync="modalArchiveClassIsOpen">
+				<el-button @click="modalArchiveClassIsOpen = false">Go back</el-button>
+				<el-button class="add-class-btn" @click="archiveClass()"><strong>Archive Class</strong></el-button>
+			</el-dialog>
+
+			<el-dialog :title="'Do you want to unarchive this class?'" :visible.sync="modalUnarchiveClassIsOpen">
+				<el-button @click="modalUnarchiveClassIsOpen = false">Go back</el-button>
+				<el-button class="add-class-btn" @click="unArchiveClass()"><strong>Unarchive Class</strong></el-button>
+			</el-dialog>		
 
 			<!-- administrator -->
 			<el-dialog :title="'Do you want to delete `' + currentClass.name + '` class?'" :visible.sync="modalDeleteClassIsOpen">
@@ -184,49 +214,50 @@
 					</span>
 			</el-dialog>
 
-			<!-- Administrator/Professor/Student - Assignments -->
-			<el-dialog v-bind:title="this.currentClass.name + ' Class assignments'" :visible.sync="modalClassAssignmentsIsOpen" class="modal-class-assignments">
+			<!-- Administrator/Professor - Assignments -->
+			<el-dialog v-bind:title="this.currentClass.name + ' Class assignments'" :visible.sync="modalClassAssignmentsIsOpen" class="modal-class-assignments" v-if="!!currentClass.id && (role === 'administrator' || role ==='professor')">
 				<!-- Loading Screen -->
 				<div class="uploadvid__sync-load" 
 					v-loading="loadingAssignments" 
 					element-loading-text="Loading..." 
 					element-loading-spinner="el-icon-loading"
 					element-loading-background="rgba(0, 0, 0, 0.8)"></div>
-                <el-tabs v-show="!!currentClass.id && !loadingAssignments">
+                <el-tabs v-show="!loadingAssignments">
+					
+					<el-dialog 
+						:visible.sync="startingAssignmentMessageVisible"
+						title="Create a starting assignment."
+						append-to-body>
+					</el-dialog>
+					
                     <el-tab-pane v-for="a in assignments" :key="a.id" :label="a.title">
-                		<el-tabs v-show="!!currentClass.id && !loadingAssignments">
-							<el-tab-pane label="General">
+                		<el-tabs v-model="assignmentsModalSubtab" v-if="!loadingAssignments">
+							<el-tab-pane label="General" name="General">
 								<div class="assignments-content">
 									<span class="assignments__title">
 										<strong>Title:</strong>
 										<span class="assignments__titleId">{{ a.id }}</span>
 										<!-- Editing functionality for admin/professor -->
-										<p class="assignments__titleText" v-if="role === 'administrator' || role === 'professor'" @click="toggleTitleEdit($event)">{{ a.title }}</p>
-										<textarea class="input assignments__titleInput" v-if="role === 'administrator' || role === 'professor'" v-model="a.title" @blur="saveTitleEdit($event, a.id)" type="text"></textarea>
-										<!-- Simple viewing for student -->
-										<p class="assignments__titleText_noEdit" v-if="role === 'student'">{{ a.title }}</p>
+										<p class="assignments__titleText" @click="toggleTitleEdit($event)">{{ a.title }}</p>
+										<textarea class="input assignments__titleInput" v-model="a.title" @blur="saveTitleEdit($event, a.id)" type="text"></textarea>
 									</span>
 									<hr>
 									<span class="assignments__desc">
 										<strong class="assignments__descTitle">Description:</strong>
 										<span class="assignments__descId">{{ a.id }}</span>
 										<!-- Editing functionality for admin/professor -->
-										<p class="assignments__descText" v-if="role === 'administrator' || role === 'professor'" @click="toggleDescriptionEdit($event)">{{ a.description }}</p>
-										<textarea class="textarea assignments__descTextarea" v-if="role === 'administrator' || role === 'professor'" v-model="a.description" @blur="saveDescriptionEdit($event, a.id)" type="text"></textarea>
-										<!-- Simple viewing for student -->
-										<p class="assignments__titleText_noEdit" v-if="role === 'student'">{{ a.description }}</p>
+										<p class="assignments__descText" @click="toggleDescriptionEdit($event)">{{ a.description }}</p>
+										<textarea class="textarea assignments__descTextarea" v-model="a.description" @blur="saveDescriptionEdit($event, a.id)" type="text"></textarea>
 									</span>
 									<hr>
 									<span class="assignments__genre" v-for="g in genres" v-if="g.id === a.genre" :key="g.id">
 										<strong class="assignments__genreTitle">Genre:</strong> 
 										<span class="assignments__genreId">{{ a.id }}</span>
 										<!-- Editing functionality for admin/professor -->
-										<p class="assignments__genreName" v-if="role === 'administrator' || role === 'professor'" @click="toggleGenreEdit($event)">{{ g.name }}</p>
-										<select class="assignments__genreSelect select" v-if="role === 'administrator' || role === 'professor'" v-model="a.genre" @change="saveGenreEdit($event, a.id)">
+										<p class="assignments__genreName" @click="toggleGenreEdit($event)">{{ g.name }}</p>
+										<select class="assignments__genreSelect select" v-model="a.genre" @change="saveGenreEdit($event, a.id)">
 											<option v-for="g in genres" :label="g.name" :value="g.id" :key="g.id" class="option"></option>
 										</select>
-										<!-- Simple viewing for student -->
-										<p class="assignments__genreName__noEdit" v-if="role === 'student'">{{ g.name }}</p>
 									</span>
 									<hr>
 									<span class="assignments__dueDate">
@@ -234,20 +265,18 @@
 										<span class="assignments__dueDateId">{{ a.id }}</span>
 										<p>
 											<!-- Editing functionality for admin/professor -->
-											<el-date-picker type="date" placeholder="Pick a date" v-if="role === 'administrator' || role === 'professor'" v-model="a.dueDate" @change="saveDueDateEdit($event, a.id)"></el-date-picker>
-											<!-- Simple viewing for student -->
-											<el-date-picker type="date" placeholder="Pick a date" v-if="role === 'student'" v-model="a.dueDate" :readonly="true"></el-date-picker>
+											<el-date-picker type="date" placeholder="Pick a date" v-model="a.dueDate" @change="saveDueDateEdit($event, a.id)"></el-date-picker>
 										</p>
 									</span>
 								</div>
 							</el-tab-pane>
-							<el-tab-pane label="Submissions">
+							<el-tab-pane label="Class Submissions" name="ClassSubmissions">
 								<mt-video-itemlist v-for="v in videos" v-bind:key="v.id" :currentVideo="v" v-if="v.assignmentId === a.id" :enableStatistics="false"></mt-video-itemlist>
 							</el-tab-pane>
                 		</el-tabs>
 						
                     </el-tab-pane>
-					<el-tab-pane v-if="role === 'administrator' || role === 'professor'" label="+ Add assignment">
+					<el-tab-pane label="+ Add assignment">
 						<el-input v-model="assignmentTitle" placeholder="Set a title" style="width:70%;margin-bottom:15px;"></el-input>
 						<el-input v-model="assignmentDescription" placeholder="Set a description" type="textarea" style="width:70%;margin-bottom:15px;"></el-input>
 						<p>Choose genre:</p>
@@ -260,46 +289,103 @@
 						<el-button @click="createAssignment()">Create</el-button>
                     </el-tab-pane>
                 </el-tabs>
-				<p v-if="assignments.length === 0 && role === 'student'" ><i>No assignments</i></p>
             </el-dialog>
 
+			<!-- Student - Assignments -->
+			<el-dialog v-bind:title="this.currentClass.name + ' Class assignments'" :visible.sync="modalClassAssignmentsIsOpen" class="modal-class-assignments" v-if="!!currentClass.id && 	role === 'student'">
+				<!-- Loading Screen -->
+				<div class="uploadvid__sync-load" 
+					v-loading="loadingAssignments" 
+					element-loading-text="Loading..." 
+					element-loading-spinner="el-icon-loading"
+					element-loading-background="rgba(0, 0, 0, 0.8)"></div>
+                <el-tabs v-show="!loadingAssignments" @tab-click="changeAssignmentTabEvent">
+					
+                    <el-tab-pane v-for="a in assignments" :key="a.id" :label="a.title">
+                		<el-tabs v-model="assignmentsModalSubtab" v-if="!loadingAssignments">
+							<el-tab-pane label="General" name="General">
+								<div class="assignments-content">
+									<span class="assignments__title">
+										<strong>Title:</strong>
+										<span class="assignments__titleId">{{ a.id }}</span>
+										<!-- Simple viewing for student -->
+										<p class="assignments__titleText_noEdit" v-if="role === 'student'">{{ a.title }}</p>
+									</span>
+									<hr>
+									<span class="assignments__desc">
+										<strong class="assignments__descTitle">Description:</strong>
+										<span class="assignments__descId">{{ a.id }}</span>
+										<!-- Simple viewing for student -->
+										<p class="assignments__titleText_noEdit" v-if="role === 'student'">{{ a.description }}</p>
+									</span>
+									<hr>
+									<span class="assignments__genre" v-for="g in genres" v-if="g.id === a.genre" :key="g.id">
+										<strong class="assignments__genreTitle">Genre:</strong> 
+										<span class="assignments__genreId">{{ a.id }}</span>
+										<!-- Simple viewing for student -->
+										<p class="assignments__genreName__noEdit" v-if="role === 'student'">{{ g.name }}</p>
+									</span>
+									<hr>
+									<span class="assignments__dueDate">
+										<strong class="assignments__dueDateTitle">Due date:</strong>
+										<span class="assignments__dueDateId">{{ a.id }}</span>
+										<p>
+											<!-- Simple viewing for student -->
+											<el-date-picker type="date" placeholder="Pick a date" v-if="role === 'student'" v-model="a.dueDate" :readonly="true"></el-date-picker>
+										</p>
+									</span>
+								</div>
+							</el-tab-pane>
+							<el-tab-pane label="My Submission" name="MySubmission">
+								<mt-video-itemlist v-for="v in userCollaborated" v-bind:key="v.id" :currentVideo="v" v-if="v.assignmentId === a.id" :enableStatistics="false"></mt-video-itemlist>
+							</el-tab-pane>
+							<el-tab-pane label="Class Submissions" name="ClassSubmissions">
+								<mt-video-itemlist v-for="v in videosWithoutUserSubs" v-bind:key="v.id" :currentVideo="v" v-if="v.assignmentId === a.id" :enableStatistics="false"></mt-video-itemlist>
+							</el-tab-pane>
+                		</el-tabs>
+						
+                    </el-tab-pane>
+                </el-tabs>
+				<p v-if="assignments.length === 0 && role === 'student' && !loadingAssignments" ><i>No assignments</i></p>
+            </el-dialog>
+	
 			<!-- Administrator/Professor - Student requests -->
 			<el-dialog :visible.sync="modalStudentRequestsIsOpen">
 				<span class="modal-student-requests" slot="title"><b><i class="fa fa-book"></i> {{currentClass.name}} - Enrollments</b></span>
 				<!-- Loading -->
 				<div class="uploadvid__sync-load" 
 					v-loading="loadingModalStudents" 
-					v-show="loadingModalStudents"
+					v-if="loadingModalStudents"
 					element-loading-text="Loading..." 
 					element-loading-spinner="el-icon-loading"
 					element-loading-background="rgba(0, 0, 0, 0.8)"><br><br><br><br><br></div>
-                <el-tabs v-model="modalStudentRequestsTab" v-show="!loadingModalStudents">
+                <el-tabs v-model="modalStudentRequestsTab" v-if="!loadingModalStudents">
                     <el-tab-pane label="Enrolled students" name="enrolledStudents">
-						<p v-show="enrolledStudents.length === 0" ><i>No enrolled students</i></p>
-                        <el-input icon="search" v-show="enrolledStudents.length !== 0" v-model="searchInput" @change="filterStudentsArray('enrolledStudents', 'filteredEnrolledStudents', searchInput)" placeholder="Search for a student..." style="width:220px;margin-bottom:7px;" class="mt-search-input"></el-input>
+						<p v-if="enrolledStudents.length === 0" ><i>No enrolled students</i></p>
+                        <el-input icon="search" v-if="enrolledStudents.length !== 0" v-model="searchInput" @change="filterStudentsArray('enrolledStudents', 'filteredEnrolledStudents', searchInput)" placeholder="Search for a student..." style="width:220px;margin-bottom:7px;" class="mt-search-input"></el-input>
 						<div class="mt-table">
 							<li v-for="(s, index) in filteredEnrolledStudents" :key="s.id" style="list-style:none">
 								<span><i class="fa fa-user"></i> {{ s.firstName + " " + s.lastName}}</span>
-								<el-button v-show="role === 'administrator'" size="small" type="info" @click="deleteEnrollment(index, s)" style="float: right; margin: -2px;">Unenroll</el-button>
+								<el-button v-if="role === 'administrator'" size="small" type="info" @click="deleteEnrollment(index, s)" style="float: right; margin: -2px;">Unenroll</el-button>
 							</li>
 						</div>
                     </el-tab-pane>
                     <el-tab-pane name="requestedStudents">
-						<p v-show="requestedStudents.length === 0" ><i>No enrollment requests</i></p>
+						<p v-if="requestedStudents.length === 0" ><i>No enrollment requests</i></p>
     					<span slot="label">Enrollment requests ({{requestedStudents.length}})</span>
-                        <el-input icon="search" v-show="requestedStudents.length !== 0" v-model="searchInput" @change="filterStudentsArray('requestedStudents', 'filteredRequestedStudents', searchInput)" placeholder="Search for a student..." style="width:220px;margin-bottom:7px;"></el-input>
+                        <el-input icon="search" v-if="requestedStudents.length !== 0" v-model="searchInput" @change="filterStudentsArray('requestedStudents', 'filteredRequestedStudents', searchInput)" placeholder="Search for a student..." style="width:220px;margin-bottom:7px;"></el-input>
 						<div class="mt-table">
 							<li v-for="(s, index) in filteredRequestedStudents" :key="s.id" style="list-style:none">
 								<span><i class="fa fa-user"></i> {{ s.firstName + " " + s.lastName}}</span>
-								<el-button v-show="role === 'administrator'" size="small" type="info" @click="deleteRequest(index, s)" style="float: right; margin:-2px;">Delete request</el-button>
+								<el-button v-if="role === 'administrator'" size="small" type="info" @click="deleteRequest(index, s)" style="float: right; margin:-2px;">Delete request</el-button>
 								<el-button size="small" type="info" @click="acceptStudent(index, s)" style="float: right; margin: -2px; margin-right: 5px">Accept request</el-button>
 							</li>
 						</div>
-                        <el-button v-show="requestedStudents.length !== 0" sfize="small" type="info" @click="acceptAllStudents()" style="margin-top: 5px;">Accept all requests</el-button>
+                        <el-button v-if="requestedStudents.length !== 0" sfize="small" type="info" @click="acceptAllStudents()" style="margin-top: 5px;">Accept all requests</el-button>
                     </el-tab-pane>
                     <el-tab-pane label="Other students" name="otherStudents" v-if="role === 'administrator'">
-						<p v-show="otherStudents.length === 0" ><i>No other students</i></p>
-                        <el-input icon="search" v-show="otherStudents.length !== 0" v-model="searchInput" @change="filterStudentsArray('otherStudents', 'filteredOtherStudents', searchInput)" placeholder="Search for a student..." style="width:220px;margin-bottom:7px;"></el-input>
+						<p v-if="otherStudents.length === 0" ><i>No other students</i></p>
+                        <el-input icon="search" v-if="otherStudents.length !== 0" v-model="searchInput" @change="filterStudentsArray('otherStudents', 'filteredOtherStudents', searchInput)" placeholder="Search for a student..." style="width:220px;margin-bottom:7px;"></el-input>
 						<div class="mt-table">
 							<li v-for="(s, index) in filteredOtherStudents" :key="s.id" style="list-style:none">
 								<span><i class="fa fa-user"></i> {{ s.firstName + " " + s.lastName}}</span>
@@ -315,14 +401,14 @@
 				<!-- Loading -->
 				<div class="uploadvid__sync-load" 
 					v-loading="loadingModalClasses" 
-					v-show="loadingModalClasses"
+					v-if="loadingModalClasses"
 					element-loading-text="Loading..." 
 					element-loading-spinner="el-icon-loading"
 					element-loading-background="rgba(0, 0, 0, 0.8)"><br><br><br><br><br></div>
-				<el-tabs v-model="modalClassesRequestsTab" v-show="!loadingModalClasses">
+				<el-tabs v-model="modalClassesRequestsTab" v-if="!loadingModalClasses">
                     <el-tab-pane label="Classes to enroll" name="classesToEnroll">
-						<p v-show="notEnrolledClasses.length === 0" ><i>No classes to enroll</i></p>
-						<el-input icon="search" v-show="notEnrolledClasses.length !== 0" v-model="searchInputClassModal" @change="filterClassArray('notEnrolledClasses', 'filteredNotEnrolledClasses', searchInputClassModal)" placeholder="Search for a class..." style="width:220px;margin-bottom:7px;" class="mt-search-input"></el-input>
+						<p v-if="notEnrolledClasses.length === 0" ><i>No classes to enroll</i></p>
+						<el-input icon="search" v-if="notEnrolledClasses.length !== 0" v-model="searchInputClassModal" @change="filterClassArray('notEnrolledClasses', 'filteredNotEnrolledClasses', searchInputClassModal)" placeholder="Search for a class..." style="width:220px;margin-bottom:7px;" class="mt-search-input"></el-input>
                         <div class="mt-table">
 							<li class="mt-table__row" v-for="c in filteredNotEnrolledClasses" :key="c.id">
 								<span>
@@ -336,8 +422,8 @@
                     </el-tab-pane>
 					<el-tab-pane name="requestsPending">
     					<span slot="label">Requests pending ({{requestedClasses.length}})</span> <!-- Dynamic tab label --> 
-                        <span v-show="requestedClasses.length === 0"><i>No requests pending</i></span>
-						<div label="" class="mt-table" v-show="!loadingModalClasses">
+                        <span v-if="requestedClasses.length === 0"><i>No requests pending</i></span>
+						<div label="" class="mt-table" v-if="!loadingModalClasses">
 							<li v-for="c in requestedClasses" :key="c.id">
 								<a><i class="fa fa-book"></i> {{ c.number }} - {{ c.name }} - {{ c.department }} - {{ c.semester }}</a>
 							</li>
@@ -375,7 +461,7 @@
 						</el-checkbox>
 					</el-checkbox-group>
 				</div>
-            </el-dialog> -->	
+            </el-dialog>	 -->
 		</aside>
 
 </template>
@@ -425,13 +511,15 @@
 				filteredProfessorArchivedClasses: [],
 
 				// MODALS
+				modalClassAssignmentsIsOpen: false,
 				// Student
 				modalClassesToEnrollIsOpen: false,
+				videosWithoutUserSubs: [], // List of all class videos for current assignment
 				// Professor, Administrator
 				modalCreateClassIsOpen: false,
+				createModalActive: 0,
 				modalArchiveClassIsOpen: false,
 				modalUnarchiveClassIsOpen: false,
-				modalClassAssignmentsIsOpen: false,
 				modalStudentRequestsIsOpen: false,
 				// Administrator
 				modalDeleteClassIsOpen: false,
@@ -447,6 +535,7 @@
 				otherStudents: [],
 				filteredOtherStudents: [],
 				// ASSIGNMENTS
+				assignmentsModalSubtab: 'General',
 				assignmentSelectedId: '',
 				assignmentTitle: '',
 				assignmentDescription: '',
@@ -454,100 +543,22 @@
 				assignmentCategorySelected: '',
 				assignmentDueDate: '',
 				categoriesCheckList: [],
+				startingAssignmentMessageVisible: false,
 
 				//-----------------------------------
 				// Categories
 				// categoriesGenre: '',
 				currentGenre: '',
+				previousGenre: '',
+				firstTimeSelectingGenre: true,
 				modalGenreCustomization: false,
 				modalAddCategoryIsOpen: false,
 				newCategoryCanon: "",
 				newCategoryName: "",
 				newCategoryDesc: "",
-				// Genre customization
-				// Genre version 1
-				canons: [
-					{
-						label: 'Moves',
-						children: [
-					// 		{ label: 'Introduction', children: [
-					// 			{ label: 'Shows that the research area is important/central/interesting/problematic/relevant and narrows down to the topic of the research' },
-					// 			{ label: 'States the value of the present research and explains why it was conducted' },
-					// 			{ label: 'Discusses the definitions of key terms' },
-					// 			{ label: 'Summarizes and previews the methods used' },
-					// 			{ label: 'Presents basic equations' },
-					// 		]},
-					// 		{ label: 'Methodology', children: [
-					// 			{ label: 'Describes materials and instrumentation in the study' },
-					// 			{ label: 'Describes tasks (actions) in the study' },
-					// 			{ label: 'Describes the procedures of an experiment (activities)' },
-					// 			{ label: 'Presents justification of techniques' },
-					// 			{ label: 'Describes variables in the study' },
-					// 			{ label: 'Describes the procedures used in data analysis' },
-					// 			{ label: 'Describes the relations between the experiment and prior/subsequent experiments' },
-					// 		]},
-					// 		{ label: 'Results and Discussion', children: [
-					// 			{ label: 'Shows that the research area is important/central/interesting/problematic/relevant and narrows down to the topic of the research' },
-					// 			{ label: 'States the value of the present research and explains why it was conducted' },
-					// 			{ label: 'Discusses the definitions of key terms' },
-					// 			{ label: 'Summarizes and previews the methods used' },
-					// 			{ label: 'Presents basic equations' },
-					// 		]},
-					// 		{ label: 'Conclusion', children: [
-					// 			{ label: 'xxxxxxxxxx' },
-					// 		]},
-					// 		{ label: 'Question and Answer', children: [
-					// 			{ label: 'xxxxxxxxxx' },
-					// 		]},
-						]
-					}, 
-					{
-						label: 'Structure',
-						children: [
-							// {
-							// 	"_id": "59a86e7e0110587e400ff79b",
-							// 	"name": "Coherence", // child label
-							// 	"canon": "Structure", // canon label
-							// 	"description": "Connects the central rhetorical moves for each section explicitly to each other" //desc
-							// }
-							// { label: 'Terms', desc: 'Provides overview of the talk, emphasizing the connection between key terms and concepts'},
-							// { label: 'Conceptual transitions' },
-							// { label: 'Line of argument' },
-							// { label: 'Central moves' },
-						]
-					}, 
-					{
-						label: 'Delivery',
-						children: [
-							// { label: 'Volume' },
-							// { label: 'Gestures' },
-							// { label: 'Metadiscourse' },
-							// { label: 'Posture' },
-							// { label: 'Language' },
-						]
-					}, 
-					{
-						label: 'Style',
-						children: [
-							// { label: 'Coherence' },
-							// { label: 'Concision' },
-							// { label: 'Flow' },
-							// { label: 'Emphasis' },
-							// { label: 'Figures of Speech' },
-							// { label: 'Figures of Sound' },
-						]
-					},
-					{
-						label: 'Visuals',
-						children: [
-							// { label: 'Pictorial cues' },
-							// { label: 'Slide titles' },
-							// { label: 'Image-text highlight' },
-							// { label: 'Graphics' },
-							// { label: 'Memorable images' }
-						]
-					},
-				],
+				// Categories customization
+				selectedNodes: [], // Data structure that contains the selected categories ids for each genre
+				elementTreeForm: [], // Data structure for the element library to read from
 				genreProps: {
 					children: 'children',
 					label: 'label',
@@ -563,7 +574,8 @@
 					department: '',
 					name: '',
 					number: '',
-					semester: ''
+					semester: '',
+					catFilter: []
 				},
 				invitation: {
 					"email": '',
@@ -602,7 +614,195 @@
 			}
 		},
 		methods: {
-			// TODO ADD REJECT ENROLLMENT REQUEST BuTTON FOR PROF/ADMIN WHICH DELETES THE ENROLLMENT REQUEST RESOURCE
+			handleGenreSelection() {
+				// Saving previous genre tree
+				if (this.firstTimeSelectingGenre) {
+					this.previousGenre = this.currentGenre
+					this.firstTimeSelectingGenre = false
+				}
+				else {
+					// console.log("saved new custom tree with genre:", this.previousGenre)
+					for(var g in this.selectedNodes) {
+						if (this.selectedNodes[g].genreName === this.previousGenre) {
+							var self = this
+							new Promise(function () {
+								self.selectedNodes[g].selectedNodes = self.$refs.elementTreeRef.getCheckedKeys(true)
+							})
+							break
+						}
+					}
+				}
+				// Set up new genre tree
+				for(var g in this.selectedNodes) {
+					if (this.selectedNodes[g].genreName === this.currentGenre) {
+						var self = this
+						new Promise(function () {
+							// leaves only = false
+							self.$refs.elementTreeRef.setCheckedKeys(self.selectedNodes[g].selectedNodes, false)
+						})
+						break
+					}
+				}
+				
+				// console.log("currentGenre: ", this.currentGenre, " - previous: ", this.previousGenre)
+				// console.log(this.selectedNodes)
+				this.previousGenre = this.currentGenre
+				
+			},
+			createNewClassModalOpen() {
+				// This function runs when the create class modal first opens
+				// It updates canon tree, genres and categories and then
+				// initializes the selectedNodes array which contains the edited
+				// category trees for each genre with default tree
+
+				var self = this
+				// Update canon tree
+				this.$store.dispatch('getCanons')
+				.then(function() {
+					// Get the default tree form from the /tree resource (this.canons)
+					self.elementTreeForm = self.createElementTree(self.canons)
+					return self.$store.dispatch('getGenres')
+				})
+				// Update categories
+				.then(function() {
+					return self.$store.dispatch('getCategories')
+				}) 
+				.then(function() {
+					self.modalCreateClassIsOpen = true
+					self.selectedNodes = []
+					// Initialize one genre object for each genre in selected nodes
+					// First get all leaf ids (categories id)
+					// These are all the leaf nodes of the tree which are selected by default
+					var defaultSelectedNodes = []
+					for (var cat in self.categories) {
+						try {
+							defaultSelectedNodes.push(self.categories[cat].id)
+						}
+						catch (err) {
+							console.log("createNewClassModalOpen err:", err)
+						}
+					}
+					for (var g in self.genres) {
+						self.selectedNodes.push({
+							"genreId": self.genres[g].id,
+							"genreName": self.genres[g].name,
+							selectedNodes: defaultSelectedNodes
+						})
+					}
+				})
+			},
+			editCategoriesModalOpen() {
+				// This function runs when the edit categories modal first opens
+				// It updates canon tree, genres and categories and then
+				// initializes the selectedNodes array which contains the edited
+				// category trees for each genre
+
+				var self = this
+				// Update canon tree
+				this.$store.dispatch('getCanons')
+				.then(function() {
+					return self.$store.dispatch('getGenres')
+				})
+				// Update categories
+				.then(function() {
+					return self.$store.dispatch('getCategories')
+				}) 
+				.then(function() {
+					self.modalGenreCustomization = true
+					self.selectedNodes = []
+					// Initialize one genre object for each genre in selected nodes
+					for (var g = 0; g < self.currentClass.catFilter.length; g++) {
+						self.selectedNodes.push({
+							"genreId": self.genres[g].id,
+							"genreName": self.genres[g].name,
+							selectedNodes: self.currentClass.catFilter[g].selectedNodes
+						})
+					}
+					// Get the default tree form from the /tree resource (this.canons)
+					var customTree = self.createCustomCanonTree(self.selectedNodes[self.selectedNodes.length - 1].selectedNodes)
+					self.elementTreeForm = self.createElementTree(customTree)
+				})
+			},
+			nextStep() {
+				if(this.newClass.department !== '' && this.newClass.name !== '' && this.newClass.number !== '' && this.newClass.semester !== ''){
+					// Cycle
+					// if(this.createModalActive++ > 2) {
+					// 	this.createModalActive = 0;
+					// } 
+					this.createModalActive++
+				}
+				else {
+					this.$message({
+						showClose: true,
+						message: 'Please fill out all the fields.',
+						type: 'warning'
+					});
+				}
+			},
+			previousStep() {
+				if(this.createModalActive-- <= 0) {
+					this.createModalActive = 0;
+				}
+			},
+			handleNewClassClose() { 
+				// This function gets called when the create class modal closes
+				// It resets all necessary variables and closes the modal
+
+				//(done) {
+				// this.$confirm('Are you sure to close this dialog?')
+				// .then(_ => {
+				// 	done();
+				// })
+				// .catch(_ => {});
+				this.currentGenre = ''
+				this.previousGenre = ''
+				this.firstTimeSelectingGenre = true
+				this.createModalActive = 0
+				this.newClass = {
+					archived: false,
+					department: '',
+					name: '',
+					number: '',
+					semester: '',
+					catFilter: []
+				}
+				this.modalCreateClassIsOpen = false
+			},
+			handleEditCategoriesClose() { 
+				// This function gets called when the edit categories modal closes
+				// It resets all necessary variables and closes the modal
+
+				//(done) {
+				// this.$confirm('Are you sure to close this dialog?')
+				// .then(_ => {
+				// 	done();
+				// })
+				// .catch(_ => {});
+				this.currentGenre = ''
+				this.previousGenre = ''
+				this.firstTimeSelectingGenre = true
+				this.newClass = {
+					archived: false,
+					department: '',
+					name: '',
+					number: '',
+					semester: '',
+					catFilter: []
+				}
+				this.modalGenreCustomization = false
+			},
+			changeAssignmentTabEvent() {
+				this.loadingAssignments = true
+				this.videosWithoutUserSubs = []
+				var self = this
+				this.updateAssignments()
+				.then(function() {
+					self.updateStudentMySubmissions()
+				})
+				.then(function() {
+					self.loadingAssignments = false
+				})
+			},
             filterClassArray: _.debounce(function (arrayName, filteredArrayName, filterString) {
 				// Filters any class array
 				// Requires the array's name as string in the first argument and 
@@ -743,30 +943,68 @@
 					}
 				})
 			},
+			updateStudentMySubmissions() {
+				// This method updates videosWithoutUserSubs used in the assignments modal, 
+				// It relies on the store's userCollaborated which gets updated first.
+
+				var self = this
+				return this.$store.dispatch("getCollaboratedVideosByUserId", self.userId) // Update state.userCollaborated
+				.then(function() {
+					for (var v = 0; v < self.videos.length; v++) {
+						// TODO this needs be improved when videos array gets big, check for class or - even better - assignment.
+						var found = false
+						for (var uc = 0; uc < self.userCollaborated.length; uc++) {
+							if (self.videos[v].id === self.userCollaborated[uc].id) {
+								found = true
+								break
+							}
+						}
+						if (!found) {
+							self.videosWithoutUserSubs.push(self.videos[v])
+						}
+					}
+				})
+			},
 			// Administrator
 			createInvitation() {
 				if (this.invitation.email === '' || this.invitation.role === '') {
-					alert("Please complete all the fields.")
+					this.$message({
+						showClose: true,
+						message: 'Please complete all the fields.',
+						type: 'warning'
+					});
 				}
 				else if (this.invitation.email != this.repeatEmail) {
-					alert("Please repeat e-mail address correctly.")
+					this.$message({
+						showClose: true,
+						message: 'Please repeat e-mail address correctly.',
+						type: 'warning'
+					});
 				}
 				else {
+					var self = this
 					this.secureHTTPService.post("invitation", this.invitation)
 					.then(function (response) {
 						// console.log(response)
-						alert("Invitation code: " + response.data.data.id)
+						self.$message({
+							showClose: true,
+							message: 'Invitation code: ' + response.data.data.id,
+							type: 'warning'
+						});
 					})
 					.catch(function (err) {
 						console.log("Error while posting invitation: ", err)
-						alert("Something went wrong.")
+						self.$message({
+							showClose: true,
+							message: "Something went wrong.",
+							type: 'warning'
+						});
 					})
 					this.modalInviteUserIsOpen = false
 					this.invitation = {"email": '', "role": ''} // Reset invitation
 					this.repeatEmail = ''
 				}
 			},
-
 			deleteClass() {
 				var classId = this.currentClass.id
 
@@ -802,22 +1040,43 @@
 			},
 			// Administrator, professor
 			setCurrentClass(classObject) {
-				if (this.role === "professor" || this.role === "administrator")
+				if (this.role === "professor" || this.role === "administrator") {
 					this.loadingClasses = true
+					// Update students. This is needed to show the little number of requested enrollments in the sidebar
+					var self = this
+					this.$store.commit('RESET_ASSIGNMENTS')
+					this.updateStudents()
+					.then(function() {
+						self.updateAssignments()
+					})
+					.then(function() {
+						if (self.role === "professor" || self.role === "administrator")
+							self.loadingClasses = false
+					})
+
+				}
 				this.$store.commit('CURRENT_CLASS_SELECT', classObject)
-
-				// Update students. This is needed to show the little number of requested enrollments in the sidebar
-				var self = this
-				this.updateStudents()
-				.then(function() {
-					if (self.role === "professor" || self.role === "administrator")
-						self.loadingClasses = false
-				})
-
 			},
 			createClass() {	
+				// This function runs when user clicks create class
+				// It saves the last genre tree and then POSTs the class
+				// It opens assignments modal to create first assignment
+
+				for(var g in this.selectedNodes) {
+					if (this.selectedNodes[g].genreName === this.currentGenre) {
+						var self = this
+						new Promise(function () {
+							self.selectedNodes[g].selectedNodes = self.$refs.elementTreeRef.getCheckedKeys(true)
+						})
+						break
+					}
+				}
+
+				this.newClass.catFilter = this.selectedNodes
 				this.newClass['professorId'] = this.userId
+
 				var self = this
+				// console.log("Now POSTing new class to server:", this.newClass)
 				this.$store.dispatch('createClass', {newClass: this.newClass})
 				.then(function(response) {
 					if (self.role === 'administrator') {
@@ -839,16 +1098,50 @@
 						name: response.data.data.name, 
 						id: response.data.data.id, 
 						number: response.data.data.number, 
-						department: response.data.data.department
+						department: response.data.data.department,
+						catFilter: response.data.data.catFilter
 					})
 				})
-				this.newClass = {
-					archived: false,
-					department: '',
-					name: '',
-					number: '',
-					semester: ''
+				this.handleNewClassClose()
+				this.openAssignmentsModal(true)
+			},
+			saveNewCustomCategories() {
+				// This function runs when user clicks save on edit categories modal
+				// It saves the last genre tree and then PUTs the class with the new cat filter
+
+
+				for(var g in this.selectedNodes) {
+					if (this.selectedNodes[g].genreName === this.currentGenre) {
+						var self = this
+						new Promise(function () {
+							self.selectedNodes[g].selectedNodes = self.$refs.elementTreeRef.getCheckedKeys(true)
+						})
+						break
+					}
 				}
+
+				this.currentClass.catFilter = this.selectedNodes
+
+				var self = this
+				console.log("Now PUTing edited class to server:", this.currentClass)
+				this.$store.dispatch('editClass', {currentClass: this.currentClass})
+				.then(function(response) {
+					if (self.role === 'administrator') {
+						self.loadingClasses = true
+						self.updateAdminClasses()
+						.then(function () {
+							self.loadingClasses = false
+						})
+					}
+					else if (self.role === 'professor') {
+						self.loadingClasses = true
+						self.updateProfessorClasses()
+						.then(function () {
+							self.loadingClasses = false
+						})
+					}
+				})
+				this.handleEditCategoriesClose()
 			},
 			archiveClass() {
 				// 1. Adds current class to Archived Classes.
@@ -1169,7 +1462,7 @@
 				.then(function() {
 					var enrollmentToBeDeletedId = ''
 					for (var u = 0; u < self.userEnrollments.length; u++) {
-						if (self.userEnrollments[u].userId === usersId) {
+						if (self.userEnrollments[u].userId === usersId && self.userEnrollments[u].classId === self.currentClass.id) {
 							enrollmentToBeDeletedId = self.userEnrollments[u].id
 							break
 						}
@@ -1185,13 +1478,22 @@
 				})
 			},
 			// ASSIGNMENTS
-			openAssignmentsModal(){
+			openAssignmentsModal(firstTime = false){
 				this.loadingAssignments = true
-				this.modalClassAssignmentsIsOpen = true
+				this.videosWithoutUserSubs = []
 				var self = this
 				this.updateAssignments()
 				.then(function() {
+					self.updateStudentMySubmissions()
+				})
+				.then(function() {
 					self.loadingAssignments = false
+					if (firstTime) {
+						self.startingAssignmentMessageVisible = true
+					}
+				})
+				.then(function() {
+					self.modalClassAssignmentsIsOpen = true
 				})
 			},
 			updateAssignments() {
@@ -1210,7 +1512,11 @@
 					this.assignmentDescription = ''
 					this.assignmentGenre = ''
 				} else {
-					alert('Please complete all assignment fields.')
+					this.$message({
+						showClose: true,
+						message: "Please complete all assignment fields.",
+						type: 'warning'
+					});
 				}
 			},
 			deleteAssignment(assignmentId) {
@@ -1307,56 +1613,145 @@
 				})
 			},
 			// CATEGORIES
-			createCategoriesTreeDataForm() {
-				try{
-					// Clear out canon children, to get fresh ones from server
-					for (var canon = 0; canon < this.canons.length; canon++) {
-						this.canons[canon].children = []
+			createElementTree(tree) {
+				// This function gets a tree in the backend form and returns an element tree
+
+				// console.log("creating element tree from:", tree)
+				var elementTreeForm = []
+				// Loop through given tree's canons
+				for (var canon in tree) {
+					// console.log(tree[canon])
+					// Add canon
+					elementTreeForm.push({
+						label: canon,
+						id: '', //tree[canon].id, // doesnt exist on backend
+						desc: '',
+						children: []
+					})						
+					// Add canon description, if one exists
+					if (tree[canon].description) {
+						elementTreeForm[elementTreeForm.length - 1].desc = 
+							tree[canon].description
 					}
-					// Loop through server categories
-					for (var category = 0; category < this.categories.length; category++) {
-						// Search for this category.canon in canons array
-						for (var canon = 0; canon < this.canons.length; canon++) {
-							if (this.canons[canon].label === this.categories[category].canon){
-								// Push this category to the appropriate canon children array
-								this.canons[canon].children.push(
-									{
-										label: this.categories[category].name, 
-										desc: this.categories[category].description
-									}
-								)
+					// Loop through this canon's categories
+					for (var cat in tree[canon].categories) {
+						// console.log(tree[canon].categories[cat])
+						// Add canon's category
+						elementTreeForm[elementTreeForm.length - 1].children.push({
+							label: tree[canon].categories[cat].name,
+							id: tree[canon].categories[cat].id,
+							desc: '', 
+							children: []
+						})
+						// Add category's description, if one exists
+						if (tree[canon].categories[cat].description) {
+							elementTreeForm[elementTreeForm.length - 1].children[elementTreeForm[elementTreeForm.length - 1].children.length - 1].desc = 
+								tree[canon].categories[cat].description
+						}
+						// Loop through this category's subcategories if there are any
+						for (var subCat in tree[canon].categories[cat].subcategories) {
+							// console.log(tree[canon].categories[cat].subcategories[subCat])
+							// Add subcategory
+							elementTreeForm[elementTreeForm.length - 1].children[elementTreeForm[elementTreeForm.length - 1].children.length - 1].children.push({
+								label: tree[canon].categories[cat].subcategories[subCat].name,
+								id: tree[canon].categories[cat].subcategories[subCat].id,
+								desc: ''
+								//children: [] //sub-subcategories
+							})
+							// Add subcategory's description, if one exists
+							if (tree[canon].categories[cat].subcategories[tree[canon].categories[cat].subcategories.length - 1].description) {
+								elementTreeForm[elementTreeForm.length - 1].children[elementTreeForm[elementTreeForm.length - 1].children.length - 1].children[elementTreeForm[elementTreeForm.length - 1].children[elementTreeForm[elementTreeForm.length - 1].children.length - 1].children.length - 1].desc = 
+									tree[canon].categories[cat].subcategories[subCat].description
 							}
+							// More subcategories/children can be added here
 						}
 					}
 				}
-				catch (err) {
-					console.log("MtSidebar.vue: createCategoriesTreeDataForm error: ", err)
-				}
+				return elementTreeForm
 			},
+            findCatId(id, array) {
+                for(var i in array) {
+                    if (array[i] === id) {
+                        return true
+                    }
+                }
+                return false
+            },
+            copy(o) {
+                var output, v, key
+                output = Array.isArray(o) ? [] : {}
+                for (key in o) {
+                    v = o[key]
+                    output[key] = (typeof v === "object") ? this.copy(v) : v
+                }
+                return output
+            },
+			createCustomCanonTree(idArray) {
+				// Gets an idArray and returns a custom backend form tree
+				
+                // Deep copy basic tree
+                var customCanonTree = this.copy(this.canons)
+                var cans = customCanonTree
+                for(var can in cans) {
+                    var cats = customCanonTree[can].categories
+                    for(var cat = 0; cat < cats.length; cat++) {
+                        if (cats[cat].subcategories.length != 0) {
+                            var subcats = cats[cat].subcategories
+                            for (var subcat = 0; subcat < subcats.length; subcat++) {
+                                // FIND ID IN ID ARRAY, FALSE -> DELETE SUBCAT
+                                if (!this.findCatId(subcats[subcat].id, idArray)) {
+                                    // console.log("found subcat")
+                                    subcats.splice(subcat, 1)
+                                    subcat --
+                                    if (subcats.length == 0) {
+                                        cats.splice(cat, 1)
+                                        cat --
+                                    }
+                                    if (cats.length == 0) {
+                                        delete cans[can]
+                                        break
+                                    }
+                                }
+                            }
+                        }
+                        else if (cats[cat].subcategories.length == 0) {
+                            // FIND ID IN ID ARRAY, FALSE -> DELETE CAT
+                            if (!this.findCatId(cats[cat].id, idArray)) {
+                                // console.log("found cat")
+                                cats.splice(cat, 1)
+                                cat --
+                                if (cats.length == 0) {
+                                    delete cans[can]
+                                    break
+                                }
+                            }
+                        }
+                    }
+				}
+				return customCanonTree
+            },
 			addNewCategory() {
 				console.log("Adding ", this.newCategoryName, "category to ", this.newCategoryCanon, "canon")
 				console.log("With description ", this.newCategoryDesc)
-				for (var canon = 0; canon < this.canons.length; canon++) {
-					if (this.canons[canon].label === this.newCategoryCanon){
-						this.canons[canon].children.push(
-							{
-								label: this.newCategoryName, 
-								desc: this.newCategoryName
-							}
-						)
-						this.newCategoryName = ''
-						this.newCategoryDesc = ''
-						this.newCategoryCanon = ''
-					}
-				}
+				console.log("TODO")
+				// for (var canon = 0; canon < this.canons.length; canon++) {
+				// 	if (this.canons[canon].label === this.newCategoryCanon) {
+				// 		this.canons[canon].children.push(
+				// 			{
+				// 				label: this.newCategoryName, 
+				// 				desc: this.newCategoryName
+				// 			}
+				// 		)
+				// 		this.newCategoryName = ''
+				// 		this.newCategoryDesc = ''
+				// 		this.newCategoryCanon = ''
+				// 	}
+				// }
 			},
 			// categoriesListChanged() {
 			// 	console.log(this.categoriesCheckList)
 			// 	console.log('fetchCategories')
 			// },
-			handleNodeClick(data) {
-				console.log(data);
-			},
 			// Student
 			toggleModalClassesToEnroll() {
 				if (this.modalClassesToEnrollIsOpen) {
@@ -1386,7 +1781,11 @@
 					.then(function() {
 					})
 					self.toggleModalClassesToEnroll()
-					alert("Enrollment request sent.")
+					self.$message({
+						showClose: true,
+						message: "Enrollment request sent.",
+						type: 'success'
+					});
 				})
 				// .catch(function(err) {
 				// 	console.log("requestToEnrollToClass error: ", err)
@@ -1406,7 +1805,8 @@
 				['videos', 'classes', 'currentClass',
 				 'assignments', 'genres', 'categories', 
 				 'enrollments', 'userEnrollments', 'enrolledClasses', // Mainly used for student side of enrollments
-				 'classEnrolledStudents', 'classEnrollments', 'users' // Mainly used for admin/professor side of enrollments
+				 'classEnrolledStudents', 'classEnrollments', 'users', // Mainly used for admin/professor side of enrollments
+				 'userCollaborated', 'canons'
 				]
             )
 		},

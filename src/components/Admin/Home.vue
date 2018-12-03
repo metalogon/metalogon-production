@@ -26,16 +26,22 @@
 				</div>
 
 				<div class="home__classvideos" v-show="!(currentClass.name === 'Home')">
-					<h3 class="class__heading"> {{ currentClass.number }} - {{ currentClass.name }}
+					<h3 class="class__heading"> 
+						{{ currentClass.number }} - {{ currentClass.name }}
+						<el-input style="margin-top:10px" class="sidebar__classesInput" icon="search" v-model="searchInputClassSidebar" @change="filterVideoArray('videos', 'filteredVideos', searchInputClassSidebar)" placeholder="Search for a video..."></el-input>
+						<a class="sidebar__classesLink" v-for="v in filteredVideos" :key="v.id"></a>
 					</h3>
-					<mt-video-itemlist v-for="v in videos" v-bind:key="v.id" :currentVideo="v" v-if="v.class === currentClass.name" :enableStatistics="true"></mt-video-itemlist>
+					<mt-video-itemlist v-for="v in videos" v-bind:key="v.id" :currentVideo="v" v-if="v.class === currentClass.name && searchInputClassSidebar === ''" :enableStatistics="true"></mt-video-itemlist>
+					<mt-video-itemlist v-for="v in filteredVideos" v-bind:key="v.id" :currentVideo="v" v-if="v.class === currentClass.name && searchInputClassSidebar !== ''" :enableStatistics="true"></mt-video-itemlist>
 				</div>
 
-				<upload-video :currentClassProp="currentClass.name" v-show="currentClass.name !== 'Home'"></upload-video>
+				<upload-video :currentClassProp="currentClass.name" v-if="currentClass.name !== 'Home' && assignments.length !== 0"></upload-video>
 
 			</div>
 
-			<mt-sidebar></mt-sidebar>
+			<mt-sidebar-admin v-if="role === 'administrator'"></mt-sidebar-admin>
+			<mt-sidebar-student v-if="role === 'student'"></mt-sidebar-student>
+			<mt-sidebar-professor v-if="role === 'professor'"></mt-sidebar-professor>
 
 		</div>
 		
@@ -52,6 +58,9 @@
 	import UploadVideo from '../Extra/UploadVideo.vue'
 	import MyHeader from '../Layout/MyHeader.vue'
 	import MtSidebar from './Shared/MtSidebar.vue'
+	import MtSidebarAdmin from './Sidebar/MtSidebarAdmin.vue'
+	import MtSidebarStudent from './Sidebar/MtSidebarStudent.vue'
+	import MtSidebarProfessor from './Sidebar/MtSidebarProfessor.vue'
 	import MyFooter from '../Layout/MyFooter.vue'
 	import MtVideoCard from './Shared/MtVideoCard.vue'
 	import MtVideoItemList from './Shared/MtVideoItemList.vue'
@@ -61,10 +70,29 @@
 			return {
 				userId: '',
 				role: "",
-				loadingInstance: null
+				loadingInstance: null,
+				searchInputClassSidebar: '', // Used in search text area
+				filteredVideos: [],
 			}
 		},
 		methods: {
+            filterVideoArray: _.debounce(function (arrayName, filteredArrayName, filterString) {
+				// Filters any video array
+				// Requires the array's name as string in the first argument and 
+				// the filtered array's name as string in the second argument and
+				// the search input in the third argument
+
+                // Define the filter method
+                var filterVideos = (queryString) => {
+                    return (v) => {
+						var videoFullName = v.title
+                        return videoFullName.toLowerCase().indexOf(queryString.toLowerCase()) !== -1
+                    }
+				} 
+				this[filteredArrayName] = this[arrayName].filter(filterVideos(filterString))
+				
+			}, 500),
+		
 			wrongClassRedirect() {
 				if (this.role === 'student') {	
 					// If user is a student we have to check if they are enrolled to this class
@@ -107,7 +135,7 @@
 			this.$store.dispatch('getAllClasses')
 			this.$store.dispatch('getGenres')
 			this.$store.dispatch('getUsers')
-			this.$store.dispatch('getCanons')			
+			this.$store.dispatch('getCanons')				
 		},
 		mounted() {
 			this.loadingInstance = Loading.service({fullscreen: true});
@@ -141,7 +169,7 @@
 		computed: {
 			...mapGetters(
 				['videos', 'classes', 'currentClass',
-				 'enrolledClasses', 'userEnrollments'
+				 'enrolledClasses', 'userEnrollments', 'assignments'
 				]
 			)
 		},
@@ -151,7 +179,10 @@
 			'my-footer': MyFooter,
 			'mt-video-card': MtVideoCard,
 			'mt-video-itemlist': MtVideoItemList,
-			'mt-sidebar': MtSidebar
+			'mt-sidebar': MtSidebar,
+			'mt-sidebar-admin': MtSidebarAdmin,
+			'mt-sidebar-student': MtSidebarStudent,
+			'mt-sidebar-professor': MtSidebarProfessor
 		}
 	}
 </script>

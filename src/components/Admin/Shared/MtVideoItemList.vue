@@ -1,15 +1,6 @@
 <template>
 
 	<div class="classvideo">
-
-		<img class="classvideo__favorite" src="../../../assets/favorite-inactive.svg" v-show="role === 'administrator' && currentVideo.featuredGlobal === false" @click="featureGlobal($event)">
-		<img class="classvideo__favorite" src="../../../assets/favorite-active.svg" v-show="role === 'administrator' &&  currentVideo.featuredGlobal === true" @click="unfeatureGlobal($event)">
-		
-		<img class="classvideo__favorite" src="../../../assets/favorite-inactive.svg" v-show="role === 'professor' && currentVideo.featuredClass === false" @click="featureVideo($event)">
-		<img class="classvideo__favorite" src="../../../assets/favorite-active.svg" v-show="role === 'professor' && currentVideo.featuredClass === true" @click="unfeatureVideo($event)">
-
-		<button class="classvideo__delete" v-show="role ==='administrator'" @click="toggleDeleteConfirmationModal()">Delete Video</button>
-
 		<router-link :to="'/video/' + currentVideo.id" tag="a" class="classvideo__metadata">
 				<img class="classvideo__image" :src="currentVideo.thumb">
 				<div class="classvideo__titles">
@@ -17,21 +8,34 @@
 					<p class="classvideo__class">{{ currentVideo.class }}</p>
 					<p class="classvideo__genre">{{ secondsToMMSS(currentVideo.duration) }} / {{ genreName }} </p>
 				</div>
-				<div class="classvideo__metameta">
-					<span v-if="enableStatistics" class="classvideo__score" @click.stop.prevent @click="openModalCanonChart()">
-						<p class="classvideo__scoreNum">{{ ratingAverage.toFixed(1) }}</p>
-						<p class="classvideo__scoreLabel">Effectiveness</p>
-					</span>
-					<span v-if="!enableStatistics" class="classvideo__scoreNoHover">
-						<p class="classvideo__scoreNum">{{ ratingAverage.toFixed(1) }}</p>
-						<p class="classvideo__scoreLabel">Effectiveness</p>
-					</span>
-					<span class="classvideo__annotations">
-						<p class="classvideo__annotationsNum">{{ numberOfAnnotations }}</p>
-						<p class="classvideo__annotationsLabel">Comments</p>
-					</span>
-				</div>
 		</router-link>
+
+		<img class="classvideo__favorite" src="../../../assets/favorite-inactive.svg" v-show="role === 'administrator' && currentVideo.featuredGlobal === false" @click="featureGlobal($event)">
+		<img class="classvideo__favorite" src="../../../assets/favorite-active.svg" v-show="role === 'administrator' &&  currentVideo.featuredGlobal === true" @click="unfeatureGlobal($event)">
+
+		<img class="classvideo__favorite" src="../../../assets/favorite-inactive.svg" v-show="role === 'professor' && currentVideo.featuredClass === false" @click="featureVideo($event)">
+		<img class="classvideo__favorite" src="../../../assets/favorite-active.svg" v-show="role === 'professor' && currentVideo.featuredClass === true" @click="unfeatureVideo($event)">
+
+		<div class="classvideo__metameta">
+			<span v-if="enableStatistics" class="classvideo__score" @click.stop.prevent @click="openModalCanonChart()">
+				<p class="classvideo__scoreNum">{{ ratingAverage.toFixed(1) }}</p>
+				<p class="classvideo__scoreLabel">Effectiveness</p>
+			</span>
+			<span v-if="!enableStatistics" class="classvideo__scoreNoHover">
+				<p class="classvideo__scoreNum">{{ ratingAverage.toFixed(1) }}</p>
+				<p class="classvideo__scoreLabel">Effectiveness</p>
+			</span>
+			<span class="classvideo__annotations">
+				<p class="classvideo__annotationsNum">{{ numberOfAnnotations }}</p>
+				<p class="classvideo__annotationsLabel">Comments</p>
+			</span>
+		</div>
+
+		<div class="classvideo__trash">
+			<i class="el-icon-delete" v-show="role ==='administrator'" @click="toggleDeleteConfirmationModal()"></i>
+		</div>
+
+
 
 		<!-- Canon statistics modal -->
 		<el-dialog :title="currentVideo.title" :visible.sync="modalCanonChartIsOpen">
@@ -175,7 +179,7 @@
 				this.$store.dispatch("deleteVideo", this.currentVideo.id)
 			},
 			featureGlobal(event) {
-				var eventVideoId = $(event.currentTarget).siblings()[4].getAttribute("href")
+				var eventVideoId = $(event.currentTarget).siblings()[0].getAttribute("href")
 				// The string '/video/' has 7 seven characters.
 				eventVideoId = eventVideoId.substring(7, eventVideoId.length)
 
@@ -189,7 +193,7 @@
 				}
 			},
 			unfeatureGlobal(event) {
-				var eventVideoId = $(event.currentTarget).siblings()[4].getAttribute("href")
+				var eventVideoId = $(event.currentTarget).siblings()[0].getAttribute("href")
 				// The string '/video/' has 7 seven characters.
 				eventVideoId = eventVideoId.substring(7, eventVideoId.length)
 
@@ -203,7 +207,7 @@
 				}
 			},
 			featureVideo(event) {
-				var eventVideoId = $(event.currentTarget).siblings()[4].getAttribute("href")
+				var eventVideoId = $(event.currentTarget).siblings()[0].getAttribute("href")
 				// The string '/video/' has 7 seven characters.
 				eventVideoId = eventVideoId.substring(7, eventVideoId.length)
 
@@ -217,7 +221,7 @@
 				}
 			},
 			unfeatureVideo(event) {
-				var eventVideoId = $(event.currentTarget).siblings()[4].getAttribute("href")
+				var eventVideoId = $(event.currentTarget).siblings()[0].getAttribute("href")
 				// The string '/video/' has 7 seven characters.
 				eventVideoId = eventVideoId.substring(7, eventVideoId.length)
 
@@ -297,17 +301,18 @@
 				.classvideo__favorite {
 					width: 30px;
 					height: 60px;
+					margin-top: 5px;
 				}
 
-				.classvideo__delete {
-					/* KOSTAS */
+				/* KOSTAS */
+				/* .classvideo__delete {
 					margin-top: 0;
 					padding-top: 0;
 					margin-bottom: 3px;
 					font-size:12px;
 					height: 60px;
 					margin-left: 10px;
-				}
+				} */
 				.classvideo__metadata {
 					display: flex;
 					justify-content: space-between;
@@ -420,5 +425,23 @@
 									text-align: center;
 									height: 50%;
 								}
+
+					.classvideo__trash {
+						margin-left: 10px;
+						display: flex;
+						align-items: center;
+					}
+
+						.classvideo__trash i {
+							padding: 10px;
+							background-color: #eee;
+							border-radius: 50%;
+							cursor: pointer;
+						}
+					
+						.classvideo__trash i:hover {
+							color: #eee;
+							background-color: gray;
+						}
 
 </style>

@@ -31,7 +31,8 @@ export const store = new Vuex.Store({
             id: '',
             number: '',
             department: '',
-            professorId: ''
+            professorId: '',
+            catFilter: []
         },
         currentVideoID: null,
         uploadingVideo: false,
@@ -55,7 +56,9 @@ export const store = new Vuex.Store({
         classEnrollments: [],      // Current class enrollments (both accepted/not accepted)
         // For Student
         userEnrollments: [],       // Current student's enrollments
-        enrolledClasses: []        // Current student's classes (both accepted/not accepted)
+        enrolledClasses: [],       // Current student's classes (both accepted/not accepted),
+        // WIKI
+        currentWikiCanon: ''
     },
 
     actions: {
@@ -218,6 +221,16 @@ export const store = new Vuex.Store({
                 console.log('createClass POST error: ', err)
             })
         },
+        editClass: function ({ commit }, payload) {
+            return secureHTTPService.put("class/" + payload.currentClass.id, payload.currentClass)
+            .then(response => {
+                commit('EDIT_CLASS', payload)
+                return response
+            })
+            .catch(function (err) {
+                console.log('editClass PUT error: ', err)
+            })
+        },
         deleteClass: function ({ commit }, payload) {
             return secureHTTPService.delete("class/" + payload)
             .then(response => {
@@ -370,14 +383,14 @@ export const store = new Vuex.Store({
         },
         /* GENRES */ 
         getGenres: function ({ commit }) {
-            secureHTTPService.get("genre")
-                .then(function (response)
-                {
-                    commit('GET_GENRES', response.data.data)
-                })
-                .catch(function (err) {
-                    
-                })
+            return secureHTTPService.get("genre")
+            .then(function (response)
+            {
+                commit('GET_GENRES', response.data.data)
+            })
+            .catch(function (err) {
+                console.log('getGenres GET err: ', err)
+            })
         },
         /* CANONS */ 
         getCanons: function ({ commit }) {
@@ -392,13 +405,34 @@ export const store = new Vuex.Store({
         },
         /* CATEGORIES */ 
         getCategories: function ({ commit }) {
-            secureHTTPService.get("category")
+            return secureHTTPService.get("category")
                 .then(function (response)
                 {
                     commit('GET_CATEGORIES', response.data.data)
                 })
                 .catch(function (err) {
-                    
+                    console.log('getCategories GET err: ', err)
+                })
+        },
+        postCategory: function ({ commit }, payload) {
+            return secureHTTPService.post("category", payload)
+                .then(function (response)
+                {
+                    console.log(response)
+                    commit('POST_CATEGORY', response.data.data)
+                })
+                .catch(function (err) {
+                    console.log('postCategory POST error: ', err)
+                })
+        },
+        editCategory: function ({ commit }, payload) {
+            secureHTTPService.put("category/" + payload.id, payload.categoryBody)
+                .then( response => {
+                    console.log(response)
+                })
+                .catch( function(err) {
+                    console.log(err)
+                    console.log('categoryBody: ', payload.categoryBody)
                 })
         },
         /* COLLABORATORS */
@@ -577,6 +611,17 @@ export const store = new Vuex.Store({
         CREATE_CLASS: (state, payload) => {
             state.classes.push(payload)
         },
+        EDIT_CLASS: (state, payload) => {
+            console.log("payload edit class:", payload)
+            for (var i = 0; i < state.classes.length; i++) {
+                // if (payload.annotationId === state.videoAnnotations[i].id) {
+                //     state.videoAnnotations[i].comment = payload.body.comment
+                //     state.videoAnnotations[i].from = payload.body.from
+                //     state.videoAnnotations[i].to = payload.body.to
+                //     state.videoAnnotations[i].rating = payload.body.rating
+                // }
+            }
+        },
         // Only for admin.
         DELETE_CLASS: (state, payload) => {
             for (var i = 0, l = state.classes.length; i < l; i++) {
@@ -611,6 +656,9 @@ export const store = new Vuex.Store({
                     state.assignments.splice(i,1)
             }
         },
+        RESET_ASSIGNMENTS: function (state) {
+            state.assignments = []
+        },
         /* GENRES */
         GET_GENRES: (state, genres) => {
             state.genres = genres
@@ -629,6 +677,9 @@ export const store = new Vuex.Store({
         /* CATEGORIES */
         GET_CATEGORIES: (state, categories) => {
             state.categories = categories
+        },
+        POST_CATEGORY: (state, newCategory) => {
+            state.categories.push(newCategory)
         },
         /* COLLABORATORS */
         GET_ALL_COLLABORATIONS: (state, allCollaborations) => {
@@ -704,6 +755,9 @@ export const store = new Vuex.Store({
                     state.enrollments.splice(i,1)
                     break
             }
+        },
+        SELECT_CURRENT_WIKI_CANON: (state, canon) => {
+            state.currentWikiCanon = canon
         }
     },
 
@@ -785,6 +839,9 @@ export const store = new Vuex.Store({
         },
         uploadingVideo: state => {
             return state.uploadingVideo
+        },
+        currentWikiCanon: state => {
+            return state.currentWikiCanon
         }
     }
 })

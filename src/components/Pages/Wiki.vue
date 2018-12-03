@@ -5,16 +5,7 @@
 
         <div class="wiki__body">
 
-            <div class="wiki__subhead">
-
-                <div class="wiki__subheadMenu">
-                    <a class="wiki__subheadLink">HOW IT WORKS</a>
-                    <a class="wiki__subheadLink">BROWSE TERMS</a>
-                    <a class="wiki__subheadLink">FORUM <i class="fa fa-caret-down"></i></a>
-                    <button class="wiki__subheadLink wiki__subheadButton">Post a Term</button>
-                </div>
-
-            </div>
+            <wiki-subhead></wiki-subhead>
 
             <div class="wiki__hero">
 
@@ -23,39 +14,37 @@
                 <span class="wiki__heroDescription">If you don't know what a term means just look it up below.</span>
 
                 <span class="wiki__search">
-                    <input class="wiki__searchInput input" type="text" placeholder="Type your search terms here">
+                    <!-- <input class="wiki__searchInput input" type="text" placeholder="Type your search terms here"> -->
+                    <el-autocomplete class="inline-input wiki__searchInput " v-model="searchInputTerm" :fetch-suggestions="querySearch" @select="handleSelect" placeholder="Type your search terms here"></el-autocomplete>
                     <button class="wiki__searchButton button">Search</button>
                 </span>
 
             </div>
 
             <div class="wiki__content">
-                <el-tabs class="wiki__tabs">
+                <div class="wiki__canons">
+                    <a v-for="canon in canons" :key="canon.id" :class="{'chosen-canon': (canon.name === currentWikiCanon)}" class="wiki__canonsItem" @click="chooseWikiCanon(canon.name)">
+                        <i class="card-menu__icon fa fa_1x" :class="{ 'fa-pencil-square-o': (canon.name === 'Invention'), 'fa-book': (canon.name === 'Structure'), 'fa-commenting': (canon.name === 'Delivery'), 'fa-eye': (canon.name === 'Visuals'), 'fa-diamond': (canon.name === 'Style') }"></i>
+                        <span class="card-menu__title">{{ canon.name }}</span>
+                    </a>
+                </div>
+                <div class="wiki__terms">
+                    <router-link :to="'/term/' + c.id" tag="div" class="term" v-for="c in categories" :key="c.id" v-if="c.canon === currentWikiCanon">
+                        <img src="../../assets/black-img.png" class="term__img">
+                        <div class="term__metadata">
+                            <span class="term__head">
+                                <h3 class="term__title">{{ c.name }}</h3>
+                            </span>
+                            <span class="term__content">{{ c.description }}</span>
+                            <span class="term__tags">
+
+                            </span>
+                        </div>
+                    </router-link>
+                </div>
+                <!-- <el-tabs class="wiki__tabs">
                     <el-tab-pane label="Recent Terms">
-                        <router-link to="/wiki-term" tag="div" class="term">
-                            <img src="../../assets/black-img.png" class="term__img">
-                            <div class="term__metadata">
-                                <span class="term__head">
-                                    <h3 class="term__title">Term 1</h3>
-                                </span>
-                                <span class="term__content">There are many variations of passages of Lorem Ipsum available, but the majority have suffered alteration in some form, by injected humour, or randomised words which don't look even slightly believable.</span>
-                                <span class="term__tags">
-
-                                </span>
-                            </div>
-                        </router-link>
-                        <router-link to="/wiki-term" tag="div" class="term">
-                            <img src="../../assets/black-img.png" class="term__img">
-                            <div class="term__metadata">
-                                <span class="term__head">
-                                    <h3 class="term__title">Term 2</h3>
-                                </span>
-                                <span class="term__content">Contrary to popular belief, Lorem Ipsum is not simply random text. It has roots in a piece of classical Latin literature from 45 BC, making it over 2000 years old. </span>
-                                <span class="term__tags">
-
-                                </span>
-                            </div>
-                        </router-link>
+                        
                     </el-tab-pane>
                     
                     <el-tab-pane label="Popular Terms">
@@ -65,7 +54,7 @@
                     <el-tab-pane label="Question Forum">
                         Question Forum
                     </el-tab-pane>
-                </el-tabs>
+                </el-tabs> -->
             </div>
 
         </div>
@@ -78,11 +67,60 @@
 <script>
     import MyHeader from '../Layout/MyHeader.vue'
     import MyFooter from '../Layout/MyFooter.vue'
+    import WikiSubhead from '../Pages/WikiSubhead.vue'
+    import { mapGetters } from 'vuex'
+	import { mapMutations } from 'vuex'
     
     export default {
+        data() {
+            return {
+                searchInputTerm: '',
+                terms: []
+            }
+        },
+        created() {
+            this.$store.dispatch('getAllClasses')
+        },
+        mounted() {
+            this.terms = this.loadAll();
+        },
+        methods: {
+            chooseWikiCanon(chosenCanon) {
+                this.$store.commit('SELECT_CURRENT_WIKI_CANON', chosenCanon)
+            },
+            /* SEARCH A TERM */
+            querySearch(queryString, cb) {
+                var terms = this.terms;
+                var results = queryString ? terms.filter(this.createFilter(queryString)) : terms;
+                // call callback function to return suggestions
+                cb(results);
+            },
+            createFilter(queryString) {
+                return (term) => {
+                    return (term.value.toLowerCase().indexOf(queryString.toLowerCase()) === 0);
+                };
+            },
+            loadAll() {
+                var allTerms = []
+                for (var i = 0; i < this.categories.length; i++) {
+                    allTerms.push({ value: this.categories[i].name, termId: this.categories[i].id })
+                }
+                return allTerms
+            },
+            handleSelect(term) {
+                console.log(term);
+                this.$router.push('/term/' + term.termId)
+            }
+        },
+        computed: {
+			...mapGetters(
+				[ 'canons', 'categories', 'currentWikiCanon' ]
+			)
+		},
         components: {
             'my-header': MyHeader,
             'my-footer': MyFooter,
+            'wiki-subhead': WikiSubhead,
         }
     }
 </script>
@@ -92,6 +130,15 @@
 .wiki__body {
     
 }
+    .wiki__content {
+        display: flex;
+        flex-direction: column;
+    }
+
+        .wiki__terms {
+            display: flex;
+            flex-direction: column;
+        }
 
 /* ==============================================
                     #WIKI-SUBMENU
@@ -185,7 +232,7 @@
 
     .wiki__content {
         margin-bottom: 80px;
-        height: 300px;
+        height: auto;
         display: flex;
         justify-content: center;
     }
@@ -221,19 +268,22 @@
 ================================================= */
 
             .term {
-                display: flex;
-                justify-content: center;
-                padding-top: 20px;
-                padding-bottom: 20px;
+                margin: 15px;
                 cursor: pointer;
+                display: flex;
+            }
+            .term:hover {
+                background-color: #eeeeee;
             }
 
                 .term__img {
                     margin-right: 20px;
+                    width: 70px;
+                    height: 70px;
                 }
 
                 .term__metadata {
-
+                    height: 100%;
                 }
 
                     .term__head {
@@ -252,5 +302,43 @@
 
                     }
 
+
+
+
+
+/* ==============================================
+                #WIKI-CANONS
+================================================= */
+
+    .wiki__canons {
+        display: flex;
+        justify-content: center;
+    }
+        .wiki__canonsItem {
+            color: #000;
+            padding: 20px;
+            font-size: 18px;
+            border-left: 1px solid #000;
+            border-right: 1px solid #000;
+            border-bottom: 1px solid #000;
+        }
+        .wiki__canonsItem:hover, .chosen-canon {
+            color: #fff;
+            background-color: #000;
+        }
+
+    .Invention { background-color: #15314F;}
+    .Structure { background-color: #F2992E; }
+    .Delivery { background-color: #39A0ED; }
+    .Visuals { background-color: #717C89; }
+    .Style { background-color: #38C97C; }
+
+
+
+
+
+/* ==============================================
+                #TRUMPS
+================================================= */
 
 </style>
