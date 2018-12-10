@@ -7,7 +7,7 @@
 				<a class="sidebar__actionsLink" @click="createNewClassModalOpen();"><i class="fa fa-plus"></i>Create new class</a>
 				<a class="sidebar__actionsLink" @click="modalInviteUserIsOpen = true"><i class="fa fa-plus"></i>Invite a new user</a>
 				<a class="sidebar__actionsLink" v-if="currentClass.name !== 'Home'" @click="modalDeleteClassIsOpen = true"><i class="fa fa-trash"></i>Delete this class</a>
-				<a class="sidebar__actionsLink" v-if="!(currentClass.name === 'Home')" @click="openAssignmentsModal()"><i class="fa fa-file-text-o"></i>Assignments</a>
+				<a class="sidebar__actionsLink" v-if="!(currentClass.name === 'Home')" @click="openAssignmentsModal()"><i class="fa fa-file-text-o"></i>Assignments<span class="dot" v-if="!!assignmentsBadgeOn && assignments.length === 0"></span></a>
 				<a class="sidebar__actionsLink" v-if="!(currentClass.name === 'Home')" @click="modalArchiveClassIsOpen = true"><i class="fa fa-archive"></i>Archive this class</a>
 				<a class="sidebar__actionsLink" v-if="!(currentClass.name === 'Home')" @click="toggleModalStudentRequests()"><i class="fa fa-file-text-o"></i>Student requests ({{ requestedStudents.length }})</a>
 				<a class="sidebar__actionsLink" v-if="!(currentClass.name === 'Home')" @click="editCategoriesModalOpen()"><i class="fa fa-commenting-o"></i>Edit categories</a>
@@ -363,6 +363,7 @@
 				assignmentDueDate: '',
 				categoriesCheckList: [],
 				startingAssignmentMessageVisible: false,
+				assignmentsBadgeOn: false,
 
 				//-----------------------------------
 				// Categories
@@ -777,7 +778,8 @@
 					})
 				})
 				this.handleNewClassClose()
-				this.openAssignmentsModal(true)
+				// todo
+				this.assignmentsBadgeOn = true
 			},
 			saveNewCustomCategories() {
 				// This function runs when user clicks save on edit categories modal
@@ -1155,6 +1157,7 @@
 					this.assignmentDescription = ''
 					this.assignmentGenre = ''
 					this.assignmentDueDate = ''
+					this.assignmentsBadgeOn = false
 				} else {
 					this.$message({
 						showClose: true,
@@ -1635,4 +1638,14 @@
 	border-radius:50%;
 	box-shadow:0 0 1px #333;
 }
+
+.dot {
+	height: 8px;
+	width: 8px;
+	background-color: #ff0000;
+	border-radius: 50%;
+	display: inline-block;
+	margin-bottom: 10px;
+}
+
 </style>
