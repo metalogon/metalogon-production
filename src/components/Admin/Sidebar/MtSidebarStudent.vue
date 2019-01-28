@@ -333,7 +333,8 @@
 					self.toggleModalClassesToEnroll()
 					self.$message({
 						showClose: true,
-						message: "Enrollment request sent.",
+						// message: "Enrollment request sent.",
+						message: "The request has been sent. Please wait the professor to accept your request.",
 						type: 'success'
 					});
 				})
