@@ -19,7 +19,7 @@
 					element-loading-background="rgba(0, 0, 0, 0.8)"><br><br><br><br><br></div>
 				<!-- The two lines below don't show if the acceptedClasses array is empty, so there is no need for a v-if="!loadingClasses" -->
 				<el-input class="sidebar__classesInput" v-if="acceptedClasses.length !== 0" icon="search" v-model="searchInputClassSidebar" @change="filterClassArray('acceptedClasses', 'filteredAcceptedClasses', searchInputClassSidebar)" placeholder="Search for a class..."></el-input>
-				<a class="sidebar__notActive" v-for="c in requestedClasses" :key="c.id">{{ c.number }} - {{ c.name }}</a>
+				<a class="sidebar__notActive" v-for="c in requestedClasses" :key="c.id" v-if="searchInputClassSidebar === ''">{{ c.number }} - {{ c.name }}</a>
 				<a class="sidebar__classesLink" v-for="c in filteredAcceptedClasses" :class="{ 'is-bg-light' : (currentClass.name === c.name) }"  :key="c.id" @click="setCurrentClass(c)">{{ c.number }} - {{ c.name }}</a>
 			</div>
 
