@@ -586,19 +586,21 @@
 					}
 				})
 			},
+			// Administrator, professor
 			setCurrentClass(classObject) {
-                this.loadingClasses = true
-                // Update students. This is needed to show the little number of requested enrollments in the sidebar
-                var self = this
-                this.$store.commit('RESET_ASSIGNMENTS')
-                this.updateStudents()
-                .then(function() {
-                    self.updateAssignments()
-                })
-                .then(function() {
-                    self.loadingClasses = false
-                })				
+				this.loadingClasses = true
+				// Update students. This is needed to show the little number of requested enrollments in the sidebar
+				var self = this
+				this.$store.commit('RESET_ASSIGNMENTS')
 				this.$store.commit('CURRENT_CLASS_SELECT', classObject)
+				this.updateStudents()
+				.then(function() {
+					self.updateAssignments()
+					// console.log(self.requestedStudents)
+				})
+				.then(function() {
+					self.loadingClasses = false
+				})
 			},
 			createClass() {	
 				// This function runs when user clicks create class

@@ -528,20 +528,21 @@
                 this.$store.dispatch('getVideoAnnotations', this.id)
 
                 // Custom categories trees
-                // console.log(this.canons, this.currentClass)
-                // console.log(this.videos)
                 // Find the customized tree for this video's genre
                 var self = this
-				this.$store.dispatch('getGenres')
-				.then(function() {
-					for (var g = 0; g < self.currentClass.catFilter.length; g++) {
-                        if (self.currentClass.catFilter[g].genreId === self.videos.genre) {
-                            self.createCustomCanonTree(self.currentClass.catFilter[g].selectedNodes)
-                            break
-                        }
-                    }
-                    self.loadingCanons = false
-                })
+
+				// this.$store.dispatch('getGenres')
+				// .then(function() {
+				// 	for (var g = 0; g < self.currentClass.catFilter.length; g++) {
+                //         if (self.currentClass.catFilter[g].genreId === self.videos.genre) {
+                //             self.createCustomCanonTree(self.currentClass.catFilter[g].selectedNodes)
+                //             break
+                //         }
+                //     }
+                //     self.loadingCanons = false
+                // })
+
+                self.loadingCanons = false
 
                 this.isAnnotating = true
                 this.isAnnotateCanons = true // Opens canons menu.
@@ -1536,7 +1537,20 @@
                     },
                     stop(event) {
                     }
-                })   
+                })
+                
+                // Custom categories trees
+                // Find the customized tree for this video's genre
+                self.$store.dispatch('getGenres')
+				.then(function() {
+					for (var g = 0; g < self.currentClass.catFilter.length; g++) {
+                        if (self.currentClass.catFilter[g].genreId === self.videos.genre) {
+                            self.createCustomCanonTree(self.currentClass.catFilter[g].selectedNodes)
+                            break
+                        }
+                    }
+                    self.loadingCanons = false
+                })
             })
         },
         updated() {

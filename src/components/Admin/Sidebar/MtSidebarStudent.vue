@@ -19,6 +19,7 @@
 					element-loading-background="rgba(0, 0, 0, 0.8)"><br><br><br><br><br></div>
 				<!-- The two lines below don't show if the acceptedClasses array is empty, so there is no need for a v-if="!loadingClasses" -->
 				<el-input class="sidebar__classesInput" v-if="acceptedClasses.length !== 0" icon="search" v-model="searchInputClassSidebar" @change="filterClassArray('acceptedClasses', 'filteredAcceptedClasses', searchInputClassSidebar)" placeholder="Search for a class..."></el-input>
+				<a class="sidebar__notActive" v-for="c in requestedClasses" :key="c.id" v-if="searchInputClassSidebar === ''">{{ c.number }} - {{ c.name }}</a>
 				<a class="sidebar__classesLink" v-for="c in filteredAcceptedClasses" :class="{ 'is-bg-light' : (currentClass.name === c.name) }"  :key="c.id" @click="setCurrentClass(c)">{{ c.number }} - {{ c.name }}</a>
 			</div>
 
@@ -109,8 +110,9 @@
     					<span slot="label">Requests pending ({{requestedClasses.length}})</span> <!-- Dynamic tab label --> 
                         <span v-if="requestedClasses.length === 0"><i>No requests pending</i></span>
 						<div label="" class="mt-table" v-if="!loadingModalClasses">
-							<li v-for="c in requestedClasses" :key="c.id">
+							<li v-for="(c, index) in requestedClasses" :key="c.id">
 								<a><i class="fa fa-book"></i> {{ c.number }} - {{ c.name }} - {{ c.department }} - {{ c.semester }}</a>
+								<el-button size="small" type="info" @click="deleteRequest(index, c)" style="float: right; margin:-2px;">Cancel request</el-button>
 							</li>
 						</div>
                     </el-tab-pane>
@@ -331,12 +333,37 @@
 					self.toggleModalClassesToEnroll()
 					self.$message({
 						showClose: true,
-						message: "Enrollment request sent.",
+						// message: "Enrollment request sent.",
+						message: "The request has been sent. Please wait the professor to accept your request.",
 						type: 'success'
 					});
 				})
 				.catch(function(err) {
 					console.log("requestToEnrollToClass error: ", err)
+				})
+			},
+			deleteRequest(index, c) {
+				// Deletes enrollment request of student
+
+				this.loadingModalClasses = true
+
+				// Delete enrollment locally
+				this.requestedClasses.splice(index, 1)
+
+				var self = this
+				this.$store.dispatch("getAllUserEnrollmentsByUserId", this.userId) // Update state.userEnrollments
+				.then(function() {
+					var enrollmentToBeDeletedId = ''
+					for (var u = 0; u < self.userEnrollments.length; u++) {
+						if (self.userEnrollments[u].userId === self.userId && self.userEnrollments[u].classId === c.id) {
+							enrollmentToBeDeletedId = self.userEnrollments[u].id
+							break
+						}
+					}
+					return self.$store.dispatch("deleteEnrollment", enrollmentToBeDeletedId)
+				})
+				.then(function() {
+					self.loadingModalClasses = false
 				})
 			},
 		},
@@ -400,10 +427,14 @@
 		.sidebar a:hover {
 			background-color: #f5f5f5;
 		}
-			.sidebar a i {
-				padding-right: 5px;
-			}
+		.sidebar a i {
+			padding-right: 5px;
+		}
 
+		.sidebar__notActive {
+			color: #4a4a4a7a !important;
+			pointer-events: none ; 
+		}
 	/* ==============================================
                 #ENROLL-TO-CLASS CLASSES-CARD
 	================================================= */
