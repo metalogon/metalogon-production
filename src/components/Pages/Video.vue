@@ -231,7 +231,8 @@
             </div>
 
             <div class="cards column is-4">
-                <div class="cards-content" v-if="canonLoadingDone">
+                <!-- PROSOXIII: sto line 235 ebala display:none apla gia to deis, to card. Meta svisto. -->
+                <div class="cards-content" v-if="canonLoadingDone" style="display:none">
                     <nav class="card-menu">
                         <!-- <a style="display:flex;flex-direction:column;justify-content:center;margin:5px;color:#4a4a4a;"><i class="fa fa-graduation-cap" style="text-align:center;"></i><span style="font-size:10px;margin-top:-3px;">Professor only</span></a> -->
                         <a class="card-menu__item" :class="canon.name" v-for="canon in customCanonTree" :key="canon.name"  @click="chooseCanonFilter($event, canon.name)" >
@@ -246,7 +247,6 @@
                             </div>
                         </div>
                     </nav>
-
 
                     <div class="timeline-container">
                         <div class="timeline-card column" :class="card.canon + '-border'" @click="seekCard($event)" v-for="card in videoAnnotations" :key="card.id" v-if="card.canon === isInvention || card.canon === isStructure || card.canon === isDelivery || card.canon === isVisuals || card.canon === isStyle">
@@ -284,8 +284,23 @@
                             </div>
                         </div>
                     </div>
+
+                </div>
+                <!-- To annotationsNotShown einai diko mou onoma. An breis kati kalytero ... :) -->
+                <div class="errorhandling column" v-if="!annotationsNotShown">
+                    <div class="errorhandling__head">
+                        <div class="errorhandling__title-container">
+                            <span class="errorhandling__title">NOTIFICATION</span>
+                        </div>
+                    </div>
+                    <div class="errorhandling__body">
+                        <p class="errorhandling__body-title" >The annotations of the current video, are not shown correctly. Please contact with the administrator.</p>
+                    </div>
+                    <div class="errorhandling__footer">
+                        Contact
+                    </div>
+                </div>
             </div>
-        </div>
         </div>
 
         <my-footer></my-footer>
@@ -384,7 +399,8 @@
                 role: '',
                 currentRoute: '',
                 loadingInstance: null,
-                canonLoadingDone: false
+                canonLoadingDone: false,
+                annotationsNotShown: false
             }
         },
         methods: {
@@ -2286,6 +2302,76 @@
                         background-color: #272424;
                     }
 
+
+
+
+
+/* ==============================================
+    #VIDEO-ERROR-HANDLING CARD
+================================================= */
+    .errorhandling {
+        background: none;
+        margin-bottom: 10px;
+        box-shadow: 0 3px 6px rgba(0,0,0,0.20), 0 1px 2px rgba(0,0,0,0.24);  
+        z-index: 100; 
+        padding-bottom: 30px;     
+    }
+
+    .errorhandling:hover {
+        opacity: 0.9;
+        transition: 0.8;
+    }
+
+        .errorhandling__head {
+            cursor: pointer;
+        }
+            .errorhandling__title-container {
+                display: flex;
+                justify-content: space-between;
+            }
+            
+            .errorhandling__title {
+                font-size: 1.2em;
+                font-style: bold;
+                text-transform: uppercase;
+            }
+            .errorhandling__time {
+                font-size: 0.8em;
+            }
+            .errorhandling__desc {
+                margin-top: 2px;
+                font-size: 0.8em;
+                line-height: 1.4em;
+            }
+
+        .errorhandling__body {
+            margin-top: 5px;   
+        }
+            .errorhandling__body-title {
+                font-size: 12px; 
+                display: flex;
+            }
+
+            .errorhandling__comment {
+                font-size: 0.8em;
+                line-height: 1.3em;
+            }
+                .errorhandling__comment span {
+                    margin: 15px;
+                }
+
+            #readmore {
+                color: #38425d;
+                font-weight: bold;
+                float: right;
+            }
+
+        .errorhandling__footer {
+            margin-top: -20px;
+            display: flex;
+            justify-content: flex-end;
+            cursor: pointer;
+        }
 
 
 
