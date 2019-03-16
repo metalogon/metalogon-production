@@ -231,8 +231,7 @@
             </div>
 
             <div class="cards column is-4">
-                <!-- PROSOXIII: sto line 235 ebala display:none apla gia to deis, to card. Meta svisto. -->
-                <div class="cards-content" v-if="canonLoadingDone" style="display:none">
+                <div class="cards-content" v-if="canonLoadingDone">
                     <nav class="card-menu">
                         <!-- <a style="display:flex;flex-direction:column;justify-content:center;margin:5px;color:#4a4a4a;"><i class="fa fa-graduation-cap" style="text-align:center;"></i><span style="font-size:10px;margin-top:-3px;">Professor only</span></a> -->
                         <a class="card-menu__item" :class="canon.name" v-for="canon in customCanonTree" :key="canon.name"  @click="chooseCanonFilter($event, canon.name)" >
@@ -286,8 +285,7 @@
                     </div>
 
                 </div>
-                <!-- To annotationsNotShown einai diko mou onoma. An breis kati kalytero ... :) -->
-                <div class="errorhandling column" v-if="!annotationsNotShown">
+                <div class="errorhandling column" v-if="false">
                     <div class="errorhandling__head">
                         <div class="errorhandling__title-container">
                             <span class="errorhandling__title">NOTIFICATION</span>
@@ -399,9 +397,7 @@
                 role: '',
                 currentRoute: '',
                 loadingInstance: null,
-                canonLoadingDone: false,
-                annotationsNotShown: false
-            }
+                canonLoadingDone: false            }
         },
         methods: {
             chooseCanonAnnotate(canon) {
