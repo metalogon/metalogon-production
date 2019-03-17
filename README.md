@@ -1,6 +1,6 @@
 # Metalogon
 
-![alt text](https://github.com/gassio/mt/blob/master/src/assets/Metalogon-screen.png)
+![alt text](https://github.com/gassio/metalogon-production/blob/master/src/assets/metalogonE.jpg)
 
 ## Setup on localhost 
 

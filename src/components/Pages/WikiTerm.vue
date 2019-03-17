@@ -32,9 +32,9 @@
 
                 <div class="term__rowtext">
                     <h3 class="rowtext-title">Definition</h3>
-                    <div class="rowtext__content" v-if="!definitionIsOpen">{{ currentTerm.description }}</div>
+                    <div class="rowtext__content" v-if="!definitionIsOpen">{{ currentTerm.definition }}</div>
                     <span class="rowtext__edit" @click="editContent('definition')" v-if="!definitionIsOpen"><i class="fa fa-pencil fa-1x"></i><p>Edit</p></span>
-                    <textarea class="textarea" v-model="currentTerm.description" type="text" v-if="definitionIsOpen"></textarea>
+                    <textarea class="textarea" v-model="currentTerm.definition" type="text" v-if="definitionIsOpen"></textarea>
                     <span class="rowtext__save" v-if="definitionIsOpen" @click="saveContent(currentTerm.id, 'definition')"><i class="fa fa-check"></i>Save</span>
                 </div>
 
