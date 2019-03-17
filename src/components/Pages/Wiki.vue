@@ -35,7 +35,7 @@
                             <span class="term__head">
                                 <h3 class="term__title">{{ c.name }}</h3>
                             </span>
-                            <span class="term__content">{{ c.description }}</span>
+                            <span class="term__content">{{ c.definition }}</span>
                             <span class="term__tags">
 
                             </span>
