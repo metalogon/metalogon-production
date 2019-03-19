@@ -35,8 +35,6 @@
 			<i class="el-icon-delete" v-show="role ==='administrator'" @click="toggleDeleteConfirmationModal()"></i>
 		</div>
 
-
-
 		<!-- Canon statistics modal -->
 		<el-dialog :title="currentVideo.title" :visible.sync="modalCanonChartIsOpen">
 			<!-- <img :src="currentVideo.thumb" width="60%"> -->
@@ -78,7 +76,9 @@
 				ratingAverage: 0,
 				genreName: '',
 				deleteModalIsOpen: false,
+				// Canon statistics
 				modalCanonChartIsOpen: false,
+				loadingModalCanonChart: false,
 				chartData: {
 					columns: ['canon', 'averageRating'],
 					rows: []
@@ -90,7 +90,6 @@
 				},
 				chartExtend: { series: {} },
 				canonInfo: [], // Helper array for v-chart array: chartData.rows[]
-				loadingModalCanonChart: false
 			}
 		},
 		methods: {
