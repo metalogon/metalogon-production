@@ -188,6 +188,8 @@
                 <button class="collaborators button" @click="toggleModalCollaborators()">
                     <i class="fa fa-users"></i><span>Collaborators</span>
                 </button>
+
+                <canon-statistics :currentVideo="videos" :currentAnnotations="videoAnnotations"></canon-statistics>
                 
                 <el-dialog :visible.sync="modalCollaboratorsIsOpen">
                     <span class="modal-collaborators" slot="title"><b>{{videos.title}} - Collaborators</b></span>
@@ -321,6 +323,7 @@
     import _ from 'lodash'
     import MyHeader from '../Layout/MyHeader.vue'
     import MyFooter from '../Layout/MyFooter.vue'
+    import CanonStatistics from '../Extra/CanonStatistics.vue'
 
     import { Loading } from 'element-ui';
 
@@ -1589,6 +1592,7 @@
         components: {
             'my-header': MyHeader,
             'my-footer': MyFooter,
+            'canon-statistics': CanonStatistics,
         }
     }
 </script>
