@@ -508,10 +508,6 @@
                 // console.log("Getting assignments")
                 return this.$store.dispatch('getAssignments', this.currentClass.id)
             },
-            getAssignmentsByThisClass() {
-                // console.log("Getting assignments")
-                return this.$store.dispatch('getAssignments', this.currentClass.id)
-            },
         },
         created() {
             // this.$store.dispatch('getAllClasses')
