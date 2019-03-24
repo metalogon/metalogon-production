@@ -117,7 +117,7 @@
 			},
         },
         mounted() {
-            console.log("CanonStatistics component mounted!")        
+            // console.log("CanonStatistics component mounted!")        
         },
         computed: {
 			...mapGetters(

@@ -31,7 +31,7 @@
 						<el-input style="margin-top:10px" class="sidebar__classesInput" icon="search" v-model="searchInputClassSidebar" @change="filterVideoArray('videos', 'filteredVideos', searchInputClassSidebar)" placeholder="Search for a video..."></el-input>
 						<a class="sidebar__classesLink" v-for="v in filteredVideos" :key="v.id"></a>
 					</h3>
-					<mt-video-itemlist v-for="v in videos" v-bind:key="v.id" :currentVideo="v" v-if="v.class === currentClass.name && searchInputClassSidebar === ''" :enableStatistics="true"></mt-video-itemlist>
+					<mt-video-itemlist v-for="v in videos" v-bind:key="v.id" :currentVideo="v" v-if="v.class === currentClass.name && searchInputClassSidebar === ''" :enableStatistics="true" :showCollaborators="true"></mt-video-itemlist>
 					<mt-video-itemlist v-for="v in filteredVideos" v-bind:key="v.id" :currentVideo="v" v-if="v.class === currentClass.name && searchInputClassSidebar !== ''" :enableStatistics="true"></mt-video-itemlist>
 				</div>
 
