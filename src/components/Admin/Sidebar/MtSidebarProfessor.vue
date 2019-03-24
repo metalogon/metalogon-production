@@ -38,7 +38,7 @@
 				</el-tabs>
 			</div>
 
-			<!-- Πrofessor -->
+			<!-- Professor -->
 			<el-dialog title="Add new class" :visible.sync="modalCreateClassIsOpen" :before-close="handleNewClassClose">
 				
 				<el-steps :active="createModalActive" finish-status="success" space="97%"> <!-- TODO change space to some function of the width of the modal -->
@@ -198,7 +198,7 @@
 								</div>
 							</el-tab-pane>
 							<el-tab-pane label="Class Submissions" name="ClassSubmissions">
-								<mt-video-itemlist v-for="v in videos" v-bind:key="v.id" :currentVideo="v" v-if="v.assignmentId === a.id" :enableStatistics="false"></mt-video-itemlist>
+								<mt-video-itemlist v-for="v in videos" v-bind:key="v.id" :currentVideo="v" v-if="v.assignmentId === a.id" :enableStatistics="false" :showCollaborators="true"></mt-video-itemlist>
 							</el-tab-pane>
                 		</el-tabs>
 						
