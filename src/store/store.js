@@ -459,8 +459,9 @@ export const store = new Vuex.Store({
                 console.log('getCollaborationsByVideoId GET error: ', err) 
             })
         },
-        getCollaboratorsByVideoId: function({commit}, payload) {
+        getCollaboratorsByVideoId: function({commit, state}, payload) {
             // Uses collaborator join
+            state.videoCollaborators = []
             return secureHTTPService.get("collaborator?videoId=" + payload)
             .then(function(response) {
                 commit('GET_COLLABORATORS_BY_VIDEO_ID', response.data.data)
