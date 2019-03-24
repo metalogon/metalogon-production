@@ -15,7 +15,7 @@
         <el-dialog class="uploadvid__metadata" title="Video details" :visible.sync="modalMetadataIsOpen" :close-on-click-modal="false">
             <el-form :model="uploadVidMetadata" ref="uploadVidMetadata" label-width="120px" :rules="uploadVidMetadataRules">
                 <el-form-item label="Title" prop="title">
-                    <el-input v-model="uploadVidMetadata.title"></el-input>
+                    <el-input v-model="uploadVidMetadata.title" placeholder="Enter a title"></el-input>
                 </el-form-item>
                 <!-- <el-form-item label="Class" prop="class">
                     <el-select v-model="uploadVidMetadata.class" placeholder="Select the class" @change="getAssignmentsByThisClass()">
@@ -30,9 +30,10 @@
                     </el-select>
                 </el-form-item> -->
                 <el-form-item label="Assignment" prop="assignment">
-                    <el-select v-model="uploadVidMetadata.assignmentId" placeholder="Select an assignment" >
-                        <el-option :label="a.title" :value="a.id" v-for="a in assignments" :key="a.id"></el-option>
+                    <el-select v-if="filteredAssignments.length !== 0" v-model="uploadVidMetadata.assignmentId" clearable placeholder="Select an assignment" @change="assignmentSelectedEventHandler">
+                        <el-option v-for="a in filteredAssignments" :key="a.id" :label="a.title" :value="a.id"></el-option>
                     </el-select>
+                    <div v-if="filteredAssignments.length === 0">No assignments for selected genre</div>
                 </el-form-item>
                 <!-- <el-form-item label="Department" prop="classDepartment">
                     <el-select placeholder="Select the department" v-model="uploadVidMetadata.classDepartment">
@@ -40,10 +41,10 @@
                     </el-select>
                 </el-form-item> -->
                 <el-form-item label="Genre" prop="genre">
-                    <el-select v-model="uploadVidMetadata.genre" placeholder="Select the video genre">
+                    <el-select v-if="uploadVidMetadata.assignmentId === ''" v-model="uploadVidMetadata.genreId" clearable placeholder="Select the video genre" @change="genreSelectedEventHandler">
                         <el-option v-for="g in genres" :key="g.name" :label="g.name" :value="g.id"></el-option>
-
                     </el-select>
+                    <div v-if="uploadVidMetadata.assignmentId !== ''">{{lockedGenre.name}}</div>
                 </el-form-item>
                 <el-form-item label="Presentation date" required>
                     <el-col :span="11">
@@ -68,7 +69,7 @@
         <el-dialog class="uploadvid__sync" :visible.sync="modalSyncOpen" :close-on-click-modal="false" :show-close="false" :close-on-press-escape="false">
             <div class="uploadvid__sync-load" 
                 v-loading="modalSyncOpen" 
-                element-loading-text="The video is being processed. The waiting time usually takes 1 minute for every minute duration of the original." 
+                element-loading-text="The video is being processed. The waiting time usually is 1 minute for every minute duration of the original." 
                 element-loading-spinner="el-icon-loading"
                 element-loading-background="rgba(0, 0, 0, 0.8)"></div>
         </el-dialog>
@@ -104,9 +105,14 @@
 					class: '',
                     classNumber: '',
                     classDepartment: '',
-                    genre: '',
                     presentedAt: '',
+                    genreId: '',
                     assignmentId: ''
+                },
+                filteredAssignments: [],
+                lockedGenre: {
+                    id: '',
+                    name: 'locked genre'
                 },
                 uploadVidMetadataRules: {
                     title: [
@@ -118,10 +124,10 @@
                     classNumber: [
                         { required: true, message: 'Choose the classNumber', trigger: 'blur' },
                     ],
-                    // assignment: [
+                    // assignmentId: [
                     //     { required: true, message: 'Choose an assignment', trigger: 'blur' },
                     // ],
-                    genre: [
+                    genreId: [
                         { required: true, message: 'Please select genre', trigger: 'blur' },
                     ],
                     presentedAt: [
@@ -134,6 +140,48 @@
             }
         },
         methods: {
+            genreSelectedEventHandler() {
+                var self = this
+                this.getAssignmentsByThisClass()
+                .then(function() {
+                    // refresh assignments on genre selection event (this can be triggered by DESELECTING genre)
+                    self.filteredAssignments = self.assignments // include all class assignments in filtered assignments
+                    // if a genre is selected then we need to filter assignments
+                    if (self.uploadVidMetadata.genreId !== '') {
+                        self.filteredAssignments = []
+                        for(var a = 0; a < self.assignments.length; a++) { // Loop through assignments and keep those of the same genreId
+                            if (self.assignments[a].genre === self.uploadVidMetadata.genreId) {
+                                self.filteredAssignments.push(self.assignments[a])
+                            }                    
+                        }
+                    }
+                })
+            },
+            assignmentSelectedEventHandler() {
+                // get selected assignment, get its genre's id and find it in genres, assign it to lockedGenre
+                var selectedAssignmentGenreId = ''
+                var self = this
+                self.lockedGenre.name = 'Loading...'
+                this.getAssignmentsByThisClass()
+                .then(function() {
+                    for(var a = 0; a < self.assignments.length; a++) {
+                        if (self.assignments[a].id === self.uploadVidMetadata.assignmentId) {
+                            selectedAssignmentGenreId = self.assignments[a].genre
+                            break
+                        }                    
+                    }
+                    return self.$store.dispatch('getGenres')
+                })
+                .then(function() {
+                    for(var g = 0; g < self.genres.length; g++) {
+                        if (self.genres[g].id === selectedAssignmentGenreId) {
+                            self.lockedGenre = self.genres[g]
+                            self.uploadVidMetadata.genreId = self.lockedGenre.id
+                            break
+                        }
+                    }
+                })
+            },
             createJwVideo() {
                 let self = this 
                 this.modalDragDropIsOpen = true
@@ -188,8 +236,8 @@
                             class: self.currentClass.name,
                             classNumber: self.currentClass.number,
                             classDepartment: self.currentClass.department,
-                            genre: '',
                             presentedAt: '',
+                            genreId: '',
                             assignmentId: ''
                         }
                         // Closes and opens the modals
@@ -271,14 +319,14 @@
                                                     if (response.data.data.thumbnail.status === 'ready') {
                                                         // POST video 
                                                         self.$store.dispatch('createVideo', {
-                                                            "assignmentId": self.uploadVidMetadata.assignmentId,
                                                             "title": self.uploadVidMetadata.title,
                                                             "class": self.uploadVidMetadata.class,
                                                             "classNumber": self.uploadVidMetadata.classNumber,
                                                             "classDepartment": self.uploadVidMetadata.classDepartment,
                                                             "jwVideoId": jwVideoId,
-                                                            "genre": self.uploadVidMetadata.genre,
                                                             "presentedAt": self.uploadVidMetadata.presentedAt,
+                                                            "genre": self.uploadVidMetadata.genreId,
+                                                            "assignmentId": self.uploadVidMetadata.assignmentId,
                                                             "featuredGlobal": false,
                                                             "featuredClass": false,
                                                             "link": link,
@@ -292,7 +340,15 @@
                                                             clearInterval(intervalID)
 
                                                             // Clearing modal form
-                                                            self.uploadVidMetadata = { title: '', class: self.currentClass.name, classNumber: self.currentClass.number, classDepartment: self.currentClass.department, genre: '', presentedAt: '', assignmentId: '' }
+                                                            self.uploadVidMetadata = { 
+                                                                title: '', 
+                                                                class: self.currentClass.name,
+                                                                classNumber: self.currentClass.number, 
+                                                                classDepartment: self.currentClass.department, 
+                                                                presentedAt: '', 
+                                                                genreId: '', 
+                                                                assignmentId: '' 
+                                                            }
                                                             self.dropzoneInstance.removeAllFiles()
                                                             // console.log('after dropzone removeAllFiles: ', self.dropzoneInstance)
                                                             self.uploadProgress = 0.0
@@ -300,14 +356,14 @@
                                                     }
                                                     else {
                                                         self.$store.dispatch('createVideo', {
-                                                            "assignmentId": self.uploadVidMetadata.assignmentId,
                                                             "title": self.uploadVidMetadata.title,
                                                             "class": self.uploadVidMetadata.class,
                                                             "classNumber": self.uploadVidMetadata.classNumber,
                                                             "classDepartment": self.uploadVidMetadata.classDepartment,
                                                             "jwVideoId": jwVideoId,
-                                                            "genre": self.uploadVidMetadata.genre,
                                                             "presentedAt": self.uploadVidMetadata.presentedAt,
+                                                            "assignmentId": self.uploadVidMetadata.assignmentId,
+                                                            "genre": self.uploadVidMetadata.genreId,
                                                             "featuredGlobal": false,
                                                             "featuredClass": false,
                                                             "link": link,
@@ -321,7 +377,15 @@
                                                             clearInterval(intervalID)
 
                                                             // Clearing modal form
-                                                            self.uploadVidMetadata = { title: '', class: self.currentClass.name, classNumber: self.currentClass.number, classDepartment: self.currentClass.department, genre: '', presentedAt: '', assignmentId: '' }
+                                                            self.uploadVidMetadata = {
+                                                                title: '',
+                                                                class: self.currentClass.name,
+                                                                classNumber: self.currentClass.number,
+                                                                classDepartment: self.currentClass.department,
+                                                                presentedAt: '',
+                                                                genreId: '',
+                                                                assignmentId: ''
+                                                            }
                                                             self.dropzoneInstance.removeAllFiles()
                                                             // console.log('after dropzone removeAllFiles: ', self.dropzoneInstance)
                                                             self.uploadProgress = 0.0
@@ -443,10 +507,20 @@
             getAssignmentsByThisClass() {
                 // console.log("Getting assignments")
                 return this.$store.dispatch('getAssignments', this.currentClass.id)
-            }
+            },
+            getAssignmentsByThisClass() {
+                // console.log("Getting assignments")
+                return this.$store.dispatch('getAssignments', this.currentClass.id)
+            },
         },
         created() {
             // this.$store.dispatch('getAllClasses')
+            var self = this
+            this.getAssignmentsByThisClass()
+            .then(function() {
+                self.filteredAssignments = self.assignments
+            })
+            this.$store.dispatch('getGenres')
         },
         mounted() {
             this.authData = this.$root.$options.authService.getAuthData()
