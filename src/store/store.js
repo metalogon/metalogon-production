@@ -381,6 +381,19 @@ export const store = new Vuex.Store({
                     
                 })
         },
+        addAssignmentToVideo: function({ commit }, payload) {
+            // payload contains payload.videoId and payload.assignmentId
+            return secureHTTPService.put("video/" + payload.videoId, {"assignmentId":payload.assignmentId})
+            .then( response => {
+                // console.log('-----')
+                // console.log('POST add assignment to video')
+            })
+            .catch( response => {
+                console.log('addAssignmentToVideo action error.')
+                console.log('payload: ', payload)
+                console.log('error:', response.error)
+            })
+        },
         /* GENRES */ 
         getGenres: function ({ commit }) {
             return secureHTTPService.get("genre")
