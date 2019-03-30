@@ -188,7 +188,7 @@
                 <button class="collaborators button" @click="toggleModalCollaborators()">
                     <i class="fa fa-users"></i><span>Collaborators</span>
                 </button>
-
+                <video-assignments :currentVideo="videos"></video-assignments>
                 <canon-statistics :currentVideo="videos" :currentAnnotations="videoAnnotations"></canon-statistics>
                 
                 <el-dialog :visible.sync="modalCollaboratorsIsOpen">
@@ -324,6 +324,7 @@
     import MyHeader from '../Layout/MyHeader.vue'
     import MyFooter from '../Layout/MyFooter.vue'
     import CanonStatistics from '../Extra/CanonStatistics.vue'
+    import VideoAssignments from '../Extra/VideoAssignments.vue'
 
     import { Loading } from 'element-ui';
 
@@ -1346,7 +1347,10 @@
             })
             .then(function() {
                 // TODO search for class in classes, and pass the whole class object
-                // TODO remove the whole search thing, add class object in video???
+                // TODO remove the whole search thing, add class object in video??? 
+                
+                // TODO Update 30/3/19: Video should have just class id and we should
+                // TODO join classes/video with classId as key
                 for(var c = 0; c < self.classes.length; c++) {
                     if (self.classes[c].name === self.videos.class) {
                         self.$store.commit('CURRENT_CLASS_SELECT', self.classes[c])
@@ -1593,6 +1597,7 @@
             'my-header': MyHeader,
             'my-footer': MyFooter,
             'canon-statistics': CanonStatistics,
+            'video-assignments': VideoAssignments,
         }
     }
 </script>
