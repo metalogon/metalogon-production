@@ -190,12 +190,12 @@
                             }                    
                         }
                     }
-                    else console.log("No assignment is selected")
+                    // else console.log("No assignment is selected")
                     return self.$store.dispatch('getGenres')
                 })
                 .then(function() {
                     if (selectedAssignmentGenreId === '') {
-                        console.log("No selected genre")
+                        // console.log("No selected genre")
                         self.uploadVidMetadata.genreId = ''
                     }
                     else {
