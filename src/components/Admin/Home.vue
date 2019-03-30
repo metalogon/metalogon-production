@@ -35,7 +35,7 @@
 					<mt-video-itemlist v-for="v in filteredVideos" v-bind:key="v.id" :currentVideo="v" v-if="v.class === currentClass.name && searchInputClassSidebar !== ''" :enableStatistics="true"></mt-video-itemlist>
 				</div>
 
-				<upload-video :currentClassProp="currentClass.name" v-if="currentClass.name !== 'Home' && assignments.length !== 0"></upload-video>
+				<upload-video :currentClassProp="currentClass.name" v-if="currentClass.name !== 'Home'"></upload-video>
 
 			</div>
 
@@ -169,7 +169,7 @@
 		computed: {
 			...mapGetters(
 				['videos', 'classes', 'currentClass',
-				 'enrolledClasses', 'userEnrollments', 'assignments'
+				 'enrolledClasses', 'userEnrollments'
 				]
 			)
 		},
