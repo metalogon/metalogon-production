@@ -7,7 +7,7 @@
 				<p class="ftdcard__class">{{ currentVideo.class }}</p>
 			</span>
 			<span class="ftdcard__meta2">
-				<p class="ftdcard__genre">{{ currentVideo.genre }}</p>
+				<p class="ftdcard__genre">{{ videoGenre }}</p>
 				<p class="ftdcard__date">{{ currentVideo.presentedAt | sliceDate }}</p>
 			</span>
 		</router-link>
@@ -20,10 +20,39 @@
     
     export default {
 		props: ['currentVideo'],
+		data() {
+			return {
+				videoGenre: 'Loading...'
+			}
+		},
+		methods: {
+			getGenreName() {
+				var self = this
+				this.$store.dispatch('getGenreById', this.currentVideo.genre)
+				.then(function ()
+				{
+					console.log(self.currentGenre)	
+					self.videoGenre = self.currentGenre.name
+				})
+			}
+		},
         computed: {
             ...mapGetters(
-                ['videos']
+                ['videos', 'genres']
             ),
+		},
+		mounted() {
+			var self = this
+			this.$store.dispatch('getGenres')
+			.then(function ()
+			{
+				for (var i = 0; i < self.genres.length; i++) {
+					if (self.genres[i].id === self.currentVideo.genre){
+						self.videoGenre = self.genres[i].name
+						break
+					}
+				}
+			})
 		},
     }
 </script>
