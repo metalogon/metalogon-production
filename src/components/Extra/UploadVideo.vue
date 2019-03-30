@@ -30,21 +30,34 @@
                     </el-select>
                 </el-form-item> -->
                 <el-form-item label="Assignment" prop="assignment">
-                    <el-select v-if="filteredAssignments.length !== 0" v-model="uploadVidMetadata.assignmentId" clearable placeholder="Select an assignment" @change="assignmentSelectedEventHandler">
+                    <el-select v-if="filteredAssignments.length !== 0" 
+                        v-model="uploadVidMetadata.assignmentId" clearable placeholder="Select an assignment" @change="assignmentSelectedEventHandler()">
+
                         <el-option v-for="a in filteredAssignments" :key="a.id" :label="a.title" :value="a.id"></el-option>
+
                     </el-select>
-                    <div v-if="filteredAssignments.length === 0">No assignments for selected genre</div>
+
+                    <div v-if="filteredAssignments.length === 0">
+                        {{assignmentSelectionPlaceholder}}
+                    </div>
+
                 </el-form-item>
                 <!-- <el-form-item label="Department" prop="classDepartment">
                     <el-select placeholder="Select the department" v-model="uploadVidMetadata.classDepartment">
                         <el-option v-for="d in departments" :label="d" :value="d" :key="d"></el-option>
                     </el-select>
                 </el-form-item> -->
-                <el-form-item label="Genre" prop="genre">
+                <el-form-item label="Genre" prop="genreId">
                     <el-select v-if="uploadVidMetadata.assignmentId === ''" v-model="uploadVidMetadata.genreId" clearable placeholder="Select the video genre" @change="genreSelectedEventHandler">
+
                         <el-option v-for="g in genres" :key="g.name" :label="g.name" :value="g.id"></el-option>
+
                     </el-select>
-                    <div v-if="uploadVidMetadata.assignmentId !== ''">{{lockedGenre.name}}</div>
+
+                    <div v-else-if="uploadVidMetadata.assignmentId !== ''">
+                        {{lockedGenre.name}}
+                    </div>
+
                 </el-form-item>
                 <el-form-item label="Presentation date" required>
                     <el-col :span="11">
@@ -114,6 +127,7 @@
                     id: '',
                     name: 'locked genre'
                 },
+                assignmentSelectionPlaceholder: 'No assignments',
                 uploadVidMetadataRules: {
                     title: [
                         { required: true, message: 'Please input video title', trigger: 'blur' },
@@ -141,6 +155,7 @@
         },
         methods: {
             genreSelectedEventHandler() {
+                this.assignmentSelectionPlaceholder = 'Loading...'
                 var self = this
                 this.getAssignmentsByThisClass()
                 .then(function() {
@@ -155,6 +170,9 @@
                             }                    
                         }
                     }
+                    if (self.filteredAssignments.length === 0) {
+                        self.assignmentSelectionPlaceholder = 'No assignments'
+                    }
                 })
             },
             assignmentSelectedEventHandler() {
@@ -164,20 +182,29 @@
                 self.lockedGenre.name = 'Loading...'
                 this.getAssignmentsByThisClass()
                 .then(function() {
-                    for(var a = 0; a < self.assignments.length; a++) {
-                        if (self.assignments[a].id === self.uploadVidMetadata.assignmentId) {
-                            selectedAssignmentGenreId = self.assignments[a].genre
-                            break
-                        }                    
+                    if (self.uploadVidMetadata.assignmentId !== '') {
+                        for(var a = 0; a < self.assignments.length; a++) {
+                            if (self.assignments[a].id === self.uploadVidMetadata.assignmentId) {
+                                selectedAssignmentGenreId = self.assignments[a].genre
+                                break
+                            }                    
+                        }
                     }
+                    else console.log("No assignment is selected")
                     return self.$store.dispatch('getGenres')
                 })
                 .then(function() {
-                    for(var g = 0; g < self.genres.length; g++) {
-                        if (self.genres[g].id === selectedAssignmentGenreId) {
-                            self.lockedGenre = self.genres[g]
-                            self.uploadVidMetadata.genreId = self.lockedGenre.id
-                            break
+                    if (selectedAssignmentGenreId === '') {
+                        console.log("No selected genre")
+                        self.uploadVidMetadata.genreId = ''
+                    }
+                    else {
+                        for(var g = 0; g < self.genres.length; g++) {
+                            if (self.genres[g].id === selectedAssignmentGenreId) {
+                                self.lockedGenre = self.genres[g]
+                                self.uploadVidMetadata.genreId = self.lockedGenre.id
+                                break
+                            }
                         }
                     }
                 })
@@ -243,6 +270,9 @@
                         // Closes and opens the modals
                         self.modalDragDropIsOpen = false
                         self.modalMetadataIsOpen = true
+                        
+                        self.filteredAssignments = self.assignments
+
                         // Sets the title field as the added file.name 
                         self.uploadVidMetadata.title = file.name
                         // console.log("Added file.")
@@ -318,6 +348,13 @@
                                                 .then( response => {
                                                     if (response.data.data.thumbnail.status === 'ready') {
                                                         // POST video 
+                                                        // convert genreId and assignmentId to null if they are empty strings
+                                                        if (self.uploadVidMetadata.genreId == '') {
+                                                            self.uploadVidMetadata.genreId = null
+                                                        }
+                                                        if (self.uploadVidMetadata.assignmentId == '') {
+                                                            self.uploadVidMetadata.assignmentId = null
+                                                        }
                                                         self.$store.dispatch('createVideo', {
                                                             "title": self.uploadVidMetadata.title,
                                                             "class": self.uploadVidMetadata.class,
@@ -347,7 +384,7 @@
                                                                 classDepartment: self.currentClass.department, 
                                                                 presentedAt: '', 
                                                                 genreId: '', 
-                                                                assignmentId: '' 
+                                                                assignmentId: ''
                                                             }
                                                             self.dropzoneInstance.removeAllFiles()
                                                             // console.log('after dropzone removeAllFiles: ', self.dropzoneInstance)
@@ -355,6 +392,13 @@
                                                         })
                                                     }
                                                     else {
+                                                        // convert genreId and assignmentId to null if they are empty strings
+                                                        if (self.uploadVidMetadata.genreId == '') {
+                                                            self.uploadVidMetadata.genreId = null
+                                                        }
+                                                        if (self.uploadVidMetadata.assignmentId == '') {
+                                                            self.uploadVidMetadata.assignmentId = null
+                                                        }
                                                         self.$store.dispatch('createVideo', {
                                                             "title": self.uploadVidMetadata.title,
                                                             "class": self.uploadVidMetadata.class,
@@ -521,7 +565,7 @@
         mounted() {
             this.authData = this.$root.$options.authService.getAuthData()
             this.role = this.authData.role
-            // this.getAssignmentsByThisClass()
+
         },
         computed: {
             ...mapGetters([
