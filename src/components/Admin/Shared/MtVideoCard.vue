@@ -25,17 +25,6 @@
 				videoGenre: 'Loading...'
 			}
 		},
-		methods: {
-			getGenreName() {
-				var self = this
-				this.$store.dispatch('getGenreById', this.currentVideo.genre)
-				.then(function ()
-				{
-					console.log(self.currentGenre)	
-					self.videoGenre = self.currentGenre.name
-				})
-			}
-		},
         computed: {
             ...mapGetters(
                 ['videos', 'genres']
