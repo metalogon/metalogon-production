@@ -5,7 +5,7 @@
             <div class="navbar-brand">
                 <!-- <router-link to="/" tag="span" class="navbar-item"> -->
                     <span class="navbar-item">
-                        <img src="../../assets/logo-white.png" width="112" height="28">
+                        <img class="head__logo" src="../../assets/logo-header.png" >
                     </span>
                 <!-- </router-link> -->
             </div>
@@ -113,6 +113,11 @@
     background-color: #A90931;
     display: flex;
 }
+
+    .head__logo {
+        max-height: 40px !important;
+        margin-top: 5px;
+    }
 
     .head__nav {
         display: flex;

@@ -2,7 +2,7 @@
 
     <div class="login">
 
-          <img class="logo" src="../../assets/logo.png" alt="Logo">
+          <img class="logo" src="../../assets/logo-login.png" alt="Logo">
 
           <form class="login-form" v-show="formLoginIsShown" v-on:submit.prevent="loginUser()">
             <input class="login-form__username" type="text" placeholder="email" v-model="email">
@@ -202,9 +202,9 @@ export default {
   box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.2), 0 5px 5px 0 rgba(0, 0, 0, 0.24); 
 }
 
-.logo{
-	max-width:150px;
-	margin: 20px;
+.logo {
+  max-width: 220px;
+  margin-bottom: 10px;
 }
 
 .login-form__username, .login-form__password {
