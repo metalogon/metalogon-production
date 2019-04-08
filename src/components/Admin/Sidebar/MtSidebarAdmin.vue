@@ -1426,6 +1426,7 @@
 		margin: 0;
 		padding: 0;
 		background-color: #F9F9F9;
+		margin-top: -100px !important;
 	}
 
 	.sidebar__actions {

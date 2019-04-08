@@ -1,9 +1,9 @@
 <template>
     <div class="upload-video">
         
-        <div class="upload-video__container" @click="createJwVideo()"> 
-            <i class="fa fa-plus fa-3x" aria-hidden="true"></i>
-            <span class="upload-video__text">Click to upload video</span>
+        <div class="upload-video__button" @click="createJwVideo()"> 
+            <i class="fa fa-upload" aria-hidden="true"></i>
+            <span class="upload-video__text">Upload video</span>
         </div>
 
 		<el-dialog class="uploadvid" title="Upload video" :visible.sync="modalDragDropIsOpen" :before-close="closeModalDragDrop" size="medium">
@@ -581,6 +581,44 @@
 <style>
 
 /* ==============================================
+					#ADD-VIDEO-BUTTON
+		================================================= */
+
+    .upload-video {
+        color: #FFF;
+        background-color: #ccc;
+		display: flex;
+		flex-direction:column;
+		justify-content: center;
+		align-items: center;
+	}
+	.upload-video:hover {
+		color: #FFF;
+		cursor: pointer;
+		transition: 0.2s;
+		-webkit-transition: 0.2s;
+		background-color: #aaa;
+	}
+
+        .upload-video__button {
+            width: 100%;
+            height: 100%;
+            margin: 0px 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+            .upload-video__text {
+                font-size: 14px;
+                margin-left: 5px;
+            }
+
+
+
+
+
+/* ==============================================
                 #VUE-DROPZONE
     ================================================= */
 
@@ -625,46 +663,6 @@
         }
         
 
-
-
-
-/* ==============================================
-					#ADD-VIDEO-BUTTON
-		================================================= */
-
-    .upload-video {
-		width: 400px;
-        height: 150px;
-		color: #A90931;
-		background-color: #FFF;
-		border: 1px dashed #DADDE2;
-        /* padding: 25px;
-        margin-bottom: 10px; */
-		display: flex;
-		flex-direction:column;
-		justify-content: center;
-		align-items: center;
-	}
-	.upload-video:hover {
-		color: #FFF;
-		cursor: pointer;
-		transition: 0.2s;
-		-webkit-transition: 0.2s;
-		background-color: #A90931;
-	}
-
-        .upload-video__container {
-            width: 100%;
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-        }
-
-            .upload-video__text {
-                font-size: 14px;
-            }
 
 
 /* ==============================================

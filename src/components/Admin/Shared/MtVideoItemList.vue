@@ -14,7 +14,7 @@
 			<p v-show="loadingCollaborators === true">Loading collaborators...</p>
 			<p v-show="localCollaborators.length === 0 && loadingCollaborators === false" ><i>No collaborators</i></p>
 			<div v-show="loadingCollaborators === false"><!-- class="mt-table"> -->
-				<li v-for="(s) in localCollaborators" :key="s.id" style="list-style:none">
+				<li v-for="s in localCollaborators" :key="s.id" style="list-style:none">
 					<span><i class="fa fa-user"></i> {{ s.firstName + " " + s.lastName}}</span>
 				</li>
 			</div>
