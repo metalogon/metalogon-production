@@ -813,7 +813,8 @@
                 if (card.rating === null) {
                     alert('Please set a rate.')
                 } else {
-
+                    console.log("Posting annotation:", card)
+                    console.log("Author:", this.authService.getAuthData().firstName + ' ' + this.authService.getAuthData().lastName)
                     this.$store.dispatch('addAnnotation', card)
                     // this.$store.dispatch('getVideoAnnotations', this.id) // The store update is necessary because we show the cards according to /viewannotation
                     

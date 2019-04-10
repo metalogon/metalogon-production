@@ -177,6 +177,7 @@ export const store = new Vuex.Store({
                 })
                 .catch(function (err) {
                     console.log('Error annotation add...', err)
+                    console.log("Payload:", payload)
                 })
         },
         editAnnotation: function ({ commit }, payload) {            
