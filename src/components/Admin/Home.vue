@@ -3,6 +3,13 @@
 	<div class="home">
 
 		<my-header></my-header>
+
+		<div class="home__jumbotron">
+			<h2 class="jumbotron__title title">{{ currentClass.name }}</h2>
+			<p class="jumbotron__info">
+				<span>{{ currentClass.semester }}</span> • <span>{{ currentClass.number }}</span> • <span>{{ currentClass.department }}</span>
+			</p>
+		</div>
 		
 		<div class="home__body columns">
 
@@ -26,16 +33,16 @@
 				</div>
 
 				<div class="home__classvideos" v-show="!(currentClass.name === 'Home')">
-					<h3 class="class__heading"> 
-						{{ currentClass.number }} - {{ currentClass.name }}
-						<el-input style="margin-top:10px" class="sidebar__classesInput" icon="search" v-model="searchInputClassSidebar" @change="filterVideoArray('videos', 'filteredVideos', searchInputClassSidebar)" placeholder="Search for a video..."></el-input>
-						<a class="sidebar__classesLink" v-for="v in filteredVideos" :key="v.id"></a>
-					</h3>
+					<div class="classvideos__section">
+						<h3 class="class__heading">Class videos</h3>
+						<el-input class="classvideos__classesInput" icon="search" v-model="searchInputClassSidebar" @change="filterVideoArray('videos', 'filteredVideos', searchInputClassSidebar)" placeholder="Search a video..."></el-input>
+						<upload-video :currentClassProp="currentClass.name" v-if="currentClass.name !== 'Home'"></upload-video>
+						<!-- <a class="sidebar__classesLink" v-for="v in filteredVideos" :key="v.id"></a> -->
+					</div>
 					<mt-video-itemlist v-for="v in videos" v-bind:key="v.id" :currentVideo="v" v-if="v.class === currentClass.name && searchInputClassSidebar === ''" :enableStatistics="true" :showCollaborators="true"></mt-video-itemlist>
 					<mt-video-itemlist v-for="v in filteredVideos" v-bind:key="v.id" :currentVideo="v" v-if="v.class === currentClass.name && searchInputClassSidebar !== ''" :enableStatistics="true"></mt-video-itemlist>
 				</div>
 
-				<upload-video :currentClassProp="currentClass.name" v-if="currentClass.name !== 'Home'"></upload-video>
 
 			</div>
 
@@ -188,9 +195,13 @@
 </script>
 
 <style>
-	/* ==============================================
+	/* ==================================================
 									#GENERAL-LAYOUT
 		================================================= */
+
+	.home {
+
+	}
 
 	.home__body { 
 		margin-bottom: 0 !important;
@@ -202,11 +213,27 @@
 		margin-top: 25px;
 	}
 
+/* ==============================================
+			#JUMBOTRON 
+================================================= */
+
+	.home__jumbotron {
+		color: #4a4a4a;
+		padding: 25px;
+		background-color: #eee;
+	}
+
+		.jumbotron__title {
+			font-size: 22px;
+			margin-bottom: 10px !important;
+		}
+
+		.jumbotron__info {
+
+		}
 
 
-
-
-	/* ==============================================
+	/* =================================================
 									#FEATURED
 		================================================= */
 
@@ -299,13 +326,26 @@
 				margin-top: 10px;
 			}
 
-			.class__heading {
+			.classvideos__section {
 				background-color: #16324f;
-				color: #FFF;
-				padding: 9px;
-				margin-bottom: 0.5em !important;
 				border-radius: 7px;
+				height: 42px;
+				display: flex;
+				justify-content: space-between;
 			}
+
+				.class__heading {
+					color: #FFF;
+					padding: 9px;
+					margin-bottom: 0.5em !important;
+					border-radius: 7px;
+				}
+
+				.classvideos__classesInput {
+					width: 25%;
+					align-self: center;
+					margin-right: 500px;
+				}
 
 
 
