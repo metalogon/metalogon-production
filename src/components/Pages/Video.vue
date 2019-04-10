@@ -94,12 +94,12 @@
                                 <!-- If has no subcategories -->
                                 <div class="annotate-desc-text" v-if="annotateCurrentCategoryObject.subcategories.length === 0">
                                     <h1>{{ annotateCurrentCategoryObject.name }}</h1>
-                                    <p>{{ annotateCurrentCategoryObject.description }}</p>
+                                    <p>{{ annotateCurrentCategoryObject.definition }}</p>
                                 </div>
                                 <!-- If has subcategories -->
                                 <div class="annotate-desc-text" v-else>
                                     <h1>{{ annotateCurrentSubcategoryObject.name }}</h1>
-                                    <p>{{ annotateCurrentSubcategoryObject.description }}</p>
+                                    <p>{{ annotateCurrentSubcategoryObject.definition }}</p>
                                 </div>
                                 <router-link :to="'/term/' + annotateCurrentCategoryObject.id" tag="a" class="annotate-desc-text__wiki"> <!-- target="_blank" -->
                                     <i class="fa fa-commenting"></i>Wiki
@@ -788,26 +788,36 @@
                 else
                     theComment = this.selectedMove
 
-                // Find the description of the chosen annotate category.
+                // Find the definition of the chosen annotate category.
                 // This is for category annotation only.
                 var annotateDesc
                 var annotateCategories = this.customCanonTree[this.annotateCanonName].categories
                 for (var i = 0, l = annotateCategories.length; i < l; i++) {
-                    if (this.annotateCategoryId === annotateCategories[i].id)
-                        annotateDesc = annotateCategories[i].description
+                    if (this.annotateCategoryId === annotateCategories[i].id) {
+                        annotateDesc = annotateCategories[i].definition
+                    }
                 }
+
+                console.log("annotateDesc: ", annotateDesc)
 
                 var card = { 
                     author: this.authService.getAuthData().firstName + ' ' + this.authService.getAuthData().lastName.slice()[0] + '.', // Alexander T.
                     videoId: this.id,
                     canon: this.annotateCanon,
                     categoryId: (this.annotationType === 'category') ? this.annotateCategoryId : this.annotateSubcategoryId,
-                    label: (this.annotationType === 'category') ? annotateDesc : this.annotateCurrentSubcategoryObject.description,
+                    label: (this.annotationType === 'category') ? annotateDesc : ((this.annotateCurrentSubcategoryObject.definition === null) ? "test" : this.annotateCurrentSubcategoryObject.definition),
                     comment: theComment,
                     from: this.annotateStart,
                     to: this.annotateEnd, 
                     rating: this.annotateRating,
                 }
+                console.log("card.label: ", card.label)
+
+                // if (card.label === null) {
+                //     card.label.value = "t"
+                // }
+
+                // console.log("card.label: ", card.label)
 
                 // Pushing new annotation in current video
                 if (card.rating === null) {
