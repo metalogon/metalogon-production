@@ -6,7 +6,7 @@
 
 		<div class="home__jumbotron">
 			<h2 class="jumbotron__title title">{{ currentClass.name }}</h2>
-			<p class="jumbotron__info">
+			<p class="jumbotron__info" v-if="currentClass.name !== 'Home'">
 				<span>{{ currentClass.semester }}</span> • <span>{{ currentClass.number }}</span> • <span>{{ currentClass.department }}</span>
 			</p>
 		</div>
