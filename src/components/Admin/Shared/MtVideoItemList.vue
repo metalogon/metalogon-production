@@ -10,6 +10,16 @@
 				</div>
 		</router-link>
 
+		<div v-if="showCollaborators" class="classvideo__metadata">
+			<p v-show="loadingCollaborators === true">Loading collaborators...</p>
+			<p v-show="localCollaborators.length === 0 && loadingCollaborators === false" ><i>No collaborators</i></p>
+			<div v-show="loadingCollaborators === false"><!-- class="mt-table"> -->
+				<li v-for="s in localCollaborators" :key="s.id" style="list-style:none">
+					<span><i class="fa fa-user"></i> {{ s.firstName + " " + s.lastName}}</span>
+				</li>
+			</div>
+		</div>
+
 		<img class="classvideo__favorite" src="../../../assets/favorite-inactive.svg" v-show="role === 'administrator' && currentVideo.featuredGlobal === false" @click="featureGlobal($event)">
 		<img class="classvideo__favorite" src="../../../assets/favorite-active.svg" v-show="role === 'administrator' &&  currentVideo.featuredGlobal === true" @click="unfeatureGlobal($event)">
 
@@ -34,8 +44,6 @@
 		<div class="classvideo__trash">
 			<i class="el-icon-delete" v-show="role ==='administrator'" @click="toggleDeleteConfirmationModal()"></i>
 		</div>
-
-
 
 		<!-- Canon statistics modal -->
 		<el-dialog :title="currentVideo.title" :visible.sync="modalCanonChartIsOpen">
@@ -69,7 +77,7 @@
     import { mapMutations } from 'vuex'
     
     export default {
-		props: ['currentVideo', 'enableStatistics'],
+		props: ['currentVideo', 'enableStatistics', 'showCollaborators'],
 		data() {
 			return {
 				role: this.$root.$options.authService.getAuthData().role,
@@ -78,7 +86,9 @@
 				ratingAverage: 0,
 				genreName: '',
 				deleteModalIsOpen: false,
+				// Canon statistics
 				modalCanonChartIsOpen: false,
+				loadingModalCanonChart: false,
 				chartData: {
 					columns: ['canon', 'averageRating'],
 					rows: []
@@ -90,7 +100,8 @@
 				},
 				chartExtend: { series: {} },
 				canonInfo: [], // Helper array for v-chart array: chartData.rows[]
-				loadingModalCanonChart: false
+				loadingCollaborators: true,
+				localCollaborators: [], // Collaborators for this video only. Decoupled from store state.videoCollaborators
 			}
 		},
 		methods: {
@@ -242,10 +253,16 @@
 
 				return ('0' + m).slice(-2) + ":" + ('0' + s).slice(-2);
 			},
+			loadCollaborators() {
+				var self = this
+				// console.log("loading collabs " + this.currentVideo.title)
+				return this.$store.dispatch('getCollaboratorsByVideoId', this.currentVideo.id)
+			},
 		},
         computed: {
             ...mapGetters(
-                ['videos', 'genres', 'videoAnnotations']
+				['videos', 'genres', 'videoAnnotations',
+				 'videoCollaborators']
             ),
 		},
 		created() {
@@ -260,9 +277,16 @@
 			// }
 
 		},
-		mounted() {
+		mounted() {			
 			var self = this
-			
+
+			this.loadingCollaborators = true
+			this.loadCollaborators()
+			.then(function() {
+				self.localCollaborators = self.videoCollaborators
+				self.loadingCollaborators = false
+			})
+
 			// Calculate the annotationsSum
 			this.secureHTTPService.get("annotation/?videoId=" + this.currentVideo.id)
                 .then(function (response) { 
@@ -387,7 +411,7 @@
 							justify-content: center;
 							border-radius: 4px;
 							margin-top: 10px;
-							cursor: help;
+							/* cursor: help; */
 						}
 								.classvideo__scoreNoHoverNum {
 									font-weight: 600;

@@ -177,6 +177,7 @@ export const store = new Vuex.Store({
                 })
                 .catch(function (err) {
                     console.log('Error annotation add...', err)
+                    console.log("Payload:", payload)
                 })
         },
         editAnnotation: function ({ commit }, payload) {            
@@ -381,6 +382,19 @@ export const store = new Vuex.Store({
                     
                 })
         },
+        addAssignmentToVideo: function({ commit }, payload) {
+            // payload contains payload.videoId and payload.assignmentId
+            return secureHTTPService.put("video/" + payload.videoId, {"assignmentId":payload.assignmentId})
+            .then( response => {
+                // console.log('-----')
+                // console.log('POST add assignment to video')
+            })
+            .catch( response => {
+                console.log('addAssignmentToVideo action error.')
+                console.log('payload: ', payload)
+                console.log('error:', response.error)
+            })
+        },
         /* GENRES */ 
         getGenres: function ({ commit }) {
             return secureHTTPService.get("genre")
@@ -459,8 +473,9 @@ export const store = new Vuex.Store({
                 console.log('getCollaborationsByVideoId GET error: ', err) 
             })
         },
-        getCollaboratorsByVideoId: function({commit}, payload) {
+        getCollaboratorsByVideoId: function({commit, state}, payload) {
             // Uses collaborator join
+            state.videoCollaborators = []
             return secureHTTPService.get("collaborator?videoId=" + payload)
             .then(function(response) {
                 commit('GET_COLLABORATORS_BY_VIDEO_ID', response.data.data)
@@ -680,6 +695,15 @@ export const store = new Vuex.Store({
         },
         POST_CATEGORY: (state, newCategory) => {
             state.categories.push(newCategory)
+        },
+        EDIT_CATEGORY: (state, payload) => {
+            console.log("payload: ", payload)
+            for (var i=0, l = state.categories.length; i < l; i++) {
+                if (payload.term.id === state.categories[i].id) {
+                    if (payload.type === 'definition') { state.categories[i].definition = payload.term.definition }
+                    else if (payload.type === 'description') { state.categories[i].description = payload.term.description }
+                }
+            }
         },
         /* COLLABORATORS */
         GET_ALL_COLLABORATIONS: (state, allCollaborations) => {

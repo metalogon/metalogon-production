@@ -94,12 +94,12 @@
                                 <!-- If has no subcategories -->
                                 <div class="annotate-desc-text" v-if="annotateCurrentCategoryObject.subcategories.length === 0">
                                     <h1>{{ annotateCurrentCategoryObject.name }}</h1>
-                                    <p>{{ annotateCurrentCategoryObject.description }}</p>
+                                    <p>{{ annotateCurrentCategoryObject.definition }}</p>
                                 </div>
                                 <!-- If has subcategories -->
                                 <div class="annotate-desc-text" v-else>
                                     <h1>{{ annotateCurrentSubcategoryObject.name }}</h1>
-                                    <p>{{ annotateCurrentSubcategoryObject.description }}</p>
+                                    <p>{{ annotateCurrentSubcategoryObject.definition }}</p>
                                 </div>
                                 <router-link :to="'/term/' + annotateCurrentCategoryObject.id" tag="a" class="annotate-desc-text__wiki"> <!-- target="_blank" -->
                                     <i class="fa fa-commenting"></i>Wiki
@@ -188,6 +188,8 @@
                 <button class="collaborators button" @click="toggleModalCollaborators()">
                     <i class="fa fa-users"></i><span>Collaborators</span>
                 </button>
+                <video-assignments :currentVideo="videos"></video-assignments>
+                <canon-statistics :currentVideo="videos" :currentAnnotations="videoAnnotations"></canon-statistics>
                 
                 <el-dialog :visible.sync="modalCollaboratorsIsOpen">
                     <span class="modal-collaborators" slot="title"><b>{{videos.title}} - Collaborators</b></span>
@@ -321,6 +323,8 @@
     import _ from 'lodash'
     import MyHeader from '../Layout/MyHeader.vue'
     import MyFooter from '../Layout/MyFooter.vue'
+    import CanonStatistics from '../Extra/CanonStatistics.vue'
+    import VideoAssignments from '../Extra/VideoAssignments.vue'
 
     import { Loading } from 'element-ui';
 
@@ -406,7 +410,6 @@
                 // @param {string} canon. The canon name "Structure", "Style", etc.
 
                 this.annotateCanon = canon
-                console.log("chooseCanonAnnotate", canon)
             },
             findCatId(id, array) {
                 for(var i in array) {
@@ -478,8 +481,6 @@
                 // Fills the current category object.
                 // Need to find where the annotateCanon is in customCanonTree due to 
                 // the fact that customCanonTree is array of objects, not object of objects
-                console.log(this.customCanonTree)
-                console.log(this.annotateCanon)
                 for (var can in this.customCanonTree) {
                     if (this.customCanonTree[can].name === this.annotateCanon) {
                         // console.log("found canon!", can)
@@ -487,8 +488,6 @@
                         break
                     }
                 }
-                console.log(this.annotateCanonName)
-                console.log(this.customCanonTree[this.annotateCanonName])
                 var categories = this.customCanonTree[this.annotateCanonName].categories
                 for (var i = 0; i < categories.length; i++) {
                     if (categories[i].id === currentCategoryId) {
@@ -499,14 +498,12 @@
                 // If there no subcategories -> show annotation fields
                 // Else there are subcategories -> show subcategory menu
                 if (this.annotateCurrentCategoryObject.subcategories.length === 0) {
-                    console.log('No subcategories')
                     this.annotationType = 'category'
                     this.isAnnotateCanons = false
                     this.isAnnotateCategories = false
                     this.isAnnotateFields = true
                     this.isVideoline = true
                 } else {
-                    console.log('Subcategories!')
                     this.annotationType = 'subcategory'
                     this.isAnnotateCategories = false
                     this.isAnnotateSubcategories = true
@@ -589,8 +586,6 @@
                 var middleCoords = barWidth / 2
                 var coordsStart = middleCoords - 10
                 var coordsEnd = middleCoords + 10
-                console.log('Coords start: ' + coordsStart)
-                console.log('Coords end: ' + coordsEnd)
 
                 $('.crop__start').css('left', coordsStart)
 
@@ -784,21 +779,34 @@
                 else
                     theComment = this.selectedMove
 
-                // Find the description of the chosen annotate category.
+                // Find the definition of the chosen annotate category.
                 // This is for category annotation only.
                 var annotateDesc
                 var annotateCategories = this.customCanonTree[this.annotateCanonName].categories
                 for (var i = 0, l = annotateCategories.length; i < l; i++) {
-                    if (this.annotateCategoryId === annotateCategories[i].id)
-                        annotateDesc = annotateCategories[i].description
+                    if (this.annotateCategoryId === annotateCategories[i].id) {
+                        annotateDesc = annotateCategories[i].definition
+                    }
                 }
 
+
+                var theLabel
+                if (this.annotationType === 'category') {
+                    theLabel = annotateDesc
+                    console.log('category')
+                } else {
+                    if (Object.keys(this.annotateCurrentSubcategoryObject.definition).length === 0) {
+                        theLabel = "-"
+                    } else {
+                        theLabel = this.annotateCurrentSubcategoryObject.definition
+                    }
+                }
                 var card = { 
                     author: this.authService.getAuthData().firstName + ' ' + this.authService.getAuthData().lastName.slice()[0] + '.', // Alexander T.
                     videoId: this.id,
                     canon: this.annotateCanon,
                     categoryId: (this.annotationType === 'category') ? this.annotateCategoryId : this.annotateSubcategoryId,
-                    label: (this.annotationType === 'category') ? annotateDesc : this.annotateCurrentSubcategoryObject.description,
+                    label: theLabel,
                     comment: theComment,
                     from: this.annotateStart,
                     to: this.annotateEnd, 
@@ -809,7 +817,6 @@
                 if (card.rating === null) {
                     alert('Please set a rate.')
                 } else {
-
                     this.$store.dispatch('addAnnotation', card)
                     // this.$store.dispatch('getVideoAnnotations', this.id) // The store update is necessary because we show the cards according to /viewannotation
                     
@@ -829,7 +836,6 @@
                 }
             },
             closeAnnotationMenu() {
-                console.log("closeAnnotationMenu")
                 this.isAnnotating = false
                 this.isAnnotateCanons = false
                 this.isAnnotateSubcategories = false
@@ -1343,7 +1349,10 @@
             })
             .then(function() {
                 // TODO search for class in classes, and pass the whole class object
-                // TODO remove the whole search thing, add class object in video???
+                // TODO remove the whole search thing, add class object in video??? 
+                
+                // TODO Update 30/3/19: Video should have just class id and we should
+                // TODO join classes/video with classId as key
                 for(var c = 0; c < self.classes.length; c++) {
                     if (self.classes[c].name === self.videos.class) {
                         self.$store.commit('CURRENT_CLASS_SELECT', self.classes[c])
@@ -1589,6 +1598,8 @@
         components: {
             'my-header': MyHeader,
             'my-footer': MyFooter,
+            'canon-statistics': CanonStatistics,
+            'video-assignments': VideoAssignments,
         }
     }
 </script>

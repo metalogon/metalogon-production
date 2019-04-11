@@ -229,7 +229,7 @@
 								</div>
 							</el-tab-pane>
 							<el-tab-pane label="Class Submissions" name="ClassSubmissions">
-								<mt-video-itemlist v-for="v in videos" v-bind:key="v.id" :currentVideo="v" v-if="v.assignmentId === a.id" :enableStatistics="false"></mt-video-itemlist>
+								<mt-video-itemlist v-for="v in videos" v-bind:key="v.id" :currentVideo="v" v-if="v.assignmentId === a.id" :enableStatistics="false" :showCollaborators="true"></mt-video-itemlist>
 							</el-tab-pane>
                 		</el-tabs>
 						
@@ -1426,6 +1426,7 @@
 		margin: 0;
 		padding: 0;
 		background-color: #F9F9F9;
+		margin-top: -100px !important;
 	}
 
 	.sidebar__actions {
