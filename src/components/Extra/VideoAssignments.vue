@@ -1,10 +1,10 @@
 <template>
     <div>
-        <button class="collaborators button" @click="openModalCollaborators()">
+        <button class="collaborators button" @click="openModalVideoAssignments()">
             <i class="fa fa-file-text-o"></i><span>Video Assignment</span>
         </button>
 
-        <el-dialog :title="currentVideo.title + ' Assignment'" v-on:close="closeModalCollaborators()" :visible.sync="modalVideoAssignmentOpen">
+        <el-dialog :title="currentVideo.title + ' Assignment'" v-on:close="closeModalVideoAssignments()" :visible.sync="modalVideoAssignmentOpen">
             <div class="uploadvid__sync-load" 
                 v-loading="loadingModalVideoAssignment" 
                 v-show="loadingModalVideoAssignment"
@@ -28,7 +28,7 @@
                         </li>
                     </div> -->
                 </el-tab-pane>
-                <el-tab-pane label="Class Assignments" name="classAssignments">
+                <el-tab-pane v-if="isInvolved" label="Class Assignments" name="classAssignments">
                     <el-card shadow="never" v-if="assignments.length === 0" ><i>No class assignments</i></el-card>
                     <el-input icon="search" v-show="assignments.length !== 0" v-model="searchInput" @change="filterAssignmentsArray('assignments', 'filteredAssignments', searchInput)" placeholder="Search for an assignment..." style="width:220px;margin-bottom:7px;" clearable></el-input>
                     <el-table class="mt-table" v-if="assignments.length !== 0" ref="singleTable" :data="filteredAssignments" highlight-current-row @current-change="handleCurrentChange">
@@ -61,6 +61,9 @@
         props: ['currentVideo'], 
         data() {
             return {
+                role: '',
+                userId: '',
+                isInvolved: false, // Whether this user is involved with the video in some way, is collaborator, admin or class professor
                 modalVideoAssignmentOpen: false,
                 loadingModalVideoAssignment: false,
                 searchInput: '',
@@ -72,12 +75,13 @@
             }
         },
         methods: {            
-            openModalCollaborators() {
-				this.modalVideoAssignmentOpen = true
+            openModalVideoAssignments() {
+                this.isUserInvolved()
                 this.loadAssignments()	
+				this.modalVideoAssignmentOpen = true
 				
             },     
-            closeModalCollaborators() {
+            closeModalVideoAssignments() {
                 this.loadingModalVideoAssignment = false
                 this.searchInput = ''
                 this.filteredAssignments = []
@@ -146,13 +150,32 @@
                     return
                 })
             },
+            isUserInvolved() {
+                if (this.role == "administrator") this.isInvolved = true
+                else if (this.role == "professor" && this.currentClass.professorId === this.userId) this.isInvolved = true
+                else if (this.role == "student") {
+                    var self = this
+                    // Update store videoCollaborators
+                    this.$store.dispatch('getCollaboratorsByVideoId', this.currentVideo.id)
+                    .then(function() {
+                        for (var i = 0; i < self.videoCollaborators.length; i++) {
+                            if (self.videoCollaborators[i].id == self.userId) {
+                                self.isInvolved = true
+                                break
+                            }
+                        }
+                    })
+                }
+            }
         },
         mounted() {
-
+			this.role = this.$root.$options.authService.getAuthData().role
+            this.userId = this.$root.$options.authService.getAuthData().userId
         },
         computed: {
 			...mapGetters(
-				[ 'assignments', 'classes', 'currentClass' ]
+                [ 'assignments', 'classes', 'currentClass',
+                  'videoCollaborators' ]
 			)
         },
     }
