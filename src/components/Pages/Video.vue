@@ -410,7 +410,6 @@
                 // @param {string} canon. The canon name "Structure", "Style", etc.
 
                 this.annotateCanon = canon
-                console.log("chooseCanonAnnotate", canon)
             },
             findCatId(id, array) {
                 for(var i in array) {
@@ -482,8 +481,6 @@
                 // Fills the current category object.
                 // Need to find where the annotateCanon is in customCanonTree due to 
                 // the fact that customCanonTree is array of objects, not object of objects
-                console.log(this.customCanonTree)
-                console.log(this.annotateCanon)
                 for (var can in this.customCanonTree) {
                     if (this.customCanonTree[can].name === this.annotateCanon) {
                         // console.log("found canon!", can)
@@ -491,8 +488,6 @@
                         break
                     }
                 }
-                console.log(this.annotateCanonName)
-                console.log(this.customCanonTree[this.annotateCanonName])
                 var categories = this.customCanonTree[this.annotateCanonName].categories
                 for (var i = 0; i < categories.length; i++) {
                     if (categories[i].id === currentCategoryId) {
@@ -503,14 +498,12 @@
                 // If there no subcategories -> show annotation fields
                 // Else there are subcategories -> show subcategory menu
                 if (this.annotateCurrentCategoryObject.subcategories.length === 0) {
-                    console.log('No subcategories')
                     this.annotationType = 'category'
                     this.isAnnotateCanons = false
                     this.isAnnotateCategories = false
                     this.isAnnotateFields = true
                     this.isVideoline = true
                 } else {
-                    console.log('Subcategories!')
                     this.annotationType = 'subcategory'
                     this.isAnnotateCategories = false
                     this.isAnnotateSubcategories = true
@@ -593,8 +586,6 @@
                 var middleCoords = barWidth / 2
                 var coordsStart = middleCoords - 10
                 var coordsEnd = middleCoords + 10
-                console.log('Coords start: ' + coordsStart)
-                console.log('Coords end: ' + coordsEnd)
 
                 $('.crop__start').css('left', coordsStart)
 
@@ -798,33 +789,34 @@
                     }
                 }
 
-                console.log("annotateDesc: ", annotateDesc)
 
+                var theLabel
+                if (this.annotationType === 'category') {
+                    theLabel = annotateDesc
+                    console.log('category')
+                } else {
+                    if (Object.keys(this.annotateCurrentSubcategoryObject.definition).length === 0) {
+                        theLabel = "-"
+                    } else {
+                        theLabel = this.annotateCurrentSubcategoryObject.definition
+                    }
+                }
                 var card = { 
                     author: this.authService.getAuthData().firstName + ' ' + this.authService.getAuthData().lastName.slice()[0] + '.', // Alexander T.
                     videoId: this.id,
                     canon: this.annotateCanon,
                     categoryId: (this.annotationType === 'category') ? this.annotateCategoryId : this.annotateSubcategoryId,
-                    label: (this.annotationType === 'category') ? annotateDesc : ((this.annotateCurrentSubcategoryObject.definition === null) ? "test" : this.annotateCurrentSubcategoryObject.definition),
+                    label: theLabel,
                     comment: theComment,
                     from: this.annotateStart,
                     to: this.annotateEnd, 
                     rating: this.annotateRating,
                 }
-                console.log("card.label: ", card.label)
-
-                // if (card.label === null) {
-                //     card.label.value = "t"
-                // }
-
-                // console.log("card.label: ", card.label)
 
                 // Pushing new annotation in current video
                 if (card.rating === null) {
                     alert('Please set a rate.')
                 } else {
-                    console.log("Posting annotation:", card)
-                    console.log("Author:", this.authService.getAuthData().firstName + ' ' + this.authService.getAuthData().lastName)
                     this.$store.dispatch('addAnnotation', card)
                     // this.$store.dispatch('getVideoAnnotations', this.id) // The store update is necessary because we show the cards according to /viewannotation
                     
@@ -844,7 +836,6 @@
                 }
             },
             closeAnnotationMenu() {
-                console.log("closeAnnotationMenu")
                 this.isAnnotating = false
                 this.isAnnotateCanons = false
                 this.isAnnotateSubcategories = false

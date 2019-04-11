@@ -696,6 +696,15 @@ export const store = new Vuex.Store({
         POST_CATEGORY: (state, newCategory) => {
             state.categories.push(newCategory)
         },
+        EDIT_CATEGORY: (state, payload) => {
+            console.log("payload: ", payload)
+            for (var i=0, l = state.categories.length; i < l; i++) {
+                if (payload.term.id === state.categories[i].id) {
+                    if (payload.type === 'definition') { state.categories[i].definition = payload.term.definition }
+                    else if (payload.type === 'description') { state.categories[i].description = payload.term.description }
+                }
+            }
+        },
         /* COLLABORATORS */
         GET_ALL_COLLABORATIONS: (state, allCollaborations) => {
             state.allCollaborations = allCollaborations

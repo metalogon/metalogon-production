@@ -120,35 +120,37 @@
         mounted() {
             var that = this
             this.terms = this.loadAll();
-            // Creates an object that contains 
-            // the current term information.
-            // .then(function() {
-            //     console.log(that.categories)
-            // }) 
+
+            // Creates an object that contains the current term information.
             for (var i = 0; i < this.categories.length; i++) {
                 if (this.categories[i].id === this.$route.params.id) {
                     this.currentTerm = this.categories[i]
+                    console.log("category: ", this.categories[i].definition)
                 }
             }
+
+            console.log("currentTerm: ", this.currentTerm.definition)
         },
         methods: {
             editContent(type){
-                if (type === 'definition')
+                if (type === 'definition') { 
                     this.definitionIsOpen = true
-                else
+                }
+                else { 
                     this.descriptionIsOpen = true
+                }
             },
             saveContent(categoryId, field) {
-                this.$store.dispatch('editCategory', { 
-                    id: categoryId, 
-                    categoryBody: { [field]: this.currentTerm[field] } 
-                })
+                this.$store.dispatch('editCategory', { id: categoryId, categoryBody: { [field]: this.currentTerm[field] } })
 
-                if (field === 'description') {
-                    this.descriptionIsOpen = false
+                if (field === 'definition') { 
+                    this.$store.commit('EDIT_CATEGORY', { term: this.currentTerm, type: 'definition' } )
                     this.definitionIsOpen = false
-                }
-                // else 
+                } 
+                else { 
+                    this.$store.commit('EDIT_CATEGORY', { term: this.currentTerm, type: 'description' } )
+                    this.descriptionIsOpen = false
+                } 
             },
             goWiki() {
                 this.$store.commit('SELECT_CURRENT_WIKI_CANON', this.currentTerm.canon)
