@@ -1,6 +1,6 @@
 <template>
 
-    <div>
+    <div style="display: inline-block">
         <button class="collaborators button" @click="openModalCanonChart()">
             <i class="fa fa-bar-chart"></i><span>Canon statistics</span>
         </button>
