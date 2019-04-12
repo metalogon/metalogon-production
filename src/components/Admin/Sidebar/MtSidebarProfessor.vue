@@ -198,7 +198,7 @@
 								</div>
 							</el-tab-pane>
 							<el-tab-pane label="Class Submissions" name="ClassSubmissions">
-								<mt-video-itemlist v-for="v in videos" v-bind:key="v.id" :currentVideo="v" v-if="v.assignmentId === a.id" :enableStatistics="false" :showCollaborators="true"></mt-video-itemlist>
+								<mt-video-itemlist v-for="v in videos" v-bind:key="v.id" :currentVideo="v" v-if="v.assignmentId === a.id" :enableStatistics="false" :showCollaborators="false"></mt-video-itemlist>
 							</el-tab-pane>
                 		</el-tabs>
 						

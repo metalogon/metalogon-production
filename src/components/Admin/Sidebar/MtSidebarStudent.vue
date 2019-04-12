@@ -69,10 +69,10 @@
 								</div>
 							</el-tab-pane>
 							<el-tab-pane label="My Submission" name="MySubmission">
-								<mt-video-itemlist v-for="v in userCollaborated" v-bind:key="v.id" :currentVideo="v" v-if="v.assignmentId === a.id" :enableStatistics="false" :showCollaborators="true"></mt-video-itemlist>
+								<mt-video-itemlist v-for="v in userCollaborated" v-bind:key="v.id" :currentVideo="v" v-if="v.assignmentId === a.id" :enableStatistics="false" :showCollaborators="false"></mt-video-itemlist>
 							</el-tab-pane>
 							<el-tab-pane label="Class Submissions" name="ClassSubmissions">
-								<mt-video-itemlist v-for="v in videosWithoutUserSubs" v-bind:key="v.id" :currentVideo="v" v-if="v.assignmentId === a.id" :enableStatistics="false" :showCollaborators="true"></mt-video-itemlist>
+								<mt-video-itemlist v-for="v in videosWithoutUserSubs" v-bind:key="v.id" :currentVideo="v" v-if="v.assignmentId === a.id" :enableStatistics="false" :showCollaborators="false"></mt-video-itemlist>
 							</el-tab-pane>
                 		</el-tabs>
 						
