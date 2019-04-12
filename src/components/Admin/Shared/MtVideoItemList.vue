@@ -11,13 +11,21 @@
 		</router-link>
 
 		<div v-if="showCollaborators" class="classvideo__metadata">
-			<p v-show="loadingCollaborators === true">Loading collaborators...</p>
-			<p v-show="localCollaborators.length === 0 && loadingCollaborators === false" ><i>No collaborators</i></p>
-			<div v-show="loadingCollaborators === false"><!-- class="mt-table"> -->
-				<li v-for="s in localCollaborators" :key="s.id" style="list-style:none">
-					<span><i class="fa fa-user"></i> {{ s.firstName + " " + s.lastName}}</span>
-				</li>
-			</div>
+			<!-- <p v-show="loadingCollaborators === true">Loading collaborators...</p> -->
+			<div>
+			<el-popover trigger="click" title="Collaborators" v-model="showDialog">
+				<div v-show="loadingCollaborators === false">
+					<li v-for="s in localCollaborators" :key="s.id" style="list-style:none">
+						<span><i class="fa fa-user"></i> {{ s.firstName + " " + s.lastName}}</span>
+					</li>
+				</div>
+				<p v-show="localCollaborators.length === 0 && loadingCollaborators === false" ><i>-</i></p>
+				<el-button type="text" @click="showDialog=false">Close</el-button>
+			</el-popover>
+			<el-button @click="showDialog=true"><i class="fa fa-user"></i></el-button>
+		  </div>
+
+			
 		</div>
 
 		<img class="classvideo__favorite" src="../../../assets/favorite-inactive.svg" v-show="role === 'administrator' && currentVideo.featuredGlobal === false" @click="featureGlobal($event)">
@@ -80,6 +88,7 @@
 		props: ['currentVideo', 'enableStatistics', 'showCollaborators'],
 		data() {
 			return {
+				showDialog: false,
 				role: this.$root.$options.authService.getAuthData().role,
 				secureHTTPService : this.$root.$options.secureHTTPService,
 				numberOfAnnotations: 0,

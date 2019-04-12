@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div style="display: inline-block">
         <button class="collaborators button" @click="openModalVideoAssignments()">
             <i class="fa fa-file-text-o"></i><span>Video Assignment</span>
         </button>
@@ -35,7 +35,7 @@
                         <el-table-column type="index"></el-table-column>
                         <el-table-column type="select" property="title" label="Title"></el-table-column>
                         <el-table-column type="expand">
-                            <template slot-scope="props">
+                            <template scope="props">
                                 <p>Description: {{ props.row.description }}</p>
                             </template>
                         </el-table-column>
