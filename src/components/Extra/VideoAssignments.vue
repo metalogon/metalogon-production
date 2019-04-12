@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div style="display: inline-block">
         <button class="collaborators button" @click="openModalVideoAssignments()">
             <i class="fa fa-file-text-o"></i><span>Video Assignment</span>
         </button>
