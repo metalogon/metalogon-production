@@ -349,7 +349,7 @@
                 annotateSubcategoryId: '', // The subcategory id from the category that is chosen.
                 annotateCurrentCategoryObject: { canon: '', description: '', id: '', name: '', subcategories: [] },
                 annotateCurrentSubcategoryObject: {},
-                annotateRating: 1,
+                annotateRating: 0,
                 annotationType: 'category', // or 'subcategory': Helps the POST /annotation to send the correct categoryId. 
                 annotateComment: '',
                 annotateStart: null,
@@ -556,7 +556,7 @@
                 this.isAnnotating = true
                 this.isAnnotateCanons = true // Opens canons menu.
                 this.isAnnotateCategories = true
-                this.annotateRating = null
+                this.annotateRating = 0
                 this.annotateComment = ''
                 this.selectedMove = 'Other'
                 if (this.player.getState() === 'playing') 
@@ -827,7 +827,7 @@
                     this.annotateComment = ''
                     this.annotateStart = null
                     this.annotateEnd = null
-                    this.annotateRating = 1
+                    this.annotateRating = 0
                     this.isAnnotating = false
                     this.isAnnotateCanons = false
                     this.isAnnotateFields = false
