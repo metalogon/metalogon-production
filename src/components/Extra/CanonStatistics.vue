@@ -65,12 +65,16 @@
 					for (var j = 0; j < this.canonInfo.length; j++) {
 						if (annotations[i].canon === this.canonInfo[j].canon) {
 							found = true
-							this.canonInfo[j].sumRating = this.canonInfo[j].sumRating + annotations[i].rating
-							this.canonInfo[j].annotationCount++
+							if (annotations[i].rating != 0) {
+								this.canonInfo[j].sumRating = this.canonInfo[j].sumRating + annotations[i].rating
+								this.canonInfo[j].annotationCount++
+							}
 						} 
 					}
 					if (found === false) {
-						this.canonInfo.push({ canon: annotations[i].canon, sumRating: annotations[i].rating, annotationCount: 1 })
+						if (annotations[i].rating != 0) {
+							this.canonInfo.push({ canon: annotations[i].canon, sumRating: annotations[i].rating, annotationCount: 1 })
+						}
 					}
 					found = false
 				}

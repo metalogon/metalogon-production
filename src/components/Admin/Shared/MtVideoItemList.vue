@@ -92,6 +92,7 @@
 				role: this.$root.$options.authService.getAuthData().role,
 				secureHTTPService : this.$root.$options.secureHTTPService,
 				numberOfAnnotations: 0,
+				numberOfRatedAnnotations: 0,
 				ratingAverage: 0,
 				genreName: '',
 				deleteModalIsOpen: false,
@@ -137,12 +138,16 @@
 					for (var j = 0; j < this.canonInfo.length; j++) {
 						if (annotations[i].canon === this.canonInfo[j].canon) {
 							found = true
-							this.canonInfo[j].sumRating = this.canonInfo[j].sumRating + annotations[i].rating
-							this.canonInfo[j].annotationCount++
+							if (annotations[i].rating != 0) {
+								this.canonInfo[j].sumRating = this.canonInfo[j].sumRating + annotations[i].rating
+								this.canonInfo[j].annotationCount++
+							}
 						} 
 					}
 					if (found === false) {
-						this.canonInfo.push({ canon: annotations[i].canon, sumRating: annotations[i].rating, annotationCount: 1 })
+						if (annotations[i].rating != 0) {
+							this.canonInfo.push({ canon: annotations[i].canon, sumRating: annotations[i].rating, annotationCount: 1 })
+						}
 					}
 					found = false
 				}
@@ -300,12 +305,14 @@
 			this.secureHTTPService.get("annotation/?videoId=" + this.currentVideo.id)
                 .then(function (response) { 
 					self.numberOfAnnotations =  response.data.data.length
+					self.numberOfRatedAnnotations = response.data.data.length
 					let ratingsSum = 0
 					for (var i = 0; i < response.data.data.length; i++) {
 						ratingsSum = ratingsSum + response.data.data[i].rating
+						if (response.data.data[i].rating == 0) self.numberOfRatedAnnotations --
 					}
-					if (self.numberOfAnnotations !== 0) { 
-						self.ratingAverage = ratingsSum / self.numberOfAnnotations
+					if (self.numberOfRatedAnnotations !== 0) { 
+						self.ratingAverage = ratingsSum / self.numberOfRatedAnnotations
 					}
 				})
 				.catch(function (err) { console.log(err) })
